@@ -6,7 +6,7 @@ require("./config/mongoose");
 
 const express = require("express");
 const createError = require("http-errors");
-var logger = require("morgan");
+const logger = require("morgan");
 const cors = require("cors");
 const routers = require("@routes");
 

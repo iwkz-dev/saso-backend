@@ -5,7 +5,7 @@ const Event = require("@models/event");
 const resUtils = require("@utils/responseUtils");
 
 class EventController {
-  // ! BELOM ADA AUTHENTICATION
+  // ! BELOM ADA AUTHENTICATION BISA JADI REFERENSI BUAT BELAJAR
   static async create(req, res, next) {
     const payload = {
       name: req.body.name,
