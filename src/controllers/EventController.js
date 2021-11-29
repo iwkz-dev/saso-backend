@@ -2,7 +2,7 @@
 
 const httpStatus = require("http-status-codes");
 const Event = require("@models/event");
-const resHelpers = require("@helpers/responseHelper");
+const resUtils = require("@utils/responseUtils");
 
 class EventController {
   // ! BELOM ADA AUTHENTICATION
@@ -19,12 +19,12 @@ class EventController {
       console.log(payload);
       res
         .status(httpStatus.StatusCodes.CREATED)
-        .json(resHelpers.success("success create an event", createEvent));
+        .json(resUtils.success("success create an event", createEvent));
     } catch (error) {
       console.log(error);
       res
         .status(httpStatus.StatusCodes.BAD_REQUEST)
-        .json(resHelpers.failed(error.message, error));
+        .json(resUtils.failed(error.message, error));
     }
   }
 
@@ -33,12 +33,12 @@ class EventController {
       const findEvents = await Event.find();
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success fetch data", findEvents));
+        .json(resUtils.success("success fetch data", findEvents));
     } catch (error) {
       console.log(error);
       res
         .status(httpStatus.StatusCodes.BAD_REQUEST)
-        .json(resHelpers.failed(error.message, error));
+        .json(resUtils.failed(error.message, error));
     }
   }
 }
