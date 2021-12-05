@@ -41,6 +41,18 @@ class EventController {
         .json(resUtils.failed(error.message, error));
     }
   }
+
+  static async uploadImage(req, res, next) {
+    try {
+      console.log(req.body.imageUrls);
+      res.send("testing ke controller");
+    } catch (error) {
+      console.log(error);
+      res
+        .status(httpStatus.StatusCodes.BAD_REQUEST)
+        .json(resUtils.failed(error.message, error));
+    }
+  }
 }
 
 module.exports = EventController;
