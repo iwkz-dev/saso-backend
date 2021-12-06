@@ -1,24 +1,25 @@
 "use strict";
 
 const router = require("express").Router();
-const multer = require("multer");
 const EventController = require("@controllers/EventController");
 const imageKit = require("@middlewares/imageKit");
+const { uploadArray } = require("@helpers/multer");
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+router.post(
+  "/",
+  uploadArray("imageUrls", 5),
+  imageKit.imgKitUploadMulti,
+  EventController.create
+);
 
-router.post("/", EventController.create);
 router.get("/", EventController.getAllEvents);
+
+router.get("/:id", EventController.getEventById);
 
 router.post(
   "/upload-image",
-  upload.array("imageUrls", 5),
-  // (req, res) => {
-  //   console.log(req.files);
-  //   res.send("success");
-  // }
-  imageKit.imgKitCreate,
+  uploadArray("imageUrls", 5),
+  imageKit.imgKitUploadMulti,
   EventController.uploadImage
 );
 

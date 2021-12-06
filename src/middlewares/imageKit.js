@@ -3,7 +3,7 @@
 const axios = require("axios");
 const FormData = require("form-data");
 
-async function imgKitCreate(req, res, next) {
+async function imgKitUploadMulti(req, res, next) {
   if (!req.files) {
     try {
       throw { name: "NoImage" };
@@ -11,13 +11,7 @@ async function imgKitCreate(req, res, next) {
       next(err);
     }
   } else {
-    console.log(req.files);
-    // const typeFile = `.${
-    //   req.files[0].originalname.split(".")[
-    //     req.files[0].originalname.split(".").length - 1
-    //   ]
-    // }`;
-
+    // ! COBA PAKE SHARP
     try {
       Promise.all(
         req.files.map((el) => {
@@ -33,8 +27,21 @@ async function imgKitCreate(req, res, next) {
               let imgBufferEncoded = el.buffer.toString("base64");
 
               let formData = new FormData();
+              let date = new Date();
+              let day = date.getDate();
+              if (day < 10) {
+                day = `0${day}`;
+              }
+              let year = date.getFullYear();
+              let month = date.getMonth() + 1;
+              if (month < 10) {
+                month = `0${month}`;
+              }
               formData.append("file", imgBufferEncoded);
-              formData.append("fileName", el.originalname);
+              formData.append(
+                "fileName",
+                `${year}${month}${day}_${el.originalname}`
+              );
 
               return axios.post(
                 "https://upload.imagekit.io/api/v1/files/upload",
@@ -54,12 +61,16 @@ async function imgKitCreate(req, res, next) {
           }
         })
       ).then((result) => {
-        let imageUrls = [];
+        let imagesData = [];
 
+        let imageData = {};
         result.forEach((el) => {
-          imageUrls.push(el.data.url);
+          imageData.imageUrl = el.data.url;
+          imageData.eTag = el.data.fileId;
+          imageData.fieldName = el.data.name;
+          imagesData.push(imageData);
         });
-        req.body.imageUrls = imageUrls;
+        req.body.imagesData = imagesData;
         next();
       });
     } catch (err) {
@@ -69,4 +80,4 @@ async function imgKitCreate(req, res, next) {
   }
 }
 
-module.exports = { imgKitCreate };
+module.exports = { imgKitUploadMulti };

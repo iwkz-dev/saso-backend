@@ -15,6 +15,7 @@ const eventSchema = new mongoose.Schema({
   started_at: {
     type: Date,
   },
+  images: [],
   updated_at: {
     type: Date,
   },

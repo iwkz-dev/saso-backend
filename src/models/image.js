@@ -10,6 +10,9 @@ const imageSchema = new mongoose.Schema({
   parent_uid: {
     type: String,
   },
+  eTag: {
+    type: String,
+  },
   type: {
     type: String,
   },
