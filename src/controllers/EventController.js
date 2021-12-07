@@ -19,15 +19,17 @@ class EventController {
     };
 
     try {
-      const payloadImage = req.body.imagesData;
       const createEvent = await Event.create(payload);
-      payloadImage.forEach((el) => {
-        el.type = "event";
-        el.parent_uid = createEvent._id;
-        el.updated_at = new Date();
-        el.created_at = new Date();
-      });
-      await Image.insertMany(payloadImage);
+      if (req.body.imagesData) {
+        const payloadImage = req.body.imagesData;
+        payloadImage.forEach((el) => {
+          el.type = "event";
+          el.parent_uid = createEvent._id;
+          el.updated_at = new Date();
+          el.created_at = new Date();
+        });
+        await Image.insertMany(payloadImage);
+      }
       res
         .status(httpStatus.StatusCodes.CREATED)
         .json(resHelpers.success("success create an event", createEvent));
@@ -54,7 +56,7 @@ class EventController {
       const { id } = req.params;
       const findEvent = await Event.findById(id);
       if (!findEvent) {
-        throw { name: "Not Found", message: "Event saso not found" };
+        throw { name: "Not Found", message: "Event not found" };
       }
       res
         .status(httpStatus.StatusCodes.OK)
@@ -70,7 +72,7 @@ class EventController {
       const { id } = req.params;
       const deletedEvent = await Event.findOneAndDelete({ _id: id });
       if (!deletedEvent) {
-        throw { name: "Not Found", message: "Event saso not found" };
+        throw { name: "Not Found", message: "Event not found" };
       }
       // DELETE PHOTO FROM DATABASE AND IMAGEKIT
       // ? ATAU MAU TETEP DISIMPEN?
@@ -102,6 +104,23 @@ class EventController {
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.OK("success delete data", deletedEvent));
     } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
+  static async update(req, res, next) {
+    const payload = {
+      name: req.body.name,
+      description: req.body.description,
+      started_at: req.body.started_at,
+      updated_at: new Date(),
+    };
+    const { id } = req.params;
+    try {
+      console.log(payload);
+    } catch (error) {
+      console.log(error);
       next(error);
     }
   }
