@@ -16,6 +16,8 @@ router.get("/", EventController.getAllEvents);
 
 router.get("/:id", EventController.getEventById);
 
+router.delete("/:id", EventController.destroy);
+
 router.post(
   "/upload-image",
   uploadArray("imageUrls", 5),

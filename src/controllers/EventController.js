@@ -1,6 +1,7 @@
 "use strict";
 
 const httpStatus = require("http-status-codes");
+const axios = require("axios");
 const Event = require("@models/event");
 const Image = require("@models/image");
 const resHelpers = require("@helpers/responseHelpers");
@@ -60,6 +61,47 @@ class EventController {
         .json(resHelpers.success("success fetch data", findEvent));
     } catch (error) {
       console.log(error);
+      next(error);
+    }
+  }
+
+  static async destroy(req, res, next) {
+    try {
+      const { id } = req.params;
+      const deletedEvent = await Event.findOneAndDelete({ _id: id });
+      if (!deletedEvent) {
+        throw { name: "Not Found", message: "Event saso not found" };
+      }
+      // DELETE PHOTO FROM DATABASE AND IMAGEKIT
+      // ? ATAU MAU TETEP DISIMPEN?
+      let fileIdImages = [];
+      if (deletedEvent.images.length > 0) {
+        deletedEvent.images.forEach(async (el) => {
+          fileIdImages.push(el.eTag);
+          await Image.findOneAndDelete({
+            eTag: el.eTag,
+          });
+        });
+        let encodePrivateKey = Buffer.from(
+          `${process.env.IMGKIT_PRIVATE_KEY}:`,
+          "utf-8"
+        ).toString("base64");
+
+        console.log(fileIdImages);
+        await axios.post(
+          "https://api.imagekit.io/v1/files/batch/deleteByFileIds",
+          { fileIds: fileIdImages },
+          {
+            headers: {
+              Authorization: `Basic ${encodePrivateKey}`,
+            },
+          }
+        );
+      }
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.OK("success delete data", deletedEvent));
+    } catch (error) {
       next(error);
     }
   }

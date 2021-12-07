@@ -63,13 +63,14 @@ async function imgKitUploadMulti(req, res, next) {
       ).then((result) => {
         let imagesData = [];
 
-        let imageData = {};
         result.forEach((el) => {
-          imageData.imageUrl = el.data.url;
-          imageData.eTag = el.data.fileId;
-          imageData.fieldName = el.data.name;
-          imagesData.push(imageData);
+          imagesData.push({
+            imageUrl: el.data.url,
+            eTag: el.data.fileId,
+            fieldName: el.data.name,
+          });
         });
+        console.log(imagesData);
         req.body.imagesData = imagesData;
         next();
       });
