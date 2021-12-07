@@ -3,7 +3,7 @@
 const httpStatus = require("http-status-codes");
 const Event = require("@models/event");
 const Image = require("@models/image");
-const resUtils = require("@utils/responseUtils");
+const resHelpers = require("@helpers/responseHelpers");
 
 class EventController {
   // ! BELOM ADA AUTHENTICATION BISA JADI REFERENSI BUAT BELAJAR
@@ -29,12 +29,10 @@ class EventController {
       await Image.insertMany(payloadImage);
       res
         .status(httpStatus.StatusCodes.CREATED)
-        .json(resUtils.success("success create an event", createEvent));
+        .json(resHelpers.success("success create an event", createEvent));
     } catch (error) {
       console.log(error);
-      res
-        .status(httpStatus.StatusCodes.BAD_REQUEST)
-        .json(resUtils.failed(error.message, error));
+      next(error);
     }
   }
 
@@ -43,12 +41,10 @@ class EventController {
       const findEvents = await Event.find();
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resUtils.success("success fetch data", findEvents));
+        .json(resHelpers.success("success fetch data", findEvents));
     } catch (error) {
       console.log(error);
-      res
-        .status(httpStatus.StatusCodes.BAD_REQUEST)
-        .json(resUtils.failed(error.message, error));
+      next(error);
     }
   }
 
@@ -56,14 +52,15 @@ class EventController {
     try {
       const { id } = req.params;
       const findEvent = await Event.findById(id);
+      if (!findEvent) {
+        throw { name: "Not Found", message: "Event saso not found" };
+      }
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resUtils.success("success fetch data", findEvent));
+        .json(resHelpers.success("success fetch data", findEvent));
     } catch (error) {
       console.log(error);
-      res
-        .status(httpStatus.StatusCodes.BAD_REQUEST)
-        .json(resUtils.failed(error.message, error));
+      next(error);
     }
   }
 
@@ -73,9 +70,6 @@ class EventController {
       res.send("testing ke controller");
     } catch (error) {
       console.log(error);
-      res
-        .status(httpStatus.StatusCodes.BAD_REQUEST)
-        .json(resUtils.failed(error.message, error));
     }
   }
 }

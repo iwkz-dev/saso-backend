@@ -6,7 +6,7 @@ const FormData = require("form-data");
 async function imgKitUploadMulti(req, res, next) {
   if (!req.files) {
     try {
-      throw { name: "NoImage" };
+      throw { name: "Bad Request", message: "No image has been uploaded" };
     } catch (err) {
       next(err);
     }
@@ -54,10 +54,10 @@ async function imgKitUploadMulti(req, res, next) {
                 }
               );
             } else {
-              throw { name: "FileIsBig" };
+              throw { name: "Bad Request" };
             }
           } else {
-            throw { name: "WrongTypeFile" };
+            throw { name: "Bad Request" };
           }
         })
       ).then((result) => {
