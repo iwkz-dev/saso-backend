@@ -11,12 +11,12 @@ class UserController {
       email: req.body.email,
       password: req.body.password,
       isActive: req.body.isActive || false,
-      role: req.body.role,
+      role: +req.body.role,
       updated_at: new Date(),
       created_at: new Date(),
     };
     try {
-      const createUser = await User.create(payload).select("-password");
+      const createUser = await User.create(payload);
       const result = {
         _id: createUser._id,
         fullname: createUser.fullname,
@@ -52,10 +52,84 @@ class UserController {
     const { id } = req.params;
     try {
       const findUser = await User.findById(id).select("-password");
+      if (!findEvent) {
+        throw { name: "Not Found", message: "User not found" };
+      }
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success("success fetch data", findUser));
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
+  static async delete(req, res, next) {
+    const { id } = req.params;
+    try {
+      const deletedUser = await User.findOneAndDelete({ _id: id });
+      if (!deletedUser) {
+        throw { name: "Not Found", message: "User not found" };
+      }
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success("success delete data", deletedUser));
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+  static async changeActive(req, res, next) {
+    const { id } = req.params;
+    const payload = {
+      isActive: req.body.isActive,
+    };
+
+    try {
+      const updatedUser = await User.findOneAndUpdate({ _id: id }, payload, {
+        _id: id,
+      });
+      if (!updatedUser) {
+        throw { name: "Not Found", message: "User not found" };
+      }
+
+      let msg = "";
+      if (payload.isActive === "true") {
+        msg += "active";
+      } else {
+        msg += "inactive";
+      }
+
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success("User is " + msg, null));
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
+  static async changeRole(req, res, next) {
+    const { id } = req.params;
+    const payload = {
+      role: +req.body.role,
+    };
+
+    try {
+      const updatedUser = await User.findOneAndUpdate({ _id: id }, payload, {
+        _id: id,
+      });
+      if (!updatedUser) {
+        throw { name: "Not Found", message: "User not found" };
+      }
+
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success("User's role has changed", null));
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
   }
 }
 
