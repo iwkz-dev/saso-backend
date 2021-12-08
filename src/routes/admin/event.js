@@ -1,7 +1,7 @@
 "use strict";
 
 const router = require("express").Router();
-const EventController = require("@controllers/EventController");
+const EventController = require("@controllers/admin/EventController");
 const imageKit = require("@middlewares/imageKit");
 const { uploadArray } = require("@helpers/multer");
 

@@ -3,7 +3,7 @@
 const mongoose = require("mongoose");
 const { ObjectId } = require("bson");
 const validator = require("validator");
-const { hashPassword } = require("../helpers/bcrypt");
+const { hashPassword } = require("@helpers/bcrypt");
 
 const userSchema = new mongoose.Schema({
   fullname: {
