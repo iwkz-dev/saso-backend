@@ -102,13 +102,14 @@ class EventController {
       }
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.OK("success delete data", deletedEvent));
+        .json(resHelpers.success("success delete data", deletedEvent));
     } catch (error) {
       console.log(error);
       next(error);
     }
   }
 
+  // ! NOTE TO ILHAM: ham ntar kalau kita skypean lagi ngobrolin gimana baiknya flow update. Gua agak bingung buat foto. ada sih beberapa ide, tp mau aja menurut lu gimana.
   static async update(req, res, next) {
     const payload = {
       name: req.body.name,
@@ -118,7 +119,15 @@ class EventController {
     };
     const { id } = req.params;
     try {
-      console.log(payload);
+      const updatedEvent = await Event.findOneAndUpdate({ _id: id }, payload, {
+        new: true,
+      });
+      if (!updatedEvent) {
+        throw { name: "Not Found", message: "Event not found" };
+      }
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success("success update data", updatedEvent));
     } catch (error) {
       console.log(error);
       next(error);

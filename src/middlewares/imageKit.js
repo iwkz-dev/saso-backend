@@ -64,7 +64,7 @@ async function imgKitUploadMulti(req, res, next) {
           imagesData.push({
             imageUrl: el.data.url,
             eTag: el.data.fileId,
-            fieldName: el.data.name,
+            fileName: el.data.name,
           });
         });
         console.log(imagesData);
