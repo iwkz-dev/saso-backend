@@ -1,8 +1,9 @@
+"use strict";
 const httpStatus = require("http-status-codes");
 const resHelpers = require("@helpers/responseHelpers");
 
 async function errorHandler(error, req, res, next) {
-  switch (error.name) {
+  switch ((error, "<<<<")) {
     case "Bad Request":
       res
         .status(httpStatus.StatusCodes.BAD_REQUEST)
