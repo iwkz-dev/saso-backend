@@ -52,7 +52,7 @@ class UserController {
     const { id } = req.params;
     try {
       const findUser = await User.findById(id).select("-password");
-      if (!findEvent) {
+      if (!findUser) {
         throw { name: "Not Found", message: "User not found" };
       }
       res

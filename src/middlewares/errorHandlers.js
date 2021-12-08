@@ -3,7 +3,12 @@ const httpStatus = require("http-status-codes");
 const resHelpers = require("@helpers/responseHelpers");
 
 async function errorHandler(error, req, res, next) {
-  switch ((error, "<<<<")) {
+  switch (error.name) {
+    case "Invalid Auth":
+      res
+        .status(httpStatus.StatusCodes.UNAUTHORIZED)
+        .json(resHelpers.failed(error.message, error.name || error));
+      break;
     case "Bad Request":
       res
         .status(httpStatus.StatusCodes.BAD_REQUEST)
