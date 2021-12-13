@@ -1,5 +1,4 @@
 async function pagination(count, limit, page) {
-  console.log("🚀 ~ file: dataHelper.js ~ line 2 ~ pagination ~ page", page);
   const totalPage = Math.ceil(count / limit);
   const pagination = {
     maxPage: totalPage,
