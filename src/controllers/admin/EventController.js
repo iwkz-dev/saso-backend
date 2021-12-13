@@ -5,6 +5,7 @@ const axios = require("axios");
 const Event = require("@models/event");
 const Image = require("@models/image");
 const resHelpers = require("@helpers/responseHelpers");
+const { dataPagination } = require("@helpers/dataHelper");
 
 class EventController {
   // ! BELOM ADA AUTHENTICATION BISA JADI REFERENSI BUAT BELAJAR
@@ -39,9 +40,30 @@ class EventController {
     }
   }
 
+  // -1 for descending & 1 for ascending
   static async getAllEvents(req, res, next) {
+    // let limit = 3;
+    // let page = 1;
+    const { page, limit } = req.query;
     try {
-      const findEvents = await Event.find();
+      const options = {
+        page: page || 1,
+        limit: limit || 100000,
+        sort: {
+          type: "updated_at",
+          method: -1,
+        },
+      };
+      const findEvents = await dataPagination(Event, null, null, options);
+
+      // const findEvents = await Event.find(null, null, {
+      //   sort: { updated_at: -1 },
+      //   limit: limit * 1,
+      //   skip: (page - 1) * limit,
+      // });
+      // .limit(limit * 1)
+      // .skip((page - 1) * limit)
+      // .sort({ updated_at: -1 });
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success("success fetch data", findEvents));

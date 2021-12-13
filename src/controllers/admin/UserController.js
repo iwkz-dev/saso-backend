@@ -3,6 +3,7 @@
 const httpStatus = require("http-status-codes");
 const User = require("@models/user");
 const resHelpers = require("@helpers/responseHelpers");
+const { dataPagination } = require("@helpers/dataHelper");
 
 class UserController {
   static async register(req, res, next) {
@@ -37,8 +38,26 @@ class UserController {
   }
 
   static async getAllUsers(req, res, next) {
+    const { page, limit } = req.query;
+
     try {
-      const findUsers = await User.find().select("-password");
+      const options = {
+        page: page || 1,
+        limit: limit || 100000,
+        sort: {
+          type: "updated_at",
+          method: -1,
+        },
+      };
+      const findUsers = await dataPagination(
+        User,
+        null,
+        ["-password"],
+        options
+      );
+      // const findUsers = await User.find()
+      //   .select("-password")
+      //   .sort({ updated_at: -1 });
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success("success fetch data", findUsers));
