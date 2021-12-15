@@ -1,6 +1,9 @@
 "use strict";
 const router = require("express").Router();
 const UserController = require("@controllers/admin/UserController");
+const { authSuperAdmin } = require("@middlewares/auth");
+
+router.use(authSuperAdmin);
 
 router.post("/create", UserController.register);
 

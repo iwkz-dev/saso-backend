@@ -26,4 +26,30 @@ async function authAdmin(req, res, next) {
   }
 }
 
-module.exports = { authAdmin };
+async function authSuperAdmin(req, res, next) {
+  const { access_token: accessToken } = req.headers;
+
+  try {
+    if (!accessToken) {
+      throw { name: "Invalid Auth", message: "Invalid Access Token" };
+    } else {
+      const verifiedAccessToken = jwtVerify(accessToken);
+
+      const findUser = await User.findById(verifiedAccessToken.id);
+      if (!findUser) {
+        throw { name: "Invalid Auth", message: "Invalid Access Token" };
+      } else {
+        if (findUser.role !== 1) {
+          throw { name: "Invalid Auth", message: "Invalid Access Token" };
+        }
+
+        next();
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+}
+
+module.exports = { authAdmin, authSuperAdmin };
