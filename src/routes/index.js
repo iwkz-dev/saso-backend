@@ -10,12 +10,10 @@ router.get("/", (req, res) => {
   res.send("You are connected to this app");
 });
 
-
 const routerListAdmin = {
   "/event": "admin/event",
   "/user": "admin/user",
-  "/auth": "admin/auth",
-  "/menu": "admin/menu"
+  "/menu": "admin/menu",
 };
 
 for (let item in routerListAdmin) {

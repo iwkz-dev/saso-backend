@@ -2,7 +2,7 @@
 
 const httpStatus = require("http-status-codes");
 const Menu = require("@models/menu");
-const resUtils = require("@utils/responseUtils");
+const resHelpers = require("@helpers/responseHelpers");
 
 class MenuController {
   // ! BELOM ADA AUTHENTICATION BISA JADI REFERENSI BUAT BELAJAR
@@ -18,17 +18,15 @@ class MenuController {
       updated_at: new Date(),
       created_at: new Date(),
     };
+    console.log(payload);
     try {
       const createMenu = await Menu.create(payload);
       console.log(payload);
       res
         .status(httpStatus.StatusCodes.CREATED)
-        .json(resUtils.success("success create an menu", createMenu));
+        .json(resHelpers.success("success create an menu", createMenu));
     } catch (error) {
-      console.log(error);
-      res
-        .status(httpStatus.StatusCodes.BAD_REQUEST)
-        .json(resUtils.failed(error.message, error));
+      next(error);
     }
   }
 
@@ -37,12 +35,9 @@ class MenuController {
       const findMenu = await Menu.find();
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resUtils.success("success fetch data", findMenu));
+        .json(resHelpers.success("success fetch data", findMenu));
     } catch (error) {
-      console.log(error);
-      res
-        .status(httpStatus.StatusCodes.BAD_REQUEST)
-        .json(resUtils.failed(error.message, error));
+      next(error);
     }
   }
 }
