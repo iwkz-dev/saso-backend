@@ -1,3 +1,5 @@
+"use strict";
+
 const { jwtVerify } = require("@helpers/jwt");
 const User = require("@models/user");
 

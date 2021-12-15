@@ -1,3 +1,5 @@
+"use strict";
+
 async function pagination(count, limit, page) {
   const totalPage = Math.ceil(count / limit);
   const pagination = {
