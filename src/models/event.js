@@ -15,6 +15,10 @@ const eventSchema = new mongoose.Schema({
   started_at: {
     type: Date,
   },
+  images: {
+    type: Array,
+    validate: [arrayLimit, "{PATH} exceeds the limit of 5"],
+  },
   updated_at: {
     type: Date,
   },
@@ -23,5 +27,8 @@ const eventSchema = new mongoose.Schema({
   },
 });
 
+function arrayLimit(val) {
+  return val.length <= 5;
+}
 const Event = mongoose.model("Event", eventSchema);
 module.exports = Event;
