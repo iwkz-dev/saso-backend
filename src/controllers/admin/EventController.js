@@ -8,7 +8,6 @@ const resHelpers = require("@helpers/responseHelpers");
 const { dataPagination } = require("@helpers/dataHelper");
 
 class EventController {
-  // ! BELOM ADA AUTHENTICATION BISA JADI REFERENSI BUAT BELAJAR
   static async create(req, res, next) {
     const payload = {
       name: req.body.name,
