@@ -32,6 +32,9 @@ const userSchema = new mongoose.Schema({
   /**
    * ROLE: 1 -> super_admin
    * ROLE: 2 -> admin
+   * ROLE: 3 -> customer page
+   * SWAGGER -> API DOCUMETANTION ->
+   * mongolab -> mlab
    */
   role: {
     type: Number,
