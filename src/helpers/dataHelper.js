@@ -28,7 +28,7 @@ module.exports = {
 
     const findData = await model.find(filter, null, options).select(select);
 
-    const countData = await model.countDocuments();
+    const countData = await model.countDocuments(filter);
     const getPagination = await pagination(countData, options.limit, page);
 
     const result = {

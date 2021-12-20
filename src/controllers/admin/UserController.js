@@ -51,7 +51,7 @@ class UserController {
       };
       const findUsers = await dataPagination(
         User,
-        null,
+        { $or: [{ role: 1 }, { role: 2 }] },
         ["-password"],
         options
       );
