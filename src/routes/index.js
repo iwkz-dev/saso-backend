@@ -16,11 +16,23 @@ const routerListAdmin = {
   "/menu": "admin/menu",
 };
 
+const routerListCustomer = {
+  "/user": "customer/user",
+  "/auth": "customer/auth",
+};
+
 for (let item in routerListAdmin) {
   router.use(
     "/admin" + item,
     authAdmin,
     require("@routes/" + routerListAdmin[item])
+  );
+}
+
+for (let item in routerListCustomer) {
+  router.use(
+    "/customer" + item,
+    require("@routes/" + routerListCustomer[item])
   );
 }
 
