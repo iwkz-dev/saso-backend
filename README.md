@@ -10,10 +10,10 @@ git clone https://github.com/Saso-Ecommerce/iwkz-saso-be.git
 lalu lakukan perintah ini di terminal / cmd kalian"
 
 ```
-npm install
+npm run setup
 ```
 
-Setalah process npm install selesai buatlah file _.env_ di root folder dan isinya dari _.env_ kalian bisa meminta ke **Bang Juan / Ilham / Asra**
+Setalah process npm run setup selesai, isinya dari _.env_ kalian bisa meminta ke **Bang Juan / Ilham / Asra**
 
 Setelah semua process penginstallan selesai kalian bisa melakukan
 

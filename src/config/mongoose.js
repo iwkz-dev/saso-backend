@@ -3,12 +3,8 @@
 const mongoose = require("mongoose");
 
 // bungkus jadi function
-let url;
-if (process.env.NODE_ENV === "production") {
-  url = process.env.MONGODB_URL;
-} else if (process.env.NODE_ENV === "development") {
-  url = "mongodb://localhost:27017/saso-api";
-}
+const url = process.env.MONGODB_URI;
+console.log(url);
 mongoose.connect(url, (err) => {
   if (err) {
     console.log(err, "connect to the database fail");
