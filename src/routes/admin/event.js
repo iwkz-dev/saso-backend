@@ -5,6 +5,13 @@ const EventController = require("@controllers/admin/EventController");
 const imageKit = require("@middlewares/imageKit");
 const { uploadArray } = require("@helpers/multer");
 
+/**
+ * @swagger
+ * tags:
+ *   name: Event
+ *   description: Authentication
+ */
+
 router.post(
   "/",
   uploadArray("imageUrls", 5),
@@ -14,16 +21,9 @@ router.post(
 
 /**
  * @swagger
- * tags:
- *   name: Event
- *   description: Authentication
- */
-
-/**
- * @swagger
  * /admin/event:
  *    get:
- *      summary: Returns the list of all the events
+ *      summary: Return the list of all the events
  *      tags: [Event]
  *      security:
  *         - ApiKeyAuth: []
@@ -57,7 +57,7 @@ router.get("/", EventController.getAllEvents);
  * @swagger
  * /admin/event/{id}/detail:
  *    get:
- *      summary: Returns detial event
+ *      summary: Return detail event
  *      tags: [Event]
  *      security:
  *         - ApiKeyAuth: []
@@ -86,15 +86,15 @@ router.get("/", EventController.getAllEvents);
  *                message: Invalid Access Token
  *                error: Invalid Auth
  *        "404":
- *           description: Event
+ *           description: Event not found
  *           content:
  *             application/json:
  *               schema:
  *                 $ref: '#/components/schemas/Error'
  *               example:
  *                status: failed
- *                message: Invalid Access Token
- *                error: Invalid Auth
+ *                message: Event not found
+ *                error: Not Found
  */
 router.get("/:id/detail", EventController.getEventById);
 
@@ -107,6 +107,64 @@ router.put(
   EventController.update
 );
 
+/**
+ * @swagger
+ * /admin/event:
+ *    post:
+ *      summary: Create Event
+ *      tags: [Event]
+ *      security:
+ *         - ApiKeyAuth: []
+ *      requestBody:
+ *        required: true
+ *        content:
+ *          multipart/form-data:
+ *            schema:
+ *              type: object
+ *              required:
+ *                 - name
+ *                 - description
+ *              properties:
+ *                name:
+ *                  type: string
+ *                description:
+ *                  type: string
+ *                started_at:
+ *                  type: string
+ *                  format: date-time
+ *                imageUrls:
+ *                  type: array
+ *                  items:
+ *                    type: string
+ *                    format: binary
+ *      responses:
+ *        "200":
+ *          description: OK
+ *          content:
+ *             application/json:
+ *               schema:
+ *                  $ref: '#/components/schemas/Event'
+ *        "401":
+ *           description: Invalid Access token
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Invalid Access Token
+ *                error: Invalid Auth
+ *        "400":
+ *           description: Validations Error
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Invalid Access Token
+ *                error: Invalid Auth
+ */
 router.post(
   "/upload-image",
   uploadArray("imageUrls", 5),

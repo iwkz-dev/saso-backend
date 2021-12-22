@@ -32,7 +32,6 @@ const userSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
   },
-  // ! NOTE TO ILHAM: untuk role apa aja ham? dua ini doang?
   /**
    * ROLE: 1 -> super_admin
    * ROLE: 2 -> admin

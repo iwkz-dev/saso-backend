@@ -23,7 +23,7 @@ const routerListCustomer = {
 for (let item in routerListAdmin) {
   router.use(
     "/admin" + item,
-    authAdmin,
+    // authAdmin,
     require("@routes/" + routerListAdmin[item])
   );
 }
