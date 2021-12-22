@@ -1,7 +1,6 @@
 "use strict";
 
 const mongoose = require("mongoose");
-const logger = require("./logger");
 
 let url;
 if (process.env.NODE_ENV === "production") {
@@ -11,8 +10,8 @@ if (process.env.NODE_ENV === "production") {
 }
 mongoose.connect(url, (err) => {
   if (err) {
-    logger.error(err, "Connect to the database fail");
+    console.log(err, "Connect to the database fail");
   } else {
-    logger.info("Connect to the database success");
+    console.log("Connect to the database success");
   }
 });

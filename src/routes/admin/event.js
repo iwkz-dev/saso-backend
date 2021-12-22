@@ -14,10 +14,17 @@ router.post(
 
 /**
  * @swagger
+ * tags:
+ *   name: Event
+ *   description: Authentication
+ */
+
+/**
+ * @swagger
  * /admin/event:
  *    get:
  *      summary: Returns the list of all the events
- *      tags: [Users]
+ *      tags: [Event]
  *      security:
  *         - ApiKeyAuth: []
  *      responses:
@@ -37,6 +44,12 @@ router.post(
  *                status: failed
  *                message: Invalid Access Token
  *                error: Invalid Auth
+ *        "500":
+ *           description: Error 500
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
  */
 router.get("/", EventController.getAllEvents);
 

@@ -31,7 +31,7 @@ class UserController {
         .status(httpStatus.StatusCodes.CREATED)
         .json(resHelpers.success("success create an user", result));
     } catch (error) {
-      logger.error(error);
+      console.log(error);
       next(error);
     }
   }

@@ -5,7 +5,6 @@ const User = require("@models/user");
 const resHelpers = require("@helpers/responseHelpers");
 const { comparePassword } = require("@helpers/bcrypt");
 const { jwtSign } = require("@helpers/jwt");
-const logger = require("@configs/logger");
 
 class AuthController {
   /**
@@ -46,7 +45,7 @@ class AuthController {
         }
       }
     } catch (error) {
-      logger.error(error);
+      console.log(error);
       next(error);
     }
   }
