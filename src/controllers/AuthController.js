@@ -7,6 +7,12 @@ const { comparePassword } = require("@helpers/bcrypt");
 const { jwtSign } = require("@helpers/jwt");
 
 class AuthController {
+  /**
+   *
+   * @param {Object} req
+   * @param {Object} res
+   * @param {Object} next
+   */
   static async login(req, res, next) {
     const { email, password } = req.body;
     // const payload = {

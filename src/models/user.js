@@ -25,10 +25,13 @@ const userSchema = new mongoose.Schema({
     required: [true, "Password is required"],
     minlength: [5, "Your password length should be greater than 5"],
   },
+  phone: {
+    type: String,
+    required: [true, "Phone is required"],
+  },
   isActive: {
     type: Boolean,
   },
-  // ! NOTE TO ILHAM: untuk role apa aja ham? dua ini doang?
   /**
    * ROLE: 1 -> super_admin
    * ROLE: 2 -> admin
