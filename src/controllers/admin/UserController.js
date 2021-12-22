@@ -13,6 +13,7 @@ class UserController {
       password: req.body.password,
       isActive: req.body.isActive || false,
       role: +req.body.role,
+      phone: req.body.phone,
       updated_at: new Date(),
       created_at: new Date(),
     };
@@ -24,6 +25,7 @@ class UserController {
         email: createUser.email,
         isActive: createUser.isActive,
         role: createUser.role,
+        phone: createUser.phone,
         updated_at: createUser.updated_at,
         created_at: createUser.created_at,
       };
