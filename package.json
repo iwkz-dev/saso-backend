@@ -4,6 +4,7 @@
   "description": "Saso API v1",
   "main": "app.js",
   "scripts": {
+    "setup": "npm i && cp .env.example .env",
     "start": "NODE_ENV=development npx nodemon bin/www",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
