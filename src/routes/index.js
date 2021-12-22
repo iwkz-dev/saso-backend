@@ -2,7 +2,7 @@
 
 const router = require("express").Router();
 
-const authRouter = require("@routes/admin/auth");
+const authRouter = require("@routes/auth");
 const { errorHandler } = require("@middlewares/errorHandlers");
 const { authAdmin } = require("@middlewares/auth");
 
@@ -18,7 +18,6 @@ const routerListAdmin = {
 
 const routerListCustomer = {
   "/user": "customer/user",
-  "/auth": "customer/auth",
 };
 
 for (let item in routerListAdmin) {
@@ -36,7 +35,7 @@ for (let item in routerListCustomer) {
   );
 }
 
-router.use("/admin/auth", authRouter);
+router.use("/auth", authRouter);
 
 router.use(errorHandler);
 

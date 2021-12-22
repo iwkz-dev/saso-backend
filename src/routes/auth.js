@@ -1,6 +1,6 @@
 "use strict";
 const router = require("express").Router();
-const AuthController = require("@controllers/admin/AuthController");
+const AuthController = require("@controllers/AuthController");
 
 /**
  * @swagger
@@ -11,7 +11,7 @@ const AuthController = require("@controllers/admin/AuthController");
 
 /**
  * @swagger
- * /admin/auth/login:
+ * /auth/login:
  *   post:
  *     summary: Login
  *     tags: [Auth]
