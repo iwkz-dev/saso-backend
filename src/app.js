@@ -11,6 +11,7 @@ const cors = require("cors");
 const swaggerUi = require("swagger-ui-express");
 const routers = require("@routes");
 const { openAPIDocs } = require("@configs/swagger");
+// const logger = require("@configs/logger");
 
 // ! BEST PRACTICE REQUIRE YANG DARI MODULE DIATAS ABIS ITU REQUIRE YANG ADA DI FILE LOCAL
 const app = express();

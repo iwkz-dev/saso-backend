@@ -25,6 +25,10 @@ const userSchema = new mongoose.Schema({
     required: [true, "Password is required"],
     minlength: [5, "Your password length should be greater than 5"],
   },
+  phone: {
+    type: String,
+    required: [true, "Phone is required"],
+  },
   isActive: {
     type: Boolean,
   },

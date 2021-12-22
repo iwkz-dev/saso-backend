@@ -34,7 +34,7 @@ class EventController {
         .status(httpStatus.StatusCodes.CREATED)
         .json(resHelpers.success("success create an event", createEvent));
     } catch (error) {
-      console.log(error);
+      logger.error(error);
       next(error);
     }
   }
@@ -67,7 +67,7 @@ class EventController {
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success("success fetch data", findEvents));
     } catch (error) {
-      console.log(error);
+      logger.error(error);
       next(error);
     }
   }
@@ -83,7 +83,7 @@ class EventController {
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success("success fetch data", findEvent));
     } catch (error) {
-      console.log(error);
+      logger.error(error);
       next(error);
     }
   }
@@ -125,7 +125,7 @@ class EventController {
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success("success delete data", deletedEvent));
     } catch (error) {
-      console.log(error);
+      logger.error(error);
       next(error);
     }
   }
@@ -150,7 +150,7 @@ class EventController {
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success("success update data", updatedEvent));
     } catch (error) {
-      console.log(error);
+      logger.error(error);
       next(error);
     }
   }
@@ -160,7 +160,7 @@ class EventController {
       console.log(req.body.imageUrls);
       res.send("testing ke controller");
     } catch (error) {
-      console.log(error);
+      logger.error(error);
     }
   }
 }

@@ -1,0 +1,47 @@
+components:
+  schemas:
+    Event:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        started_at:
+          type: string
+          format: date-time
+        images:
+          type: array
+          items:
+            type: string
+        updated_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+
+    Events:
+      type: array
+      items:
+        $ref: "#/components/schemas/Event"
+
+    DataEvent:
+      type: object
+      properties:
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+        data:
+          $ref: "#/components/schemas/Events"
+
+    ResultEvents:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/DataEvent"

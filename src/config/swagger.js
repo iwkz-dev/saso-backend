@@ -9,19 +9,8 @@ const options = {
       description: "Saso API",
     },
     servers: [{ url: "http://localhost:3000/api/v1" }],
-    components: {
-      securitySchemes: {
-        JWT: {
-          type: "http",
-          scheme: "bearer",
-          bearerFormat: "JWT",
-          name: "access_token",
-          in: "header",
-        },
-      },
-    },
   },
-  apis: ["./src/routes/*/*.js"], // files containing annotations as above
+  apis: ["src/docs/*.yml", "./src/routes/*/*.js"], // files containing annotations as above
 };
 
 const openAPIDocs = swaggerJsdoc(options);

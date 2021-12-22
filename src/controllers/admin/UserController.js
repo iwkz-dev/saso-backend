@@ -32,7 +32,7 @@ class UserController {
         .status(httpStatus.StatusCodes.CREATED)
         .json(resHelpers.success("success create an user", result));
     } catch (error) {
-      console.log(error);
+      logger.error(error);
       next(error);
     }
   }
@@ -62,7 +62,7 @@ class UserController {
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success("success fetch data", findUsers));
     } catch (error) {
-      console.log(error);
+      logger.error(error);
       next(error);
     }
   }
@@ -78,7 +78,7 @@ class UserController {
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success("success fetch data", findUser));
     } catch (error) {
-      console.log(error);
+      logger.error(error);
       next(error);
     }
   }
@@ -94,7 +94,7 @@ class UserController {
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success("success delete data", deletedUser));
     } catch (error) {
-      console.log(error);
+      logger.error(error);
       next(error);
     }
   }
@@ -123,7 +123,7 @@ class UserController {
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success("User is " + msg, null));
     } catch (error) {
-      console.log(error);
+      logger.error(error);
       next(error);
     }
   }
@@ -146,7 +146,7 @@ class UserController {
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success("User's role has changed", null));
     } catch (error) {
-      console.log(error);
+      logger.error(error);
       next(error);
     }
   }

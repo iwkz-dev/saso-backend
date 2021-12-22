@@ -21,7 +21,7 @@ async function authAdmin(req, res, next) {
       }
     }
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     next(error);
   }
 }
@@ -43,7 +43,7 @@ async function authSuperAdmin(req, res, next) {
       }
     }
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     next(error);
   }
 }
@@ -66,7 +66,7 @@ async function authCustomer(req, res, next) {
       }
     }
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     next(error);
   }
 }

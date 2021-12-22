@@ -1,0 +1,48 @@
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        fullname:
+          type: string
+        password:
+          type: string
+          format: password
+        role:
+          type: number
+        isActive:
+          type: boolean
+      example:
+        id: 5ebac534954b54139806c112
+        email: fake@example.com
+        fullname: fake name
+        password: test1234
+        role: 1
+
+    DataAuth:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+      example:
+        id: 61c039ea37c0ca6cfc731320
+        email": customer.iwkz@test.com
+        accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxYzAzOWVhMzdjMGNhNmNmYzczMTMyMCIsImVtYWlsIjoiY3VzdG9tZXIuaXdrekB0ZXN0LmNvbSIsInJvbGUiOjMsImlhdCI6MTY0MDA2MTcyNX0.YonDN87jAqxBVSnuYUdi8uzID3OR9oHLwRt6trWFjG0
+
+    AuthTokens:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/DataAuth"

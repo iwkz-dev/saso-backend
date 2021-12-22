@@ -39,7 +39,7 @@ class AuthController {
         }
       }
     } catch (error) {
-      console.log(error);
+      logger.error(error);
       next(error);
     }
   }
