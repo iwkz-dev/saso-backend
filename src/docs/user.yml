@@ -1,0 +1,50 @@
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        fullname:
+          type: string
+        password:
+          type: string
+          format: password
+        role:
+          type: number
+        isActive:
+          type: boolean
+        phone:
+          type: string
+      example:
+        id: 5ebac534954b54139806c112
+        email: fake@example.com
+        fullname: fake name
+        password: test1234
+        role: 1
+
+    Users:
+      type: array
+      items:
+        $ref: "#/components/schemas/User"
+
+    DataUser:
+      type: object
+      properties:
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+        data:
+          $ref: "#/components/schemas/Users"
+
+    ResultUsers:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/DataUser"

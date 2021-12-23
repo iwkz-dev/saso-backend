@@ -1,29 +1,5 @@
 components:
   schemas:
-    User:
-      type: object
-      properties:
-        id:
-          type: string
-        email:
-          type: string
-          format: email
-        fullname:
-          type: string
-        password:
-          type: string
-          format: password
-        role:
-          type: number
-        isActive:
-          type: boolean
-      example:
-        id: 5ebac534954b54139806c112
-        email: fake@example.com
-        fullname: fake name
-        password: test1234
-        role: 1
-
     DataAuth:
       type: object
       properties:

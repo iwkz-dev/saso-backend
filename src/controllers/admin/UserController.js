@@ -108,8 +108,8 @@ class UserController {
 
     try {
       const updatedUser = await User.findOneAndUpdate({ _id: id }, payload, {
-        _id: id,
-      });
+        new: true,
+      }).select("-password");
       if (!updatedUser) {
         throw { name: "Not Found", message: "User not found" };
       }
@@ -123,7 +123,7 @@ class UserController {
 
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("User is " + msg, null));
+        .json(resHelpers.success("User is " + msg, updatedUser));
     } catch (error) {
       console.log(error);
       next(error);
@@ -138,15 +138,15 @@ class UserController {
 
     try {
       const updatedUser = await User.findOneAndUpdate({ _id: id }, payload, {
-        _id: id,
-      });
+        new: true,
+      }).select("-password");
       if (!updatedUser) {
         throw { name: "Not Found", message: "User not found" };
       }
 
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("User's role has changed", null));
+        .json(resHelpers.success("User's role has changed", updatedUser));
     } catch (error) {
       console.log(error);
       next(error);

@@ -32,6 +32,8 @@ class MenuController {
   }
 
   static async getAllMenus(req, res, next) {
+    const { page, limit } = req.query;
+
     try {
       const options = {
         page: page || 1,

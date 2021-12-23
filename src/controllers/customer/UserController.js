@@ -4,6 +4,7 @@ const httpStatus = require("http-status-codes");
 const User = require("@models/user");
 const resHelpers = require("@helpers/responseHelpers");
 const { dataPagination } = require("@helpers/dataHelper");
+const { jwtSign } = require("@helpers/jwt");
 
 class UserController {
   static async register(req, res, next) {
@@ -12,6 +13,7 @@ class UserController {
       email: req.body.email,
       password: req.body.password,
       isActive: true,
+      phone: req.body.phone,
       role: 3,
       updated_at: new Date(),
       created_at: new Date(),
@@ -24,9 +26,16 @@ class UserController {
         email: createUser.email,
         isActive: createUser.isActive,
         role: createUser.role,
+        phone: createUser.phone,
         updated_at: createUser.updated_at,
         created_at: createUser.created_at,
       };
+      const accessToken = jwtSign({
+        id: result._id,
+        email: result.email,
+        role: result.role,
+      });
+      result.accessToken = accessToken;
       res
         .status(httpStatus.StatusCodes.CREATED)
         .json(resHelpers.success("success create an user", result));

@@ -32,8 +32,8 @@ const AuthController = require("@controllers/AuthController");
  *                 type: string
  *                 format: password
  *             example:
- *               email: fake@example.com
- *               password: password1
+ *               email: superadmin@test.com
+ *               password: test1234
  *     responses:
  *       "200":
  *         description: OK
