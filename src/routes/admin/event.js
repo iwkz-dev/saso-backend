@@ -8,10 +8,69 @@ const { uploadArray } = require("@helpers/multer");
 /**
  * @swagger
  * tags:
- *   name: Event
- *   description: Authentication
+ *   name: Admin-Event
+ *   description: CRUD operation Event
  */
 
+/**
+ * @swagger
+ * /admin/event:
+ *    post:
+ *      summary: Create Event
+ *      tags: [Admin-Event]
+ *      security:
+ *         - ApiKeyAuth: []
+ *      requestBody:
+ *        required: true
+ *        content:
+ *          multipart/form-data:
+ *            schema:
+ *              type: object
+ *              required:
+ *                 - name
+ *                 - description
+ *              properties:
+ *                name:
+ *                  type: string
+ *                description:
+ *                  type: string
+ *                started_at:
+ *                  type: string
+ *                  format: date-time
+ *                imageUrls:
+ *                  type: array
+ *                  maxItems: 5
+ *                  items:
+ *                    type: string
+ *                    format: binary
+ *      responses:
+ *        "200":
+ *          description: OK
+ *          content:
+ *             application/json:
+ *               schema:
+ *                  $ref: '#/components/schemas/Event'
+ *        "401":
+ *           description: Invalid Access token
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Invalid Access Token
+ *                error: Invalid Auth
+ *        "400":
+ *           description: Validations Error
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Validation Error
+ *                error: Validation Error
+ */
 router.post(
   "/",
   uploadArray("imageUrls", 5),
@@ -24,7 +83,7 @@ router.post(
  * /admin/event:
  *    get:
  *      summary: Return the list of all the events
- *      tags: [Event]
+ *      tags: [Admin-Event]
  *      security:
  *         - ApiKeyAuth: []
  *      responses:
@@ -58,7 +117,7 @@ router.get("/", EventController.getAllEvents);
  * /admin/event/{id}/detail:
  *    get:
  *      summary: Return detail event
- *      tags: [Event]
+ *      tags: [Admin-Event]
  *      security:
  *         - ApiKeyAuth: []
  *      parameters:
@@ -98,23 +157,66 @@ router.get("/", EventController.getAllEvents);
  */
 router.get("/:id/detail", EventController.getEventById);
 
+/**
+ * @swagger
+ * /admin/event/{id}:
+ *    delete:
+ *      summary: Delete an Event
+ *      tags: [Admin-Event]
+ *      security:
+ *         - ApiKeyAuth: []
+ *      parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Event id
+ *      responses:
+ *        "200":
+ *          description: OK
+ *          content:
+ *             application/json:
+ *               schema:
+ *                  $ref: '#/components/schemas/Event'
+ *        "401":
+ *           description: Invalid Access token
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Invalid Access Token
+ *                error: Invalid Auth
+ *        "404":
+ *           description: Event not found
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Event not found
+ *                error: Not Found
+ */
 router.delete("/:id", EventController.destroy);
-
-router.put(
-  "/:id",
-  uploadArray("imageUrls", 5),
-  imageKit.imgKitUploadMulti,
-  EventController.update
-);
 
 /**
  * @swagger
- * /admin/event:
- *    post:
- *      summary: Create Event
- *      tags: [Event]
+ * /admin/event/{id}:
+ *    put:
+ *      summary: Edit an Event
+ *      tags: [Admin-Event]
  *      security:
  *         - ApiKeyAuth: []
+ *      parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Event id
  *      requestBody:
  *        required: true
  *        content:
@@ -134,6 +236,7 @@ router.put(
  *                  format: date-time
  *                imageUrls:
  *                  type: array
+ *                  maxItems: 5
  *                  items:
  *                    type: string
  *                    format: binary
@@ -154,6 +257,16 @@ router.put(
  *                status: failed
  *                message: Invalid Access Token
  *                error: Invalid Auth
+ *        "404":
+ *           description: Event not found
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Event not found
+ *                error: Not Found
  *        "400":
  *           description: Validations Error
  *           content:
@@ -162,9 +275,16 @@ router.put(
  *                 $ref: '#/components/schemas/Error'
  *               example:
  *                status: failed
- *                message: Invalid Access Token
- *                error: Invalid Auth
+ *                message: Validation Error
+ *                error: Validation Error
  */
+router.put(
+  "/:id",
+  uploadArray("imageUrls", 5),
+  imageKit.imgKitUploadMulti,
+  EventController.update
+);
+
 router.post(
   "/upload-image",
   uploadArray("imageUrls", 5),

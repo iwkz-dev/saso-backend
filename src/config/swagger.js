@@ -10,7 +10,7 @@ const options = {
     },
     servers: [{ url: "http://localhost:3000/api/v1" }],
   },
-  apis: ["src/docs/*.yml", "./src/routes/*/*.js"], // files containing annotations as above
+  apis: ["src/docs/*.yml", "./src/routes/*.js", "./src/routes/*/*.js"], // files containing annotations as above
 };
 
 const openAPIDocs = swaggerJsdoc(options);
