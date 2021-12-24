@@ -5,6 +5,7 @@ const router = require("express").Router();
 const authRouter = require("@routes/auth");
 const { errorHandler } = require("@middlewares/errorHandlers");
 const { authAdmin } = require("@middlewares/auth");
+const UserController = require("@controllers/admin/UserController");
 
 router.get("/", (req, res) => {
   res.send("You are connected to this app");
@@ -34,6 +35,9 @@ for (let item in routerListCustomer) {
     require("@routes/" + routerListCustomer[item])
   );
 }
+
+// ! LATER WILL BEHANDLED
+router.post("/admin/register", UserController.register);
 
 router.use("/auth", authRouter);
 
