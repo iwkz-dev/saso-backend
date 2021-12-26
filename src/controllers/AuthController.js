@@ -34,10 +34,16 @@ class AuthController {
             email: findUser.email,
             role: findUser.role,
           });
+          /**
+           * ROLE: 1 -> super_admin
+           * ROLE: 2 -> admin
+           * ROLE: 3 -> customer page
+           */
           const result = {
             id: findUser._id,
             email: findUser.email,
             accessToken,
+            role: findUser.role,
           };
           res
             .status(httpStatus.StatusCodes.OK)
