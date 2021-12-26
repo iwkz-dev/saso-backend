@@ -43,7 +43,8 @@ class EventController {
   static async getAllEvents(req, res, next) {
     // let limit = 3;
     // let page = 1;
-    const { page, limit } = req.query;
+    const { page, limit, date } = req.query;
+    console.log(req.query);
     try {
       const options = {
         page: page || 1,
@@ -53,7 +54,11 @@ class EventController {
           method: -1,
         },
       };
-      const findEvents = await dataPagination(Event, null, null, options);
+      let filter = {};
+      if (date === "now") {
+        filter.started_at = { $gte: new Date() };
+      }
+      const findEvents = await dataPagination(Event, filter, null, options);
 
       // const findEvents = await Event.find(null, null, {
       //   sort: { updated_at: -1 },
