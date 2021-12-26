@@ -8,7 +8,10 @@ const options = {
       version: "1.0.0",
       description: "Saso API",
     },
-    servers: [{ url: "http://localhost:3000/api/v1" }],
+    servers: [
+      { url: "http://localhost:3000/api/v1" },
+      { url: "https://saso.iwkz.de/api/api/v1" },
+    ],
   },
   apis: ["src/docs/*.yml", "./src/routes/*.js", "./src/routes/*/*.js"], // files containing annotations as above
 };
