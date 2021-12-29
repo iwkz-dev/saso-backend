@@ -12,6 +12,10 @@ async function authAdmin(req, res, next) {
       throw { name: "Invalid Auth", message: "Invalid Access Token" };
     } else {
       const verifiedAccessToken = jwtVerify(accessToken);
+      console.log(
+        "🚀 ~ file: auth.js ~ line 15 ~ authAdmin ~ verifiedAccessToken",
+        verifiedAccessToken
+      );
 
       const findUser = await User.findById(verifiedAccessToken.id);
       if (!findUser || findUser.role === 3) {

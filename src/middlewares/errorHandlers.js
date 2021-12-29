@@ -4,6 +4,11 @@ const resHelpers = require("@helpers/responseHelpers");
 
 async function errorHandler(error, req, res, next) {
   switch (error.name) {
+    case "Forbidden":
+      res
+        .status(httpStatus.StatusCodes.FORBIDDEN)
+        .json(resHelpers.failed(error.message, error.name || error));
+      break;
     case "Invalid Auth":
       res
         .status(httpStatus.StatusCodes.UNAUTHORIZED)
