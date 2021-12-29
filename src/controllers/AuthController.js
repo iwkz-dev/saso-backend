@@ -25,29 +25,36 @@ class AuthController {
       if (!findUser) {
         throw { name: "Invalid Auth", message: "Email / Password is wrong" };
       } else {
-        const verifiedPassword = comparePassword(password, findUser.password);
-        if (!verifiedPassword) {
-          throw { name: "Invalid Auth", message: "Email / Password is wrong" };
+        if (findUser.isActive) {
+          const verifiedPassword = comparePassword(password, findUser.password);
+          if (!verifiedPassword) {
+            throw {
+              name: "Invalid Auth",
+              message: "Email / Password is wrong",
+            };
+          } else {
+            const accessToken = jwtSign({
+              id: findUser._id,
+              email: findUser.email,
+              role: findUser.role,
+            });
+            /**
+             * ROLE: 1 -> super_admin
+             * ROLE: 2 -> admin
+             * ROLE: 3 -> customer page
+             */
+            const result = {
+              id: findUser._id,
+              email: findUser.email,
+              accessToken,
+              role: findUser.role,
+            };
+            res
+              .status(httpStatus.StatusCodes.OK)
+              .json(resHelpers.success("Success login", result));
+          }
         } else {
-          const accessToken = jwtSign({
-            id: findUser._id,
-            email: findUser.email,
-            role: findUser.role,
-          });
-          /**
-           * ROLE: 1 -> super_admin
-           * ROLE: 2 -> admin
-           * ROLE: 3 -> customer page
-           */
-          const result = {
-            id: findUser._id,
-            email: findUser.email,
-            accessToken,
-            role: findUser.role,
-          };
-          res
-            .status(httpStatus.StatusCodes.OK)
-            .json(resHelpers.success("Success login", result));
+          throw { name: "Forbidden", message: "Your account is inactive" };
         }
       }
     } catch (error) {

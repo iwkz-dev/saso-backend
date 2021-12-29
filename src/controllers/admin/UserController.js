@@ -18,21 +18,27 @@ class UserController {
       created_at: new Date(),
     };
     try {
-      const createUser = await User.create(payload);
-      const result = {
-        _id: createUser._id,
-        fullname: createUser.fullname,
-        email: createUser.email,
-        isActive: createUser.isActive,
-        role: createUser.role,
-        phone: createUser.phone,
-        updated_at: createUser.updated_at,
-        created_at: createUser.created_at,
-      };
+      const findEmail = await User.findOne({ email: req.body.email });
 
-      res
-        .status(httpStatus.StatusCodes.CREATED)
-        .json(resHelpers.success("success create an user", result));
+      if (findEmail) {
+        throw { name: "Bad Request", message: "Email is already registered" };
+      } else {
+        const createUser = await User.create(payload);
+        const result = {
+          _id: createUser._id,
+          fullname: createUser.fullname,
+          email: createUser.email,
+          isActive: createUser.isActive,
+          role: createUser.role,
+          phone: createUser.phone,
+          updated_at: createUser.updated_at,
+          created_at: createUser.created_at,
+        };
+
+        res
+          .status(httpStatus.StatusCodes.CREATED)
+          .json(resHelpers.success("success create an user", result));
+      }
     } catch (error) {
       console.log(error);
       next(error);
