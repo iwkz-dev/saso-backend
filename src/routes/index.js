@@ -21,6 +21,11 @@ const routerListCustomer = {
   "/user": "customer/user",
 };
 
+const routerListCustomerAuth = {
+  "/order": "customer/order",
+};
+
+// ADMIN AUTH
 for (let item in routerListAdmin) {
   router.use(
     "/admin" + item,
@@ -29,10 +34,19 @@ for (let item in routerListAdmin) {
   );
 }
 
+// USER NO AUTH
 for (let item in routerListCustomer) {
   router.use(
     "/customer" + item,
     require("@routes/" + routerListCustomer[item])
+  );
+}
+
+// USER AUTH
+for (let item in routerListCustomerAuth) {
+  router.use(
+    "/customer" + item,
+    require("@routes/" + routerListCustomerAuth[item])
   );
 }
 
