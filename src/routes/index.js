@@ -4,7 +4,7 @@ const router = require("express").Router();
 
 const authRouter = require("@routes/auth");
 const { errorHandler } = require("@middlewares/errorHandlers");
-const { authAdmin } = require("@middlewares/auth");
+const { authAdmin, authCustomer } = require("@middlewares/auth");
 const UserController = require("@controllers/admin/UserController");
 
 router.get("/", (req, res) => {
@@ -46,6 +46,7 @@ for (let item in routerListCustomer) {
 for (let item in routerListCustomerAuth) {
   router.use(
     "/customer" + item,
+    authCustomer,
     require("@routes/" + routerListCustomerAuth[item])
   );
 }

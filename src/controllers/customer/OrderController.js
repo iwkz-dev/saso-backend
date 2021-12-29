@@ -10,6 +10,7 @@ class UserController {
   static async order(req, res, next) {
     const { menus } = req.body;
     try {
+      const { id } = req.user;
       //   ! LATER: WILL BE AUTOMATED SS21
       const countData = await Order.countDocuments();
       let invoiceNumber = "SS21-";
@@ -22,9 +23,28 @@ class UserController {
       const findMenu = await Promise.all(
         menus.map(async (el) => {
           const foundMenu = await Menu.findOne({ _id: el._id })
-            .select(["-updated_at", "-created_at", "-description", "-quantity"])
+            .select(["-updated_at", "-created_at", "-description"])
             .lean();
+
+          if (el.totalPortion < 0 || !el.totalPortion) {
+            throw {
+              name: "Bad Request",
+              message: `Portion should be greater 0`,
+            };
+          }
+          if (foundMenu.quantity < 1) {
+            throw {
+              name: "Bad Request",
+              message: `Menu '${foundMenu.name}' is out of stock`,
+            };
+          }
+          const quantityFound = foundMenu.quantity;
           foundMenu["totalPortion"] = el.totalPortion;
+          delete foundMenu.quantity;
+          const payloadMenu = {
+            quantity: quantityFound - el.totalPortion,
+          };
+          await Menu.findOneAndUpdate({ _id: el._id }, payloadMenu);
           return foundMenu;
         })
       );
@@ -42,6 +62,7 @@ class UserController {
         menus: findMenu,
         totalPrice,
         status: 0,
+        customer: id,
         updated_at: new Date(),
         created_at: new Date(),
       };
@@ -51,7 +72,6 @@ class UserController {
       res
         .status(httpStatus.StatusCodes.CREATED)
         .json(resHelpers.success("success create an order", createOrder));
-      console.log(invoiceNumber);
     } catch (error) {
       console.log(error);
       next(error);

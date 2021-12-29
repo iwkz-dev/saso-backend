@@ -17,6 +17,7 @@ async function authAdmin(req, res, next) {
       if (!findUser || findUser.role === 3) {
         throw { name: "Invalid Auth", message: "Invalid Access Token" };
       } else {
+        req.user = verifiedAccessToken;
         next();
       }
     }
@@ -62,6 +63,7 @@ async function authCustomer(req, res, next) {
       if (!findUser || findUser.role !== 3) {
         throw { name: "Invalid Auth", message: "Invalid Access Token" };
       } else {
+        req.user = verifiedAccessToken;
         next();
       }
     }
@@ -71,4 +73,4 @@ async function authCustomer(req, res, next) {
   }
 }
 
-module.exports = { authAdmin, authSuperAdmin };
+module.exports = { authAdmin, authSuperAdmin, authCustomer };
