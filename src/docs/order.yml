@@ -1,20 +1,31 @@
 components:
   schemas:
-    Menu:
+    Order:
       type: object
       properties:
         _id:
           type: string
-        name:
+        invoiceNumber:
           type: string
-        category:
+        status:
           type: number
-        description:
+        customer:
           type: string
-        quantity:
+        totalPrice:
           type: number
-        price:
-          type: number
+        menus:
+          type: array
+          items:
+            type: object
+            properties:
+              _id:
+                type: string
+              name:
+                type: string
+              price:
+                type: number
+              category:
+                type: number
         updated_at:
           type: string
           format: date-time
@@ -22,20 +33,20 @@ components:
           type: string
           format: date-time
 
-    Menus:
+    Orders:
       type: array
       items:
-        $ref: "#/components/schemas/Menu"
+        $ref: "#/components/schemas/Order"
 
-    DataMenu:
+    DataOrder:
       type: object
       properties:
         pagination:
           $ref: "#/components/schemas/Pagination"
         data:
-          $ref: "#/components/schemas/Menus"
+          $ref: "#/components/schemas/Orders"
 
-    ResultMenus:
+    ResultOrders:
       type: object
       properties:
         status:
@@ -43,4 +54,4 @@ components:
         message:
           type: string
         data:
-          $ref: "#/components/schemas/DataMenu"
+          $ref: "#/components/schemas/DataOrder"

@@ -21,13 +21,13 @@ const menuSchema = new mongoose.Schema({
     type: Number,
     min: [0, "Cannot be lower than 0"],
     required: [true, "Quantity is required"],
-    currency:{
+    currency: {
       type: String,
-      default: "EUR"
-    }
+      default: "EUR",
+    },
   },
-  category:{
-    type: String,
+  category: {
+    type: Number,
     required: [true, "Category is required"],
   },
   started_at: {
