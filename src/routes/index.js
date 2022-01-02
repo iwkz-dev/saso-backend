@@ -62,7 +62,7 @@ for (let item in routerListCustomerAuth) {
 
 /**
  * @swagger
- * /admin/user/create:
+ * /admin/register:
  *    post:
  *      summary: Create user
  *      security:
