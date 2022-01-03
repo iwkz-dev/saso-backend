@@ -12,7 +12,7 @@ const OrderController = require("@controllers/customer/OrderController");
 
 /**
  * @swagger
- * /Customer/order:
+ * /customer/order:
  *    post:
  *      summary: Create Order
  *      tags: [Customer-Order]
@@ -52,7 +52,7 @@ const OrderController = require("@controllers/customer/OrderController");
  *                message: Invalid Access Token
  *                error: Invalid Auth
  *        "400":
- *           description: Validations Error
+ *           description: Validations Error / Portion out of stock
  *           content:
  *             application/json:
  *               schema:
@@ -63,5 +63,96 @@ const OrderController = require("@controllers/customer/OrderController");
  *                error: Validation Error
  */
 router.post("/", OrderController.order);
+
+/**
+ * @swagger
+ * /customer/order:
+ *    get:
+ *      summary: Return the list of all the orders
+ *      tags: [Customer-Order]
+ *      security:
+ *         - ApiKeyAuth: []
+ *      responses:
+ *        "200":
+ *          description: OK
+ *          content:
+ *             application/json:
+ *               schema:
+ *                  $ref: '#/components/schemas/ResultOrders'
+ *        "401":
+ *           description: Invalid Access token
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Invalid Access Token
+ *                error: Invalid Auth
+ *        "500":
+ *           description: Error 500
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ */
+router.get("/", OrderController.getAllOrders);
+
+/**
+ * @swagger
+ * /customer/order/{id}/detail:
+ *    get:
+ *      summary: Return detail order
+ *      tags: [Customer-Order]
+ *      security:
+ *         - ApiKeyAuth: []
+ *      parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Order id
+ *      responses:
+ *        "200":
+ *          description: OK
+ *          content:
+ *             application/json:
+ *               schema:
+ *                  $ref: '#/components/schemas/Order'
+ *        "401":
+ *           description: Invalid Access token
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Invalid Access Token
+ *                error: Invalid Auth
+ *        "404":
+ *           description: Order not found
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Order not found
+ *                error: Not Found
+ *        "403":
+ *           description: No authorization for the order
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Order not found
+ *                error: Not Found
+ */
+router.get("/:id/detail", OrderController.getOrderById);
+
+// router.get("/:id/refund", OrderController.orderRefund);
 
 module.exports = router;
