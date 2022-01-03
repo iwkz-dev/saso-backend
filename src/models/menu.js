@@ -17,6 +17,10 @@ const menuSchema = new mongoose.Schema({
     min: [0, "Cannot be lower than 0"],
     required: [true, "Quantity is required"],
   },
+  event: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Events",
+  },
   price: {
     type: Number,
     min: [0, "Cannot be lower than 0"],
