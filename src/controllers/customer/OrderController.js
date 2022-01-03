@@ -13,7 +13,9 @@ class UserController {
     try {
       //   ! LATER: WILL BE AUTOMATED SS21
       const countData = await Order.countDocuments();
-      let invoiceNumber = "SS21-";
+      let date = new Date().getFullYear().toString().substring(2);
+
+      let invoiceNumber = `SS${date}-`;
       if (countData < 10) {
         invoiceNumber += `00${countData + 1}`;
       } else if (countData < 100) {
@@ -80,7 +82,7 @@ class UserController {
 
   static async getAllOrders(req, res, next) {
     const { id: userId } = req.user;
-    const { page, limit } = req.query;
+    const { page, limit, date } = req.query;
     try {
       const options = {
         page: page || 1,
@@ -93,6 +95,11 @@ class UserController {
       let filter = {
         customer: userId,
       };
+
+      // ! LATER ONLY SHOW THE ACTUAL ORDER OF THE EVENT
+      // if (date === "now") {
+      //   filter.updated_at = { $gte: new Date() };
+      // }
       const findOrdersById = await dataPagination(Order, filter, null, options);
       res
         .status(httpStatus.StatusCodes.OK)

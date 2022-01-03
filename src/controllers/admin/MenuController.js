@@ -6,7 +6,6 @@ const resHelpers = require("@helpers/responseHelpers");
 const { dataPagination } = require("@helpers/dataHelper");
 
 class MenuController {
-  // ! BELOM ADA AUTHENTICATION BISA JADI REFERENSI BUAT BELAJAR
   // TO DO: update menu, get specific menu based on name, delete specific menu, delete all menu
   // belum ada image
   static async create(req, res, next) {
@@ -16,13 +15,13 @@ class MenuController {
       quantity: req.body.quantity,
       price: req.body.price,
       category: req.body.category,
+      event: req.body.event || null,
       updated_at: new Date(),
       created_at: new Date(),
     };
     console.log(payload);
     try {
       const createMenu = await Menu.create(payload);
-      console.log(payload);
       res
         .status(httpStatus.StatusCodes.CREATED)
         .json(resHelpers.success("success create an menu", createMenu));
@@ -32,7 +31,7 @@ class MenuController {
   }
 
   static async getAllMenus(req, res, next) {
-    const { page, limit } = req.query;
+    const { page, limit, event } = req.query;
 
     try {
       const options = {
@@ -44,7 +43,12 @@ class MenuController {
         },
       };
 
-      const findMenu = await dataPagination(Menu, null, null, options);
+      let filter = {};
+      if (event) {
+        filter.event = event;
+      }
+
+      const findMenu = await dataPagination(Menu, filter, null, options);
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success("success fetch data", findMenu));
