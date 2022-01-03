@@ -44,7 +44,6 @@ class EventController {
     // let limit = 3;
     // let page = 1;
     const { page, limit, date } = req.query;
-    console.log(req.query);
     try {
       const options = {
         page: page || 1,
@@ -160,6 +159,7 @@ class EventController {
     }
   }
 
+  // ! LATER BAKAL KEHAPUS
   static async uploadImage(req, res, next) {
     try {
       console.log(req.body.imageUrls);
