@@ -17,6 +17,18 @@ const AuthController = require("@controllers/AuthController");
  *     tags: [Auth]
  *     requestBody:
  *       required: true
+ *       description: >-
+ *          TEST FOR CUSTOMER: <br>
+ *          {<br>
+ *              "email": "customer.iwkz@test.com",<br>
+ *              "password": "test1234" <br>
+ *          }<br>
+ *
+ *          TEST FOR ADMIN: <br>
+ *          {<br>
+ *              "email": "admin@test.com",<br>
+ *              "password": "test1234"<br>
+ *          }
  *       content:
  *         application/json:
  *           schema:
