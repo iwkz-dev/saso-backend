@@ -31,8 +31,8 @@ const menuSchema = new mongoose.Schema({
     },
   },
   category: {
-    type: Number,
-    required: [true, "Category is required"],
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Categories",
   },
   started_at: {
     type: Date,

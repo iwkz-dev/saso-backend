@@ -47,7 +47,7 @@ class MenuController {
       if (event) {
         filter.event = event;
       }
-      if (event) {
+      if (category) {
         filter.category = category;
       }
 
