@@ -16,6 +16,15 @@ const MenuController = require("@controllers/customer/MenuController");
  *    get:
  *      summary: Return the list of all the menus
  *      tags: [Customer-Menu]
+ *      parameters:
+ *         - in: query
+ *           name: event
+ *           schema:
+ *             type: string
+ *         - in: query
+ *           name: category
+ *           schema:
+ *             type: string
  *      responses:
  *        "200":
  *          description: OK

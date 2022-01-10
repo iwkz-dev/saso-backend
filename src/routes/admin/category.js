@@ -1,21 +1,21 @@
 "use strict";
 
 const router = require("express").Router();
-const MenuController = require("@controllers/admin/MenuController");
+const CategoryController = require("@controllers/admin/CategoryController");
 
 /**
  * @swagger
  * tags:
- *   name: Admin-Menu
- *   description: CRUD operation Menu
+ *   name: Admin-Category
+ *   description: CRUD operation Category
  */
 
 /**
  * @swagger
- * /admin/menu:
+ * /admin/category:
  *    post:
- *      summary: Create Menu
- *      tags: [Admin-Menu]
+ *      summary: Create Category
+ *      tags: [Admin-Category]
  *      security:
  *         - ApiKeyAuth: []
  *      requestBody:
@@ -33,25 +33,13 @@ const MenuController = require("@controllers/admin/MenuController");
  *              properties:
  *                name:
  *                  type: string
- *                description:
- *                  type: string
- *                quantity:
- *                  type: number
- *                price:
- *                  type: number
- *                category:
- *                  type: string
- *                  format: uuid
- *                event:
- *                  type: string
- *                  format: uuid
  *      responses:
  *        "200":
  *          description: OK
  *          content:
  *             application/json:
  *               schema:
- *                  $ref: '#/components/schemas/Menu'
+ *                  $ref: '#/components/schemas/Category'
  *        "401":
  *           description: Invalid Access token
  *           content:
@@ -73,32 +61,23 @@ const MenuController = require("@controllers/admin/MenuController");
  *                message: Validation Error
  *                error: Validation Error
  */
-router.post("/", MenuController.create);
+router.post("/", CategoryController.create);
 
 /**
  * @swagger
- * /admin/menu:
+ * /admin/category:
  *    get:
- *      summary: Return the list of all the menus
- *      tags: [Admin-Menu]
+ *      summary: Return the list of all the categories
+ *      tags: [Admin-Category]
  *      security:
  *         - ApiKeyAuth: []
- *      parameters:
- *         - in: query
- *           name: event
- *           schema:
- *             type: string
- *         - in: query
- *           name: category
- *           schema:
- *             type: string
  *      responses:
  *        "200":
  *          description: OK
  *          content:
  *             application/json:
  *               schema:
- *                  $ref: '#/components/schemas/ResultMenus'
+ *                  $ref: '#/components/schemas/ResultCategories'
  *        "401":
  *           description: Invalid Access token
  *           content:
@@ -116,6 +95,6 @@ router.post("/", MenuController.create);
  *               schema:
  *                 $ref: '#/components/schemas/Error'
  */
-router.get("/", MenuController.getAllMenus);
+router.get("/", CategoryController.getAllCategories);
 
 module.exports = router;
