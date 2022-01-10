@@ -32,16 +32,6 @@ const MenuController = require("@controllers/customer/MenuController");
  *             application/json:
  *               schema:
  *                  $ref: '#/components/schemas/ResultMenus'
- *        "401":
- *           description: Invalid Access token
- *           content:
- *             application/json:
- *               schema:
- *                 $ref: '#/components/schemas/Error'
- *               example:
- *                status: failed
- *                message: Invalid Access Token
- *                error: Invalid Auth
  *        "500":
  *           description: Error 500
  *           content:

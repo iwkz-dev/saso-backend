@@ -35,8 +35,8 @@ const OrderController = require("@controllers/customer/OrderController");
  *                       totalPortion:
  *                         type: number
  *      responses:
- *        "200":
- *          description: OK
+ *        "201":
+ *          description: CREATED
  *          content:
  *             application/json:
  *               schema:

@@ -49,6 +49,49 @@ class CategoryController {
       next(error);
     }
   }
+
+  static async update(req, res, next) {
+    const payload = {
+      name: req.body.name,
+      slug: req.body.name.toLowerCase().replace(" ", "_"),
+      updated_at: new Date(),
+    };
+
+    const { id } = req.params;
+    try {
+      const updatedCategory = await Category.findOneAndUpdate(
+        { _id: id },
+        payload,
+        { new: true }
+      );
+      if (!updatedCategory) {
+        throw { name: "Not Found", message: "Category not found" };
+      }
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success("success update data", updatedCategory));
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
+  static async delete(req, res, next) {
+    const { id } = req.params;
+
+    try {
+      const deletedCategory = await Category.findOneAndDelete({ _id: id });
+      if (!deletedCategory) {
+        throw { name: "Not Found", message: "Category not found" };
+      }
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success("success delete data", deletedCategory));
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
 }
 
 module.exports = CategoryController;

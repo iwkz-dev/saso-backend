@@ -44,8 +44,8 @@ const { uploadArray } = require("@helpers/multer");
  *                    type: string
  *                    format: binary
  *      responses:
- *        "200":
- *          description: OK
+ *        "201":
+ *          description: CREATED
  *          content:
  *             application/json:
  *               schema:

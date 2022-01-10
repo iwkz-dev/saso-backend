@@ -47,8 +47,8 @@ router.use(authSuperAdmin);
  *                phone:
  *                  type: string
  *      responses:
- *        "200":
- *          description: OK
+ *        "201":
+ *          description: CREATED
  *          content:
  *             application/json:
  *               schema:

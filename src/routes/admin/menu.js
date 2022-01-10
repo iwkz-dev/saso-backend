@@ -46,8 +46,8 @@ const MenuController = require("@controllers/admin/MenuController");
  *                  type: string
  *                  format: uuid
  *      responses:
- *        "200":
- *          description: OK
+ *        "201":
+ *          description: CREATED
  *          content:
  *             application/json:
  *               schema:
