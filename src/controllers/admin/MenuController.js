@@ -31,7 +31,7 @@ class MenuController {
   }
 
   static async getAllMenus(req, res, next) {
-    const { page, limit, event } = req.query;
+    const { page, limit, event, category } = req.query;
 
     try {
       const options = {
@@ -46,6 +46,9 @@ class MenuController {
       let filter = {};
       if (event) {
         filter.event = event;
+      }
+      if (event) {
+        filter.category = category;
       }
 
       const findMenu = await dataPagination(Menu, filter, null, options);

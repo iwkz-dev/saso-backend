@@ -69,6 +69,7 @@ for (let item in routerListCustomerAuth) {
  *         - ApiKeyAuth: []
  *      requestBody:
  *        required: true
+ *        description: ROLE = 1 -> Super Admin; 2 -> Admin; 3 -> Customer
  *        content:
  *          application/json:
  *            schema:
@@ -93,6 +94,13 @@ for (let item in routerListCustomerAuth) {
  *                  type: number
  *                phone:
  *                  type: string
+ *              example:
+ *                fullname: Super Admin
+ *                email: superadmin@test.com
+ *                password: test1234
+ *                isActive: true
+ *                role: 1
+ *                phone: 011111111110
  *      responses:
  *        "200":
  *          description: OK
