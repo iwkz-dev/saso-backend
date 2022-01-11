@@ -12,8 +12,8 @@ class MenuController {
     const payload = {
       name: req.body.name,
       description: req.body.description,
-      quantity: req.body.quantity,
-      price: req.body.price,
+      quantity: +req.body.quantity,
+      price: _req.body.price,
       category: req.body.category,
       event: req.body.event || null,
       updated_at: new Date(),
@@ -26,6 +26,7 @@ class MenuController {
         .status(httpStatus.StatusCodes.CREATED)
         .json(resHelpers.success("success create an menu", createMenu));
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
@@ -56,6 +57,116 @@ class MenuController {
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success("success fetch data", findMenu));
     } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
+  static async getMenuById(req, res, next) {
+    const { id } = req.params;
+    try {
+      const findMenu = await Menu.findById(id);
+      if (!findMenu) {
+        throw { name: "Not Found", message: "Menu not found" };
+      }
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success("success fetch data", findMenu));
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
+  static async destroy(req, res, next) {
+    const { id } = req.params;
+
+    try {
+      const deletedMenu = await Menu.findOneAndDelete({ _id: id });
+      if (!deletedMenu) {
+        throw { name: "Not Found", message: "Menu not found" };
+      }
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success("success delete data", deletedMenu));
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
+  static async update(req, res, next) {
+    const { id } = req.params;
+    const payload = {
+      name: req.body.name,
+      description: req.body.description,
+      price: +req.body.price,
+      category: req.body.category,
+      event: req.body.event || null,
+      updated_at: new Date(),
+    };
+    try {
+      const updatedMenu = await Menu.findOneAndUpdate({ _id: id }, payload, {
+        new: true,
+      });
+      if (!updatedMenu) {
+        throw { name: "Not Found", message: "Menu not found" };
+      }
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success("success update data", updatedMenu));
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
+  static async addQuantity(req, res, next) {
+    const { id } = req.params;
+    try {
+      const findMenu = await Menu.findById(id);
+
+      if (!findMenu) {
+        throw { name: "Not Found", message: "Menu not found" };
+      }
+      const totalQuantity = findMenu.quantity + +req.body.quantity;
+      const payload = {
+        quantity: totalQuantity,
+        updated_at: new Date(),
+      };
+      const updatedMenu = await Menu.findOneAndUpdate({ _id: id }, payload, {
+        new: true,
+      });
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success("success add quantity menu", updatedMenu));
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
+  static async subsQuantity(req, res, next) {
+    const { id } = req.params;
+    try {
+      const findMenu = await Menu.findById(id);
+
+      if (!findMenu) {
+        throw { name: "Not Found", message: "Menu not found" };
+      }
+      const totalQuantity = findMenu.quantity - +req.body.quantity;
+      const payload = {
+        quantity: totalQuantity,
+        updated_at: new Date(),
+      };
+      const updatedMenu = await Menu.findOneAndUpdate({ _id: id }, payload, {
+        new: true,
+      });
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success("success add quantity menu", updatedMenu));
+    } catch (error) {
+      console.log(error);
       next(error);
     }
   }
