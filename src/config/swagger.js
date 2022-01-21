@@ -11,10 +11,7 @@ const options = {
       version: "1.0.0",
       description: "Saso API",
     },
-    servers: [
-      { url: apiUrl,
-      { url: `http://localhost:${port}/api/v1` },
-    ],
+    servers: [{ url: apiUrl }, { url: `http://localhost:${port}/api/v1` }],
   },
   apis: ["src/docs/*.yml", "./src/routes/*.js", "./src/routes/*/*.js"], // files containing annotations as above
 };
