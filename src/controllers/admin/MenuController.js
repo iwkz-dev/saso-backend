@@ -2,6 +2,7 @@
 
 const httpStatus = require("http-status-codes");
 const Menu = require("@models/menu");
+const Event = require("@models/event");
 const resHelpers = require("@helpers/responseHelpers");
 const { dataPagination } = require("@helpers/dataHelper");
 
@@ -13,7 +14,7 @@ class MenuController {
       name: req.body.name,
       description: req.body.description,
       quantity: +req.body.quantity,
-      price: _req.body.price,
+      price: +req.body.price,
       category: req.body.category,
       event: req.body.event || null,
       updated_at: new Date(),
@@ -32,7 +33,7 @@ class MenuController {
   }
 
   static async getAllMenus(req, res, next) {
-    const { page, limit, event, category } = req.query;
+    const { page, limit, event, category, date } = req.query;
 
     try {
       const options = {
@@ -45,6 +46,13 @@ class MenuController {
       };
 
       let filter = {};
+      if (date === "now") {
+        const findEvent = await Event.findOne({
+          started_at: { $gte: new Date() },
+        });
+
+        filter.event = findEvent._id;
+      }
       if (event) {
         filter.event = event;
       }
