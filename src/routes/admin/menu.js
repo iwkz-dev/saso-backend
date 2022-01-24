@@ -83,6 +83,7 @@ router.post("/", MenuController.create);
  *    get:
  *      summary: Return the list of all the menus
  *      tags: [Admin-Menu]
+ *      description: If you want to show all menus please delete all forms below
  *      security:
  *         - ApiKeyAuth: []
  *      parameters:
@@ -90,10 +91,32 @@ router.post("/", MenuController.create);
  *           name: event
  *           schema:
  *             type: string
+ *           description: Event id in bson object, if not defined it will show all menus
+ *           example: 61c57ee6cca613610e9795b1
  *         - in: query
  *           name: category
  *           schema:
  *             type: string
+ *           description: Category id in bson object, if not defined it will show all menus
+ *           example: 61dbb879a59f547c07e1ce21
+ *         - in: query
+ *           name: date
+ *           schema:
+ *             type: string
+ *           description: Filter for filtering menus depends on year now, if not defined it will show all menus
+ *           example: now
+ *         - in: query
+ *           name: page
+ *           schema:
+ *             type: number
+ *           description: Number of current page
+ *           example: 1
+ *         - in: query
+ *           name: limit
+ *           schema:
+ *             type: number
+ *           description: Number of items will shown in one page
+ *           example: 2
  *      responses:
  *        "200":
  *          description: OK

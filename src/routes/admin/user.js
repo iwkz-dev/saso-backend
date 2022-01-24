@@ -84,6 +84,20 @@ router.post("/create", UserController.register);
  *      tags: [Admin-User]
  *      security:
  *         - ApiKeyAuth: []
+ *      description: If you want to show all items please delete all forms below
+ *      parameters:
+ *         - in: query
+ *           name: page
+ *           schema:
+ *             type: number
+ *           description: Number of current page
+ *           example: 1
+ *         - in: query
+ *           name: limit
+ *           schema:
+ *             type: number
+ *           description: Number of items will shown in one page
+ *           example: 2
  *      responses:
  *        "200":
  *          description: OK

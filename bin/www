@@ -2,7 +2,7 @@
 
 const app = require("../src/app.js");
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || process.env.LOCAL_PORT_API || 3000;
 
 app.listen(port, function () {
   console.log("Running on port: " + port);

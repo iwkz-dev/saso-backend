@@ -70,8 +70,22 @@ router.post("/", OrderController.order);
  *    get:
  *      summary: Return the list of all the orders
  *      tags: [Customer-Order]
+ *      description: If you want to show all items please delete all forms below
  *      security:
  *         - ApiKeyAuth: []
+ *      parameters:
+ *         - in: query
+ *           name: page
+ *           schema:
+ *             type: number
+ *           description: Number of current page
+ *           example: 1
+ *         - in: query
+ *           name: limit
+ *           schema:
+ *             type: number
+ *           description: Number of items will shown in one page
+ *           example: 2
  *      responses:
  *        "200":
  *          description: OK
