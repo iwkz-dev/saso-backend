@@ -5,6 +5,7 @@ const axios = require("axios");
 const Event = require("@models/event");
 const Image = require("@models/image");
 const resHelpers = require("@helpers/responseHelpers");
+const { bulkUpload, deleteImages } = require("@helpers/images");
 const { dataPagination } = require("@helpers/dataHelper");
 
 class EventController {
@@ -21,15 +22,9 @@ class EventController {
     try {
       const createEvent = await Event.create(payload);
       if (req.body.imagesData) {
-        const payloadImage = req.body.imagesData;
-        payloadImage.forEach((el) => {
-          el.type = "event";
-          el.parent_uid = createEvent._id;
-          el.updated_at = new Date();
-          el.created_at = new Date();
-        });
-        await Image.insertMany(payloadImage);
+        await bulkUpload(req.body.imagesData, createEvent._id, "event");
       }
+
       res
         .status(httpStatus.StatusCodes.CREATED)
         .json(resHelpers.success("success create an event", createEvent));
@@ -101,29 +96,8 @@ class EventController {
       }
       // DELETE PHOTO FROM DATABASE AND IMAGEKIT
       // ? ATAU MAU TETEP DISIMPEN?
-      let fileIdImages = [];
       if (deletedEvent.images.length > 0) {
-        deletedEvent.images.forEach(async (el) => {
-          fileIdImages.push(el.eTag);
-          await Image.findOneAndDelete({
-            eTag: el.eTag,
-          });
-        });
-        let encodePrivateKey = Buffer.from(
-          `${process.env.IMGKIT_PRIVATE_KEY}:`,
-          "utf-8"
-        ).toString("base64");
-
-        console.log(fileIdImages);
-        await axios.post(
-          "https://api.imagekit.io/v1/files/batch/deleteByFileIds",
-          { fileIds: fileIdImages },
-          {
-            headers: {
-              Authorization: `Basic ${encodePrivateKey}`,
-            },
-          }
-        );
+        await deleteImages(deletedEvent);
       }
       res
         .status(httpStatus.StatusCodes.OK)
@@ -134,7 +108,6 @@ class EventController {
     }
   }
 
-  // ! NOTE TO ILHAM: ham ntar kalau kita skypean lagi ngobrolin gimana baiknya flow update. Gua agak bingung buat foto. ada sih beberapa ide, tp mau aja menurut lu gimana.
   static async update(req, res, next) {
     const payload = {
       name: req.body.name,
@@ -153,6 +126,44 @@ class EventController {
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success("success update data", updatedEvent));
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
+  static async uploadImages(req, res, next) {
+    const { id } = req.params;
+    const payload = {
+      images: req.body.imagesData,
+      updated_at: new Date(),
+    };
+    try {
+      const findEvent = await Event.findById(id);
+
+      if (!findEvent) {
+        throw { name: "Not Found", message: "Event not found" };
+      }
+      if (findEvent.images.length > 0) {
+        await deleteImages(findEvent);
+      }
+
+      const updateEventImages = await Event.update({ _id: id }, payload, {
+        new: true,
+      });
+
+      if (req.body.imagesData) {
+        await bulkUpload(req.body.imagesData, updateEventImages._id, "event");
+      }
+
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(
+          resHelpers.success(
+            "success add images to the Event",
+            updateEventImages
+          )
+        );
     } catch (error) {
       console.log(error);
       next(error);

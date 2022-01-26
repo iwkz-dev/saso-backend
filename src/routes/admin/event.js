@@ -298,11 +298,79 @@ router.delete("/:id", EventController.destroy);
  *                message: Validation Error
  *                error: Validation Error
  */
-router.put(
-  "/:id",
+router.put("/:id", EventController.update);
+
+/**
+ * @swagger
+ * /admin/event/{id}/upload-images:
+ *    patch:
+ *      summary: Update image of menu
+ *      tags: [Admin-Event]
+ *      security:
+ *         - ApiKeyAuth: []
+ *      parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Event id
+ *      requestBody:
+ *        required: true
+ *        content:
+ *          multipart/form-data:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                imageUrls:
+ *                  type: array
+ *                  maxItems: 5
+ *                  items:
+ *                    type: string
+ *                    format: binary
+ *      responses:
+ *        "200":
+ *          description: OK
+ *          content:
+ *             application/json:
+ *               schema:
+ *                  $ref: '#/components/schemas/Menu'
+ *        "401":
+ *           description: Invalid Access token
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Invalid Access Token
+ *                error: Invalid Auth
+ *        "404":
+ *           description: Menu not found
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Menu not found
+ *                error: Not Found
+ *        "400":
+ *           description: Validations Error
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Validation Error
+ *                error: Validation Error
+ */
+router.patch(
+  "/:id/upload-images",
   uploadArray("imageUrls", 5),
   imageKit.imgKitUploadMulti,
-  EventController.update
+  EventController.uploadImages
 );
 
 router.post(

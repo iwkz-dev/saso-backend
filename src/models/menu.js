@@ -30,6 +30,10 @@ const menuSchema = new mongoose.Schema({
       default: "EUR",
     },
   },
+  images: {
+    type: Array,
+    validate: [arrayLimit, "{PATH} exceeds the limit of 5"],
+  },
   category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Categories",
@@ -44,6 +48,8 @@ const menuSchema = new mongoose.Schema({
     type: Date,
   },
 });
-
+function arrayLimit(val) {
+  return val.length <= 5;
+}
 const Menu = mongoose.model("Menu", menuSchema);
 module.exports = Menu;
