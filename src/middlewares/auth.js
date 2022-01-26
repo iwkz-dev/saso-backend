@@ -9,13 +9,16 @@ async function authAdmin(req, res, next) {
 
   try {
     if (!accessToken) {
-      throw { name: "Invalid Auth", message: "Invalid Access Token" };
+      throw { name: "No Access Token", message: "Invalid Access Token" };
     } else {
       const verifiedAccessToken = jwtVerify(accessToken);
 
       const findUser = await User.findById(verifiedAccessToken.id);
       if (!findUser || findUser.role === 3) {
-        throw { name: "Invalid Auth", message: "Invalid Access Token" };
+        throw {
+          name: "User and role not fit",
+          message: "Invalid Access Token",
+        };
       } else {
         req.user = verifiedAccessToken;
         next();
@@ -32,13 +35,16 @@ async function authSuperAdmin(req, res, next) {
 
   try {
     if (!accessToken) {
-      throw { name: "Invalid Auth", message: "Invalid Access Token" };
+      throw { name: "In auth sa no token", message: "Invalid Access Token" };
     } else {
       const verifiedAccessToken = jwtVerify(accessToken);
 
       const findUser = await User.findById(verifiedAccessToken.id);
       if (!findUser || findUser.role !== 1) {
-        throw { name: "Invalid Auth", message: "Invalid Access Token" };
+        throw {
+          name: "In auth sa no fit role and user ",
+          message: "Invalid Access Token",
+        };
       } else {
         next();
       }
