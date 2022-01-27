@@ -24,7 +24,6 @@ components:
 
   securitySchemes:
     ApiKeyAuth:
-      type: apiKey
-      in: header
+      type: http
+      scheme: bearer
       bearerFormat: JWT
-      name: access_token
