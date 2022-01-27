@@ -9,7 +9,7 @@ async function authAdmin(req, res, next) {
 
   try {
     if (!accessToken) {
-      throw { name: "No Access Token", message: accessToken };
+      throw { name: "No Access Token", message: req.headers };
     } else {
       const verifiedAccessToken = jwtVerify(accessToken);
       console.log(
