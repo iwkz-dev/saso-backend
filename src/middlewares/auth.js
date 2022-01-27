@@ -11,7 +11,7 @@ async function authAdmin(req, res, next) {
 
   try {
     if (!accessToken) {
-      throw { name: "Invalid Auth", message: req.headers };
+      throw { name: "Invalid Auth", message: "Invalid Access Token" };
     } else {
       const verifiedAccessToken = jwtVerify(accessToken);
 
