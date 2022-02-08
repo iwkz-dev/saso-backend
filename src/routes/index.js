@@ -16,6 +16,7 @@ const routerListAdmin = {
   "/user": "admin/user",
   "/menu": "admin/menu",
   "/category": "admin/category",
+  "/order": "admin/order",
 };
 
 const routerListCustomer = {
