@@ -116,7 +116,6 @@ class UserController {
 
     try {
       const findOrder = await Order.findById({ _id: orderId });
-      console.log(userId, findOrder.customer);
       if (userId !== findOrder.customer.toString()) {
         throw {
           name: "Forbidden",

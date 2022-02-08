@@ -1,6 +1,6 @@
 const swaggerJsdoc = require("swagger-jsdoc");
 
-const apiUrl = process.env.PROD_API_URL || "https://saso.iwkz.de";
+const apiUrl = process.env.PROD_API_URL || "https://saso.iwkz.de/api/v1";
 const port = process.env.LOCAL_PORT_API || 3000;
 
 const options = {

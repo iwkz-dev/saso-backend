@@ -32,7 +32,6 @@ module.exports = {
         "utf-8"
       ).toString("base64");
 
-      console.log(fileIdImages);
       await axios.post(
         "https://api.imagekit.io/v1/files/batch/deleteByFileIds",
         { fileIds: fileIdImages },
