@@ -22,7 +22,6 @@ class MenuController {
       updated_at: new Date(),
       created_at: new Date(),
     };
-    console.log(payload);
     try {
       const createMenu = await Menu.create(payload);
       if (req.body.imagesData) {
