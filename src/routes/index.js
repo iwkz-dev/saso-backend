@@ -21,7 +21,8 @@ const routerListAdmin = {
 
 const routerListCustomer = {
   "/user": "customer/user",
-  "/menu": "admin/menu",
+  "/menu": "customer/menu",
+  "/event": "customer/event",
 };
 
 const routerListCustomerAuth = {

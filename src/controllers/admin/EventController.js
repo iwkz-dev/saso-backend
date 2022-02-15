@@ -1,26 +1,26 @@
 "use strict";
 
 const httpStatus = require("http-status-codes");
-const axios = require("axios");
 const Event = require("@models/event");
-const Image = require("@models/image");
 const resHelpers = require("@helpers/responseHelpers");
 const { bulkUpload, deleteImages } = require("@helpers/images");
 const { dataPagination } = require("@helpers/dataHelper");
 
 class EventController {
   static async create(req, res, next) {
-    const payload = {
+    let payload = {
       name: req.body.name,
       description: req.body.description,
       started_at: req.body.started_at,
       images: req.body.imagesData,
-      isActive: req.body.isActive || false,
       updated_at: new Date(),
       created_at: new Date(),
     };
 
     try {
+      const getYear = req.body.started_at.split("-");
+      payload.startYear = getYear[0];
+      // if(req.body.started_at) {}
       const createEvent = await Event.create(payload);
       if (req.body.imagesData) {
         await bulkUpload(req.body.imagesData, createEvent._id, "event");
@@ -51,8 +51,12 @@ class EventController {
       };
       let filter = {};
       if (date === "now") {
-        filter.started_at = { $gte: new Date() };
+        filter.startYear = { $gte: new Date().getFullYear() };
       }
+      console.log(
+        "🚀 ~ file: EventController.js ~ line 50 ~ EventController ~ getAllEvents ~ filter",
+        filter
+      );
       const findEvents = await dataPagination(Event, filter, null, options);
 
       // const findEvents = await Event.find(null, null, {
@@ -110,23 +114,16 @@ class EventController {
   }
 
   static async update(req, res, next) {
-    const payload = {
+    let payload = {
       name: req.body.name,
       description: req.body.description,
       started_at: req.body.started_at,
-      isActive: req.body.isActive,
       updated_at: new Date(),
     };
-    console.log(
-      "🚀 ~ file: EventController.js ~ line 120 ~ EventController ~ update ~ payload",
-      payload
-    );
     const { id } = req.params;
-    console.log(
-      "🚀 ~ file: EventController.js ~ line 125 ~ EventController ~ update ~ id",
-      id
-    );
     try {
+      const getYear = req.body.started_at.split("-");
+      payload.startYear = getYear[0];
       const updatedEvent = await Event.findOneAndUpdate({ _id: id }, payload, {
         new: true,
       });

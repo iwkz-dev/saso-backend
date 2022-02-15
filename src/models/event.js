@@ -15,8 +15,8 @@ const eventSchema = new mongoose.Schema({
   started_at: {
     type: Date,
   },
-  isActive: {
-    type: Boolean,
+  startYear: {
+    type: Number,
   },
   images: {
     type: Array,
