@@ -15,6 +15,9 @@ const eventSchema = new mongoose.Schema({
   started_at: {
     type: Date,
   },
+  isActive: {
+    type: Boolean,
+  },
   images: {
     type: Array,
     validate: [arrayLimit, "{PATH} exceeds the limit of 5"],

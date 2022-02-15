@@ -15,6 +15,7 @@ class EventController {
       description: req.body.description,
       started_at: req.body.started_at,
       images: req.body.imagesData,
+      isActive: req.body.isActive || false,
       updated_at: new Date(),
       created_at: new Date(),
     };
@@ -113,9 +114,18 @@ class EventController {
       name: req.body.name,
       description: req.body.description,
       started_at: req.body.started_at,
+      isActive: req.body.isActive,
       updated_at: new Date(),
     };
+    console.log(
+      "🚀 ~ file: EventController.js ~ line 120 ~ EventController ~ update ~ payload",
+      payload
+    );
     const { id } = req.params;
+    console.log(
+      "🚀 ~ file: EventController.js ~ line 125 ~ EventController ~ update ~ id",
+      id
+    );
     try {
       const updatedEvent = await Event.findOneAndUpdate({ _id: id }, payload, {
         new: true,
