@@ -2,6 +2,7 @@
 
 const httpStatus = require("http-status-codes");
 const Menu = require("@models/menu");
+const Event = require("@models/event");
 const resHelpers = require("@helpers/responseHelpers");
 const { dataPagination } = require("@helpers/dataHelper");
 
@@ -24,10 +25,6 @@ class MenuController {
         const findEvent = await Event.findOne({
           startYear: { $gte: new Date().getFullYear() },
         });
-        console.log(
-          "🚀 ~ file: MenuController.js ~ line 57 ~ MenuController ~ getAllMenus ~ findEvent",
-          findEvent
-        );
 
         filter.event = findEvent._id;
       }

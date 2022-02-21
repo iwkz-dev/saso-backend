@@ -53,10 +53,7 @@ class EventController {
       if (flagDate === "now") {
         filter.startYear = { $gte: new Date().getFullYear() };
       }
-      console.log(
-        "🚀 ~ file: EventController.js ~ line 50 ~ EventController ~ getAllEvents ~ filter",
-        filter
-      );
+
       const findEvents = await dataPagination(Event, filter, null, options);
 
       // const findEvents = await Event.find(null, null, {
