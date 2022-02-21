@@ -23,6 +23,7 @@ const routerListCustomer = {
   "/user": "customer/user",
   "/menu": "customer/menu",
   "/event": "customer/event",
+  "/category": "customer/category",
 };
 
 const routerListCustomerAuth = {

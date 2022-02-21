@@ -16,10 +16,25 @@ components:
           type: string
           format: date-time
 
+    CategoryMenu:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        menus:
+          $ref: "#/components/schemas/DataMenu"
+
     Categories:
       type: array
       items:
         $ref: "#/components/schemas/Category"
+
+    CategoriesMenus:
+      type: array
+      items:
+        $ref: "#/components/schemas/CategoryMenu"
 
     DataCategory:
       type: object
@@ -28,6 +43,14 @@ components:
           $ref: "#/components/schemas/Pagination"
         data:
           $ref: "#/components/schemas/Categories"
+
+    DataCategoryMenus:
+      type: object
+      properties:
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+        data:
+          $ref: "#/components/schemas/CategoriesMenus"
 
     ResultCategories:
       type: object
@@ -38,3 +61,13 @@ components:
           type: string
         data:
           $ref: "#/components/schemas/DataCategory"
+
+    ResultCategoriesMenus:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/DataCategoryMenus"

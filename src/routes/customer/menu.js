@@ -37,6 +37,12 @@ const MenuController = require("@controllers/customer/MenuController");
  *           description: Number of current page
  *           example: 1
  *         - in: query
+ *           name: date
+ *           schema:
+ *             type: string
+ *           description: Filter for filtering menus depends on year now, if not defined it will show all menus
+ *           example: now
+ *         - in: query
  *           name: limit
  *           schema:
  *             type: number
