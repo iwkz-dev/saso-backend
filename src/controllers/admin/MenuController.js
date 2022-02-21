@@ -37,7 +37,7 @@ class MenuController {
   }
 
   static async getAllMenus(req, res, next) {
-    const { page, limit, event, category, date } = req.query;
+    const { page, limit, event, category, flagDate } = req.query;
 
     try {
       const options = {
@@ -50,10 +50,14 @@ class MenuController {
       };
 
       let filter = {};
-      if (date === "now") {
+      if (flagDate === "now") {
         const findEvent = await Event.findOne({
-          started_at: { $gte: new Date() },
+          startYear: { $gte: new Date().getFullYear() },
         });
+        console.log(
+          "🚀 ~ file: MenuController.js ~ line 57 ~ MenuController ~ getAllMenus ~ findEvent",
+          findEvent
+        );
 
         filter.event = findEvent._id;
       }

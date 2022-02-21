@@ -114,7 +114,7 @@ router.post(
  *           description: Category id in bson object, if not defined it will show all menus
  *           example: 61dbb879a59f547c07e1ce21
  *         - in: query
- *           name: date
+ *           name: flagDate
  *           schema:
  *             type: string
  *           description: Filter for filtering menus depends on year now, if not defined it will show all menus

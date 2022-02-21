@@ -9,7 +9,7 @@ const { uploadArray } = require("@helpers/multer");
  * @swagger
  * tags:
  *   name: Admin-Event
- *   description: CRUD operation Event
+ *   description: CRUD operation Event. Date format is YYYY-MM-DD
  */
 
 /**
@@ -89,7 +89,7 @@ router.post(
  *         - ApiKeyAuth: []
  *      parameters:
  *         - in: query
- *           name: date
+ *           name: flagDate
  *           schema:
  *             type: string
  *           description: Filter for filtering events depends on year now, if not defined it will show all events
@@ -240,7 +240,7 @@ router.delete("/:id", EventController.destroy);
  *      requestBody:
  *        required: true
  *        content:
- *          multipart/form-data:
+ *          application/json:
  *            schema:
  *              type: object
  *              required:
@@ -251,6 +251,8 @@ router.delete("/:id", EventController.destroy);
  *                  type: string
  *                description:
  *                  type: string
+ *                isActive:
+ *                  type: boolean
  *                started_at:
  *                  type: string
  *                  format: date-time
