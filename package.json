@@ -1,6 +1,6 @@
 {
   "name": "saso-api",
-  "version": "1.0.0",
+  "version": "v1",
   "description": "Saso API v1",
   "main": "app.js",
   "scripts": {
