@@ -7,7 +7,7 @@ const { dataPagination } = require("@helpers/dataHelper");
 
 class MenuController {
   static async getAllMenus(req, res, next) {
-    const { page, limit, event, category, date } = req.query;
+    const { page, limit, event, category, flagDate } = req.query;
 
     try {
       const options = {
@@ -20,7 +20,7 @@ class MenuController {
       };
 
       let filter = {};
-      if (date === "now") {
+      if (flagDate === "now") {
         const findEvent = await Event.findOne({
           startYear: { $gte: new Date().getFullYear() },
         });

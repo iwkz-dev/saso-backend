@@ -21,7 +21,7 @@ const EventController = require("@controllers/customer/EventController");
  *         - ApiKeyAuth: []
  *      parameters:
  *         - in: query
- *           name: date
+ *           name: flagDate
  *           schema:
  *             type: string
  *           description: Filter for filtering events depends on year now, if not defined it will show all events

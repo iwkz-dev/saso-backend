@@ -39,7 +39,7 @@ class EventController {
   static async getAllEvents(req, res, next) {
     // let limit = 3;
     // let page = 1;
-    const { page, limit, date } = req.query;
+    const { page, limit, flagDate } = req.query;
     try {
       const options = {
         page: page || 1,
@@ -50,7 +50,7 @@ class EventController {
         },
       };
       let filter = {};
-      if (date === "now") {
+      if (flagDate === "now") {
         filter.startYear = { $gte: new Date().getFullYear() };
       }
       console.log(

@@ -8,7 +8,7 @@ const { dataPagination } = require("@helpers/dataHelper");
 
 class UserController {
   static async getAllOrders(req, res, next) {
-    const { page, limit, date, invoiceNumber } = req.query;
+    const { page, limit, flagDate, invoiceNumber } = req.query;
     try {
       const options = {
         page: page || 1,

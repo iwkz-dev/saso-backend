@@ -82,7 +82,7 @@ class UserController {
 
   static async getAllOrders(req, res, next) {
     const { id: userId } = req.user;
-    const { page, limit, date } = req.query;
+    const { page, limit, flagDate } = req.query;
     try {
       const options = {
         page: page || 1,
@@ -97,7 +97,7 @@ class UserController {
       };
 
       // ! LATER ONLY SHOW THE ACTUAL ORDER OF THE EVENT
-      // if (date === "now") {
+      // if (flagDate === "now") {
       //   filter.updated_at = { $gte: new Date() };
       // }
       const findOrdersById = await dataPagination(Order, filter, null, options);
