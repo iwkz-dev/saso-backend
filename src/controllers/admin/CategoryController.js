@@ -13,10 +13,19 @@ class CategoryController {
       created_at: new Date(),
     };
     try {
-      const createCategory = await Category.create(payload);
-      res
-        .status(httpStatus.StatusCodes.CREATED)
-        .json(resHelpers.success("success create an event", createCategory));
+      const slug = req.body.name.toLowerCase().replace(" ", "_");
+      const findCategory = await Category.findOne({ slug });
+      if (findCategory) {
+        throw {
+          name: "Bad Request",
+          message: "You already have category with name " + req.body.name,
+        };
+      } else {
+        const createCategory = await Category.create(payload);
+        res
+          .status(httpStatus.StatusCodes.CREATED)
+          .json(resHelpers.success("success create an event", createCategory));
+      }
     } catch (error) {
       console.log(error);
       next(error);
