@@ -26,12 +26,11 @@ module.exports = {
     };
     const storageInDisk = multer.diskStorage({
       destination: function (req, file, cb) {
-        console.log("masuk 20");
         cb(null, "./uploads/");
       },
       filename: function (req, file, cb) {
         const dateTimeStamp = Date.now();
-        cb(null, file.originalname + "-" + dateTimeStamp);
+        cb(null, dateTimeStamp + "-" + file.originalname);
       },
     });
 
