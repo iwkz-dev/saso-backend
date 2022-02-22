@@ -48,3 +48,15 @@ components:
           type: string
         data:
           $ref: "#/components/schemas/DataMenu"
+
+    ResultBulkMenus:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        count:
+          type: number
+        data:
+          $ref: "#/components/schemas/Menus"

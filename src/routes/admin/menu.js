@@ -525,14 +525,75 @@ router.patch("/:id/subs-quantity", MenuController.subsQuantity);
  *                message: Validation Error
  *                error: Validation Error
  */
-
-router.post("/bulkCreate", uploadFileXls("file"), MenuController.bulkCreate);
-
 router.patch(
   "/:id/upload-images",
   uploadArray("imageUrls", 5),
   imageKit.imgKitUploadMulti,
   MenuController.uploadImages
 );
+
+/**
+ * @swagger
+ * /admin/menu/bulkCreate:
+ *    post:
+ *      summary: Bulk create of menus
+ *      tags: [Admin-Menu]
+ *      security:
+ *         - ApiKeyAuth: []
+ *      requestBody:
+ *        required: true
+ *        description: |
+ *            The file should be in .xlsx | <br>
+ *            <b>Sample table <i>Please crete .xlsx file with format like below</i>:</b>
+ *              | Name | Description | Quantity | Price | Category      |
+ *              |------|-------------|----------|-------|---------------|
+ *              | Sate | Sate Enak   | 12       | 5     | Makanan Besar |
+ *        content:
+ *          multipart/form-data:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                file:
+ *                  type: string
+ *                  format: binary
+ *      responses:
+ *        "200":
+ *          description: OK
+ *          content:
+ *             application/json:
+ *               schema:
+ *                  $ref: '#/components/schemas/ResultBulkMenus'
+ *        "401":
+ *           description: Invalid Access token
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Invalid Access Token
+ *                error: Invalid Auth
+ *        "404":
+ *           description: Menu not found
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Menu not found
+ *                error: Not Found
+ *        "400":
+ *           description: Validations Error
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Validation Error
+ *                error: Validation Error
+ */
+router.post("/bulkCreate", uploadFileXls("file"), MenuController.bulkCreate);
 
 module.exports = router;
