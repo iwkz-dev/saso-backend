@@ -224,6 +224,23 @@ class MenuController {
       next(error);
     }
   }
+
+  static async bulkCreate(req, res, next) {
+    const payload = {
+      name: req.body.name,
+      description: req.body.description,
+      quantity: +req.body.quantity,
+      price: +req.body.price,
+      updated_at: new Date(),
+      created_at: new Date(),
+    };
+
+    try {
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
 }
 
 module.exports = MenuController;

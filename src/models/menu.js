@@ -38,9 +38,6 @@ const menuSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Categories",
   },
-  started_at: {
-    type: Date,
-  },
   updated_at: {
     type: Date,
   },

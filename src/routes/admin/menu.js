@@ -3,7 +3,7 @@
 const router = require("express").Router();
 const MenuController = require("@controllers/admin/MenuController");
 const imageKit = require("@middlewares/imageKit");
-const { uploadArray } = require("@helpers/multer");
+const { uploadArray, uploadFileXls } = require("@helpers/multer");
 
 // ! LATER: BELOM ADA IMAGE
 
@@ -525,6 +525,9 @@ router.patch("/:id/subs-quantity", MenuController.subsQuantity);
  *                message: Validation Error
  *                error: Validation Error
  */
+
+router.post("/bulkCreate", uploadFileXls("file"), MenuController.bulkCreate);
+
 router.patch(
   "/:id/upload-images",
   uploadArray("imageUrls", 5),

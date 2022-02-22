@@ -3,6 +3,7 @@ const httpStatus = require("http-status-codes");
 const resHelpers = require("@helpers/responseHelpers");
 
 async function errorHandler(error, req, res, next) {
+  console.log(error);
   switch (error.name) {
     case "Forbidden":
       res
