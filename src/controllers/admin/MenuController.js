@@ -2,7 +2,9 @@
 
 const httpStatus = require("http-status-codes");
 const Menu = require("@models/menu");
+const readXlsxFile = require("read-excel-file/node");
 const Event = require("@models/event");
+const Category = require("@models/category");
 const resHelpers = require("@helpers/responseHelpers");
 const { bulkUpload, deleteImages } = require("@helpers/images");
 const { dataPagination } = require("@helpers/dataHelper");
@@ -219,6 +221,58 @@ class MenuController {
         .json(
           resHelpers.success("success add images to the menu", updateMenuImages)
         );
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
+  static async bulkCreate(req, res, next) {
+    try {
+      const xlsxRead = await readXlsxFile("./uploads/" + req.file.filename);
+      const sliceXlsx = xlsxRead.slice(1);
+
+      const bulkPayload = await Promise.all(
+        sliceXlsx.map(async (item) => {
+          const findEvent = await Event.findOne({
+            startYear: { $gte: new Date().getFullYear() },
+          });
+          if (findEvent) {
+            item.event = findEvent._id;
+          } else {
+            throw {
+              name: "Bad Request",
+              message:
+                "You have no event for this year, please create an event first",
+            };
+          }
+          const slug = item[4].toLowerCase().replace(" ", "_");
+          const findCategories = await Category.findOne({ slug });
+          if (!findCategories) {
+            const categoryPayload = {
+              name: item[4],
+              updated_at: new Date(),
+              created_at: new Date(),
+            };
+            const createCategory = await Category.create(categoryPayload);
+            item.category = createCategory._id;
+          } else {
+            item.category = findCategories._id;
+          }
+          item.name = item[0];
+          item.description = item[1];
+          item.quantity = item[2];
+          item.price = item[3];
+          item.updated_at = new Date();
+          item.created_at = new Date();
+          return item;
+        })
+      );
+
+      const createBulkMenus = await Menu.insertMany(bulkPayload);
+      res
+        .status(httpStatus.StatusCodes.CREATED)
+        .json(resHelpers.success("success create a menu", createBulkMenus));
     } catch (error) {
       console.log(error);
       next(error);
