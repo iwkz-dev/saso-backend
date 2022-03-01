@@ -306,7 +306,7 @@ router.put("/:id", EventController.update);
  * @swagger
  * /admin/event/{id}/upload-images:
  *    patch:
- *      summary: Update image of menu
+ *      summary: Update image of Event
  *      tags: [Admin-Event]
  *      security:
  *         - ApiKeyAuth: []
@@ -336,7 +336,7 @@ router.put("/:id", EventController.update);
  *          content:
  *             application/json:
  *               schema:
- *                  $ref: '#/components/schemas/Menu'
+ *                  $ref: '#/components/schemas/Event'
  *        "401":
  *           description: Invalid Access token
  *           content:
@@ -348,14 +348,14 @@ router.put("/:id", EventController.update);
  *                message: Invalid Access Token
  *                error: Invalid Auth
  *        "404":
- *           description: Menu not found
+ *           description: Event not found
  *           content:
  *             application/json:
  *               schema:
  *                 $ref: '#/components/schemas/Error'
  *               example:
  *                status: failed
- *                message: Menu not found
+ *                message: Event not found
  *                error: Not Found
  *        "400":
  *           description: Validations Error
@@ -374,6 +374,67 @@ router.patch(
   imageKit.imgKitUploadMulti,
   EventController.uploadImages
 );
+
+/**
+ * @swagger
+ * /admin/event/{id}/delete-images/{eTag}:
+ *    delete:
+ *      summary: Delete image of event
+ *      tags: [Admin-Event]
+ *      security:
+ *         - ApiKeyAuth: []
+ *      parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Event id
+ *       - in: path
+ *         name: eTag
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: eTag of the Image
+ *      responses:
+ *        "200":
+ *          description: OK
+ *          content:
+ *             application/json:
+ *               schema:
+ *                  $ref: '#/components/schemas/Event'
+ *        "401":
+ *           description: Invalid Access token
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Invalid Access Token
+ *                error: Invalid Auth
+ *        "404":
+ *           description: Delete not found
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Delete not found
+ *                error: Not Found
+ *        "400":
+ *           description: Validations Error
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Validation Error
+ *                error: Validation Error
+ */
+router.delete("/:id/delete-images/:eTag", EventController.destroyImages);
 
 router.post(
   "/upload-image",

@@ -3,7 +3,7 @@
 const httpStatus = require("http-status-codes");
 const Event = require("@models/event");
 const resHelpers = require("@helpers/responseHelpers");
-const { bulkUpload, deleteImages } = require("@helpers/images");
+const { bulkUpload, deleteImages, deleteImage } = require("@helpers/images");
 const { dataPagination } = require("@helpers/dataHelper");
 
 class EventController {
@@ -90,8 +90,8 @@ class EventController {
   }
 
   static async destroy(req, res, next) {
+    const { id } = req.params;
     try {
-      const { id } = req.params;
       const deletedEvent = await Event.findOneAndDelete({ _id: id });
       if (!deletedEvent) {
         throw { name: "Not Found", message: "Event not found" };
@@ -138,26 +138,29 @@ class EventController {
 
   static async uploadImages(req, res, next) {
     const { id } = req.params;
-    const payload = {
-      images: req.body.imagesData,
-      updated_at: new Date(),
-    };
+
     try {
       const findEvent = await Event.findById(id);
 
       if (!findEvent) {
         throw { name: "Not Found", message: "Event not found" };
       }
-      if (findEvent.images.length > 0) {
-        await deleteImages(findEvent);
-      }
+      let imagesPayload = [...findEvent.images];
+      req.body.imagesData.forEach((el) => {
+        imagesPayload.push(el);
+      });
+
+      const payload = {
+        images: imagesPayload,
+        updated_at: new Date(),
+      };
 
       const updateEventImages = await Event.update({ _id: id }, payload, {
         new: true,
       });
 
       if (req.body.imagesData) {
-        await bulkUpload(req.body.imagesData, updateEventImages._id, "event");
+        await bulkUpload(req.body.imagesData, findEvent._id, "event");
       }
 
       res
@@ -168,6 +171,49 @@ class EventController {
             updateEventImages
           )
         );
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
+  static async destroyImages(req, res, next) {
+    const { id, eTag } = req.params;
+
+    try {
+      const findEvent = await Event.findById(id);
+
+      if (!findEvent) {
+        throw { name: "Not Found", message: "Event not found" };
+      }
+
+      let imagesPayload = [];
+
+      if (findEvent.images.length > 0) {
+        await deleteImage("event", eTag);
+        findEvent.images.forEach((el) => {
+          if (el.eTag !== eTag) {
+            imagesPayload.push(el);
+          }
+        });
+        const payload = {
+          images: imagesPayload,
+          updated_at: new Date(),
+        };
+
+        const updatedEvent = await Event.findOneAndUpdate(
+          { _id: id },
+          payload,
+          {
+            new: true,
+          }
+        );
+        res
+          .status(httpStatus.StatusCodes.CREATED)
+          .json(resHelpers.success("success destroy an image", updatedEvent));
+      } else {
+        throw { name: "Bad Request", message: "Image is empty" };
+      }
     } catch (error) {
       console.log(error);
       next(error);

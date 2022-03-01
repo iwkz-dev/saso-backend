@@ -534,6 +534,67 @@ router.patch(
 
 /**
  * @swagger
+ * /admin/menu/{id}/delete-images/{eTag}:
+ *    delete:
+ *      summary: Delete image of menu
+ *      tags: [Admin-Menu]
+ *      security:
+ *         - ApiKeyAuth: []
+ *      parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Menu id
+ *       - in: path
+ *         name: eTag
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: eTag of the Image
+ *      responses:
+ *        "200":
+ *          description: OK
+ *          content:
+ *             application/json:
+ *               schema:
+ *                  $ref: '#/components/schemas/Menu'
+ *        "401":
+ *           description: Invalid Access token
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Invalid Access Token
+ *                error: Invalid Auth
+ *        "404":
+ *           description: Menu not found
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Menu not found
+ *                error: Not Found
+ *        "400":
+ *           description: Bad Request
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Validation Error
+ *                error: Validation Error
+ */
+router.delete("/:id/delete-images/:eTag", MenuController.destroyImages);
+
+/**
+ * @swagger
  * /admin/menu/bulkCreate:
  *    post:
  *      summary: Bulk create of menus

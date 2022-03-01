@@ -6,7 +6,7 @@ const readXlsxFile = require("read-excel-file/node");
 const Event = require("@models/event");
 const Category = require("@models/category");
 const resHelpers = require("@helpers/responseHelpers");
-const { bulkUpload, deleteImages } = require("@helpers/images");
+const { bulkUpload, deleteImages, deleteImage } = require("@helpers/images");
 const { dataPagination } = require("@helpers/dataHelper");
 
 class MenuController {
@@ -194,26 +194,29 @@ class MenuController {
 
   static async uploadImages(req, res, next) {
     const { id } = req.params;
-    const payload = {
-      images: req.body.imagesData,
-      updated_at: new Date(),
-    };
     try {
       const findMenu = await Menu.findById(id);
 
       if (!findMenu) {
         throw { name: "Not Found", message: "Menu not found" };
       }
-      if (findMenu.images.length > 0) {
-        await deleteImages(findMenu);
-      }
+
+      let imagesPayload = [...findMenu.images];
+      req.body.imagesData.forEach((el) => {
+        imagesPayload.push(el);
+      });
+
+      const payload = {
+        images: imagesPayload,
+        updated_at: new Date(),
+      };
 
       const updateMenuImages = await Menu.update({ _id: id }, payload, {
         new: true,
       });
 
       if (req.body.imagesData) {
-        await bulkUpload(req.body.imagesData, updateMenuImages._id, "menu");
+        await bulkUpload(req.body.imagesData, findMenu._id, "menu");
       }
 
       res
@@ -221,6 +224,45 @@ class MenuController {
         .json(
           resHelpers.success("success add images to the menu", updateMenuImages)
         );
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
+  static async destroyImages(req, res, next) {
+    const { id, eTag } = req.params;
+
+    try {
+      const findMenu = await Menu.findById(id);
+
+      if (!findMenu) {
+        throw { name: "Not Found", message: "Menu not found" };
+      }
+
+      let imagesPayload = [];
+
+      if (findMenu.images.length > 0) {
+        await deleteImage("menu", eTag);
+        findMenu.images.forEach((el) => {
+          if (el.eTag !== eTag) {
+            imagesPayload.push(el);
+          }
+        });
+        const payload = {
+          images: imagesPayload,
+          updated_at: new Date(),
+        };
+
+        const updatedMenu = await Menu.findOneAndUpdate({ _id: id }, payload, {
+          new: true,
+        });
+        res
+          .status(httpStatus.StatusCodes.CREATED)
+          .json(resHelpers.success("success destroy an image", updatedMenu));
+      } else {
+        throw { name: "Bad Request", message: "Image is empty" };
+      }
     } catch (error) {
       console.log(error);
       next(error);
