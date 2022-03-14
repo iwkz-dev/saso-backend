@@ -25,26 +25,35 @@ class UserController {
       const findMenu = await Promise.all(
         menus.map(async (el) => {
           const foundMenu = await Menu.findOne({ _id: el._id })
-            .select(["-updated_at", "-created_at", "-description"])
+            .select([
+              "-updated_at",
+              "-created_at",
+              "-description",
+              "-quantityOrder",
+            ])
             .lean();
 
-          if (el.totalPortion < 0 || !el.totalPortion) {
+          if (el.totalPortion <= 0 || !el.totalPortion) {
             throw {
               name: "Bad Request",
               message: `Portion should be greater 0`,
             };
           }
-          if (foundMenu.quantity < 1) {
+          let quantityFound = foundMenu.quantityOrder;
+          if (!quantityFound) {
+            quantityFound = 0;
+          }
+          const totalOrder = quantityFound + el.totalPortion;
+          if (foundMenu.quantity < totalOrder) {
             throw {
               name: "Bad Request",
               message: `Menu '${foundMenu.name}' is out of stock`,
             };
           }
-          const quantityFound = foundMenu.quantity;
           foundMenu["totalPortion"] = el.totalPortion;
           delete foundMenu.quantity;
           const payloadMenu = {
-            quantity: quantityFound - el.totalPortion,
+            quantityOrder: totalOrder,
           };
           await Menu.findOneAndUpdate({ _id: el._id }, payloadMenu);
           return foundMenu;

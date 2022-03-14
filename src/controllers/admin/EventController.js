@@ -145,6 +145,9 @@ class EventController {
       if (!findEvent) {
         throw { name: "Not Found", message: "Event not found" };
       }
+      if (findEvent.images.length > 4) {
+        throw { name: "Bad Request", message: "You can only upload 5 images" };
+      }
       let imagesPayload = [...findEvent.images];
       req.body.imagesData.forEach((el) => {
         imagesPayload.push(el);

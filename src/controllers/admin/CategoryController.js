@@ -59,6 +59,22 @@ class CategoryController {
     }
   }
 
+  static async getCategoryById(req, res, next) {
+    const { id } = req.params;
+    try {
+      const findCategory = await Category.findById(id);
+      if (!findCategory) {
+        throw { name: "Not Found", message: "Category not found" };
+      }
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success("success fetch data", findCategory));
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
   static async update(req, res, next) {
     const payload = {
       name: req.body.name,
