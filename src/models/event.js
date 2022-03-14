@@ -18,6 +18,14 @@ const eventSchema = new mongoose.Schema({
   startYear: {
     type: Number,
   },
+  /**
+   * STATUS: 0 -> upcoming
+   * STATUS: 1 -> ongoing
+   * STATUS: 2 -> finished
+   */
+  status: {
+    type: Number,
+  },
   images: {
     type: Array,
     validate: [arrayLimit, "{PATH} exceeds the limit of 5"],

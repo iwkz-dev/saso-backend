@@ -95,6 +95,51 @@ router.get("/", CategoryController.getAllCategories);
 
 /**
  * @swagger
+ * /admin/category/{id}/detail:
+ *    get:
+ *      summary: Return the details of category
+ *      tags: [Admin-Category]
+ *      security:
+ *         - ApiKeyAuth: []
+ *      parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Category id
+ *      responses:
+ *        "200":
+ *          description: OK
+ *          content:
+ *             application/json:
+ *               schema:
+ *                  $ref: '#/components/schemas/Category'
+ *        "401":
+ *           description: Invalid Access token
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Invalid Access Token
+ *                error: Invalid Auth
+ *        "404":
+ *           description: Menu not found
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Menu not found
+ *                error: Not Found
+ */
+router.get("/:id/detail", CategoryController.getCategoryById);
+
+/**
+ * @swagger
  * /admin/category/{id}:
  *    put:
  *      summary: Edit an Category

@@ -281,6 +281,8 @@ router.delete("/:id", MenuController.destroy);
  *                  type: string
  *                price:
  *                  type: number
+ *                quantity:
+ *                  type: number
  *                category:
  *                  type: string
  *                  format: uuid

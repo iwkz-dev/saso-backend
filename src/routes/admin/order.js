@@ -16,7 +16,7 @@ const OrderController = require("@controllers/admin/OrderController");
  *    get:
  *      summary: Return the list of all the orders
  *      tags: [Admin-Order]
- *      description: If you want to show all items please delete all forms below, status 1 = done, status 2 = refund/cancel, status 3 = done
+ *      description: If you want to show all items please delete all forms below, status 1 = menu/s has/have been paid / done paid, status 2 = refund/cancel, status 3 = done
  *      security:
  *         - ApiKeyAuth: []
  *      parameters:

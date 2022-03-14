@@ -17,6 +17,7 @@ class MenuController {
       name: req.body.name,
       description: req.body.description,
       quantity: +req.body.quantity,
+      quantityOrder: +req.body.quantityOrder || 0,
       price: +req.body.price,
       category: req.body.category,
       images: req.body.imagesData,
@@ -121,6 +122,7 @@ class MenuController {
       description: req.body.description,
       price: +req.body.price,
       category: req.body.category,
+      quantity: +req.body.quantity,
       event: req.body.event || null,
       updated_at: new Date(),
     };
@@ -199,6 +201,9 @@ class MenuController {
 
       if (!findMenu) {
         throw { name: "Not Found", message: "Menu not found" };
+      }
+      if (findMenu.images.length > 4) {
+        throw { name: "Bad Request", message: "You can only upload 5 images" };
       }
 
       let imagesPayload = [...findMenu.images];
@@ -305,6 +310,7 @@ class MenuController {
           item.description = item[1];
           item.quantity = item[2];
           item.price = item[3];
+          item.quantityOrder = 0;
           item.updated_at = new Date();
           item.created_at = new Date();
           return item;
