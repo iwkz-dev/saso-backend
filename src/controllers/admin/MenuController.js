@@ -103,7 +103,7 @@ class MenuController {
       }
 
       if (deletedMenu.images.length > 0) {
-        await deleteImages(deletedMenu);
+        await deleteImages(deletedMenu.images);
       }
 
       res
@@ -117,19 +117,58 @@ class MenuController {
 
   static async update(req, res, next) {
     const { id } = req.params;
-    const payload = {
-      name: req.body.name,
-      description: req.body.description,
-      price: +req.body.price,
-      category: req.body.category,
-      quantity: +req.body.quantity,
-      event: req.body.event || null,
-      updated_at: new Date(),
-    };
+
     try {
+      let imagesSaved = [...req.body.imagesData];
+      const findMenu = await Menu.findById(id);
+      if (!findMenu) {
+        throw { name: "Not Found", message: "Menu not found" };
+      }
+      let eTags;
+      let imagesNotSaved = [];
+      if (req.body.eTags) {
+        if (typeof req.body.eTags === "string") {
+          eTags = [req.body.eTags];
+        } else {
+          eTags = [...req.body.eTags];
+        }
+        findMenu.images.forEach((image) => {
+          eTags.forEach((eTag) => {
+            if (image.eTag === eTag) {
+              imagesSaved.push(image);
+            } else if (image.eTag !== eTag) {
+              imagesNotSaved.push(image);
+            }
+          });
+        });
+      }
+      if (!req.body.eTags) {
+        findMenu.images.forEach((image) => {
+          imagesNotSaved.push(image);
+        });
+      }
+
+      await deleteImages(imagesNotSaved);
+
+      const payload = {
+        name: req.body.name,
+        description: req.body.description,
+        price: +req.body.price,
+        category: req.body.category,
+        quantity: +req.body.quantity,
+        event: req.body.event || null,
+        images: imagesSaved,
+        updated_at: new Date(),
+      };
+
       const updatedMenu = await Menu.findOneAndUpdate({ _id: id }, payload, {
         new: true,
       });
+
+      if (req.body.imagesData) {
+        await bulkUpload(req.body.imagesData, findMenu._id, "menu");
+      }
+
       if (!updatedMenu) {
         throw { name: "Not Found", message: "Menu not found" };
       }

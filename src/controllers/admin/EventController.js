@@ -99,7 +99,7 @@ class EventController {
       // DELETE PHOTO FROM DATABASE AND IMAGEKIT
       // ? ATAU MAU TETEP DISIMPEN?
       if (deletedEvent.images.length > 0) {
-        await deleteImages(deletedEvent);
+        await deleteImages(deletedEvent.images);
       }
       res
         .status(httpStatus.StatusCodes.OK)

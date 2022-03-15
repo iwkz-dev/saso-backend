@@ -20,8 +20,8 @@ module.exports = {
   },
   deleteImages: async (data) => {
     let fileIdImages = [];
-    if (data.images.length > 0) {
-      data.images.forEach(async (el) => {
+    if (data.length > 0) {
+      data.forEach(async (el) => {
         fileIdImages.push(el.eTag);
         await Image.findOneAndDelete({
           eTag: el.eTag,
