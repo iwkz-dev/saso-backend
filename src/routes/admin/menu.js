@@ -265,7 +265,7 @@ router.delete("/:id", MenuController.destroy);
  *      requestBody:
  *        required: true
  *        content:
- *          application/json:
+ *          multipart/form-data:
  *            schema:
  *              type: object
  *              required:
@@ -274,6 +274,7 @@ router.delete("/:id", MenuController.destroy);
  *                 - quantity
  *                 - price
  *                 - category
+ *                 - event
  *              properties:
  *                name:
  *                  type: string
@@ -289,6 +290,17 @@ router.delete("/:id", MenuController.destroy);
  *                event:
  *                  type: string
  *                  format: uuid
+ *                imageUrls:
+ *                  type: array
+ *                  maxItems: 5
+ *                  items:
+ *                    type: string
+ *                    format: binary
+ *                eTags:
+ *                  type: array
+ *                  maxItems: 5
+ *                  items:
+ *                    type: string
  *      responses:
  *        "200":
  *          description: OK
@@ -327,7 +339,12 @@ router.delete("/:id", MenuController.destroy);
  *                message: Validation Error
  *                error: Validation Error
  */
-router.put("/:id", MenuController.update);
+router.put(
+  "/:id",
+  uploadArray("imageUrls", 5),
+  imageKit.imgKitUploadMulti,
+  MenuController.update
+);
 
 /**
  * @swagger
