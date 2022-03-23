@@ -26,8 +26,9 @@ app.use(express.json());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openAPIDocs));
 // app.get("/api-docs", );
 
-// const apiVersion = "v1";
-app.use("/api/" + version, routers);
+const apiPrefix = process.env.API_PREFIX;
+const uriPrefix = `${apiPrefix}/${version}`;
+app.use(uriPrefix, routers);
 
 app.use(function (req, res, next) {
   next(createError(404));
