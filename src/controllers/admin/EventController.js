@@ -4,7 +4,11 @@ const httpStatus = require("http-status-codes");
 const Event = require("@models/event");
 const resHelpers = require("@helpers/responseHelpers");
 const { bulkUpload, deleteImages, deleteImage } = require("@helpers/images");
-const { dataPagination } = require("@helpers/dataHelper");
+const {
+  dataPagination,
+  detailById,
+  updateWithImages,
+} = require("@helpers/dataHelper");
 
 class EventController {
   static async create(req, res, next) {
@@ -13,6 +17,7 @@ class EventController {
       description: req.body.description,
       started_at: req.body.started_at,
       images: req.body.imagesData,
+      status: 0,
       updated_at: new Date(),
       created_at: new Date(),
     };
@@ -76,7 +81,7 @@ class EventController {
   static async getEventById(req, res, next) {
     try {
       const { id } = req.params;
-      const findEvent = await Event.findById(id);
+      const findEvent = await detailById(Event, id, null);
       if (!findEvent) {
         throw { name: "Not Found", message: "Event not found" };
       }
@@ -111,21 +116,45 @@ class EventController {
   }
 
   static async update(req, res, next) {
-    let payload = {
-      name: req.body.name,
-      description: req.body.description,
-      started_at: req.body.started_at,
-      updated_at: new Date(),
-    };
     const { id } = req.params;
     try {
+      const findEvent = await detailById(Event, id, null);
+
+      if (!findEvent) {
+        throw { name: "Not Found", message: `Event not found` };
+      }
+      const options = {
+        imagesData: req.body.imagesData,
+        bodyETags: req.body.eTags,
+        dataFound: findEvent,
+      };
+      const payloadImages = await updateWithImages(options);
+      if (payloadImages.imagesSaved.length > 5) {
+        await deleteImages(req.body.imagesData);
+        throw { name: "Bad Request", message: "The limit of image is 5" };
+      }
+      await deleteImages(payloadImages.imagesNotSaved);
+
       const getYear = req.body.started_at.split("-");
-      payload.startYear = getYear[0];
+
+      let payload = {
+        name: req.body.name,
+        description: req.body.description,
+        started_at: req.body.started_at,
+        startYear: getYear[0],
+        images: payloadImages.imagesSaved,
+        updated_at: new Date(),
+      };
+
       const updatedEvent = await Event.findOneAndUpdate({ _id: id }, payload, {
         new: true,
       });
       if (!updatedEvent) {
         throw { name: "Not Found", message: "Event not found" };
+      }
+
+      if (req.body.imagesData) {
+        await bulkUpload(req.body.imagesData, findEvent._id, "event");
       }
       res
         .status(httpStatus.StatusCodes.OK)

@@ -3,7 +3,7 @@
 const httpStatus = require("http-status-codes");
 const User = require("@models/user");
 const resHelpers = require("@helpers/responseHelpers");
-const { dataPagination } = require("@helpers/dataHelper");
+const { dataPagination, detailById } = require("@helpers/dataHelper");
 
 class UserController {
   static async register(req, res, next) {
@@ -78,7 +78,7 @@ class UserController {
   static async getUserById(req, res, next) {
     const { id } = req.params;
     try {
-      const findUser = await User.findById(id).select("-password");
+      const findUser = await detailById(User, id, "-password");
       if (!findUser) {
         throw { name: "Not Found", message: "User not found" };
       }

@@ -4,7 +4,7 @@ const httpStatus = require("http-status-codes");
 const Order = require("@models/order");
 const Menu = require("@models/menu");
 const resHelpers = require("@helpers/responseHelpers");
-const { dataPagination } = require("@helpers/dataHelper");
+const { dataPagination, detailById } = require("@helpers/dataHelper");
 
 class UserController {
   static async order(req, res, next) {
@@ -124,7 +124,10 @@ class UserController {
     const { id: orderId } = req.params;
 
     try {
-      const findOrder = await Order.findById({ _id: orderId });
+      const findOrder = await detailById(Order, orderId, null);
+      if (!findOrder) {
+        throw { name: "Not Found", message: "Order not found" };
+      }
       if (userId !== findOrder.customer.toString()) {
         throw {
           name: "Forbidden",

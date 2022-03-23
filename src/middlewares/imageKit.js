@@ -51,10 +51,13 @@ async function imgKitUploadMulti(req, res, next) {
                 }
               );
             } else {
-              throw { name: "Bad Request" };
+              throw { name: "Bad Request", message: "File size is too big" };
             }
           } else {
-            throw { name: "Bad Request" };
+            throw {
+              name: "Bad Request",
+              message: "The type file is incorrect",
+            };
           }
         })
       ).then((result) => {

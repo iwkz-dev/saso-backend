@@ -3,7 +3,7 @@
 const httpStatus = require("http-status-codes");
 const Category = require("@models/category");
 const resHelpers = require("@helpers/responseHelpers");
-const { dataPagination } = require("@helpers/dataHelper");
+const { dataPagination, detailById } = require("@helpers/dataHelper");
 
 class CategoryController {
   static async create(req, res, next) {
@@ -62,7 +62,7 @@ class CategoryController {
   static async getCategoryById(req, res, next) {
     const { id } = req.params;
     try {
-      const findCategory = await Category.findById(id);
+      const findCategory = await detailById(Category, id, null);
       if (!findCategory) {
         throw { name: "Not Found", message: "Category not found" };
       }

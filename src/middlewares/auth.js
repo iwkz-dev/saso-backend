@@ -4,7 +4,6 @@ const { jwtVerify } = require("@helpers/jwt");
 const User = require("@models/user");
 
 async function authAdmin(req, res, next) {
-  // ! DI HEADERS TAMBAH -> access_token
   // const { access_token: accessToken } = req.headers;
   const { authorization } = req.headers;
   const accessToken = authorization && authorization.split(" ")[1];
@@ -53,7 +52,6 @@ async function authSuperAdmin(req, res, next) {
 }
 
 async function authCustomer(req, res, next) {
-  // ! DI HEADERS TAMBAH -> access_token
   const { authorization } = req.headers;
   const accessToken = authorization && authorization.split(" ")[1];
 

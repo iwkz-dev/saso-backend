@@ -7,7 +7,11 @@ const Event = require("@models/event");
 const Category = require("@models/category");
 const resHelpers = require("@helpers/responseHelpers");
 const { bulkUpload, deleteImages, deleteImage } = require("@helpers/images");
-const { dataPagination } = require("@helpers/dataHelper");
+const {
+  dataPagination,
+  detailById,
+  updateWithImages,
+} = require("@helpers/dataHelper");
 
 class MenuController {
   // TO DO: update menu, get specific menu based on name, delete specific menu, delete all menu
@@ -80,7 +84,7 @@ class MenuController {
   static async getMenuById(req, res, next) {
     const { id } = req.params;
     try {
-      const findMenu = await Menu.findById(id);
+      const findMenu = await detailById(Menu, id, null);
       if (!findMenu) {
         throw { name: "Not Found", message: "Menu not found" };
       }
@@ -119,36 +123,22 @@ class MenuController {
     const { id } = req.params;
 
     try {
-      let imagesSaved = [...req.body.imagesData];
-      const findMenu = await Menu.findById(id);
+      const findMenu = await detailById(Menu, id, null);
       if (!findMenu) {
-        throw { name: "Not Found", message: "Menu not found" };
+        throw { name: "Not Found", message: `Menu not found` };
       }
-      let eTags;
-      let imagesNotSaved = [];
-      if (req.body.eTags) {
-        if (typeof req.body.eTags === "string") {
-          eTags = [req.body.eTags];
-        } else {
-          eTags = [...req.body.eTags];
-        }
-        findMenu.images.forEach((image) => {
-          eTags.forEach((eTag) => {
-            if (image.eTag === eTag) {
-              imagesSaved.push(image);
-            } else if (image.eTag !== eTag) {
-              imagesNotSaved.push(image);
-            }
-          });
-        });
-      }
-      if (!req.body.eTags) {
-        findMenu.images.forEach((image) => {
-          imagesNotSaved.push(image);
-        });
-      }
+      const options = {
+        imagesData: req.body.imagesData,
+        bodyETags: req.body.eTags,
+        dataFound: findMenu,
+      };
 
-      await deleteImages(imagesNotSaved);
+      const payloadImages = await updateWithImages(options);
+      if (payloadImages.imagesSaved.length > 5) {
+        await deleteImages(req.body.imagesData);
+        throw { name: "Bad Request", message: "The limit of image is 5" };
+      }
+      await deleteImages(payloadImages.imagesNotSaved);
 
       const payload = {
         name: req.body.name,
@@ -157,7 +147,7 @@ class MenuController {
         category: req.body.category,
         quantity: +req.body.quantity,
         event: req.body.event || null,
-        images: imagesSaved,
+        images: payloadImages.imagesSaved,
         updated_at: new Date(),
       };
 
@@ -165,13 +155,14 @@ class MenuController {
         new: true,
       });
 
+      if (!updatedMenu) {
+        throw { name: "Not Found", message: "Menu not found" };
+      }
+
       if (req.body.imagesData) {
         await bulkUpload(req.body.imagesData, findMenu._id, "menu");
       }
 
-      if (!updatedMenu) {
-        throw { name: "Not Found", message: "Menu not found" };
-      }
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success("success update data", updatedMenu));
