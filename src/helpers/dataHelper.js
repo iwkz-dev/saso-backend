@@ -37,4 +37,51 @@ module.exports = {
     };
     return result;
   },
+
+  detailById: async (model, id, selected) => {
+    const findDetail = await model.findById(id).select(selected);
+    return findDetail;
+  },
+
+  updateWithImages: async (options) => {
+    const { imagesData, bodyETags, dataFound } = options;
+
+    let imagesSaved = [...imagesData];
+    let eTags;
+    let imagesNotSaved = [];
+
+    if (bodyETags) {
+      if (typeof bodyETags === "string") {
+        eTags = [bodyETags];
+      } else {
+        eTags = [...bodyETags];
+      }
+      let saved = [];
+      let notSaved = [];
+      // ! SAMPAI DISINI CODINGAN ERROR
+
+      saved = dataFound.images.filter((image) => eTags.includes(image.eTag));
+      notSaved = dataFound.images.filter(
+        (image) => !eTags.includes(image.eTag)
+      );
+
+      if (saved.length > 0) {
+        saved.forEach((el) => {
+          imagesSaved.push(el);
+        });
+      }
+      if (notSaved.length > 0) {
+        notSaved.forEach((el) => {
+          imagesNotSaved.push(el);
+        });
+      }
+    }
+    if (!bodyETags) {
+      dataFound.images.forEach((image) => {
+        imagesNotSaved.push(image);
+      });
+    }
+
+    return { imagesSaved, imagesNotSaved };
+  },
 };

@@ -5,8 +5,6 @@ const MenuController = require("@controllers/admin/MenuController");
 const imageKit = require("@middlewares/imageKit");
 const { uploadArray, uploadFileXls } = require("@helpers/multer");
 
-// ! LATER: BELOM ADA IMAGE
-
 /**
  * @swagger
  * tags:

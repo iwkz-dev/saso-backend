@@ -15,10 +15,6 @@ class AuthController {
    */
   static async login(req, res, next) {
     const { email, password } = req.body;
-    // const payload = {
-    //   email,
-    //   password,
-    // };
     try {
       // ! FLOW LOGIN -> check email ada apa gk -> compare password dari user yg dicari-> check password sama apa gk dengan password.body -> done / kirim token
       const findUser = await User.findOne({ email });

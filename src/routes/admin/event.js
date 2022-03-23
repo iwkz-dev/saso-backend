@@ -18,6 +18,7 @@ const { uploadArray } = require("@helpers/multer");
  *    post:
  *      summary: Create Event
  *      tags: [Admin-Event]
+ *      description: status = 0 -> upcoming, status = 1 -> ongoing, status = 2 -> finished
  *      security:
  *         - ApiKeyAuth: []
  *      requestBody:
@@ -240,7 +241,7 @@ router.delete("/:id", EventController.destroy);
  *      requestBody:
  *        required: true
  *        content:
- *          application/json:
+ *          multipart/form-data:
  *            schema:
  *              type: object
  *              required:
@@ -251,8 +252,6 @@ router.delete("/:id", EventController.destroy);
  *                  type: string
  *                description:
  *                  type: string
- *                isActive:
- *                  type: boolean
  *                started_at:
  *                  type: string
  *                  format: date-time
@@ -262,6 +261,11 @@ router.delete("/:id", EventController.destroy);
  *                  items:
  *                    type: string
  *                    format: binary
+ *                eTags:
+ *                  type: array
+ *                  maxItems: 5
+ *                  items:
+ *                    type: string
  *      responses:
  *        "200":
  *          description: OK
@@ -300,7 +304,12 @@ router.delete("/:id", EventController.destroy);
  *                message: Validation Error
  *                error: Validation Error
  */
-router.put("/:id", EventController.update);
+router.put(
+  "/:id",
+  uploadArray("imageUrls", 5),
+  imageKit.imgKitUploadMulti,
+  EventController.update
+);
 
 /**
  * @swagger
