@@ -3,17 +3,26 @@
 const httpStatus = require("http-status-codes");
 const Order = require("@models/order");
 const Menu = require("@models/menu");
+const Event = require("@models/event");
 const resHelpers = require("@helpers/responseHelpers");
 const { dataPagination, detailById } = require("@helpers/dataHelper");
 
 class UserController {
   static async order(req, res, next) {
-    const { menus } = req.body;
+    const { menus, event } = req.body;
+
     const { id: userId } = req.user;
     try {
       //   ! LATER: WILL BE AUTOMATED SS21
-      const countData = await Order.countDocuments();
-      let date = new Date().getFullYear().toString().substring(2);
+      const findEvent = await Event.findOne({ _id: event });
+      if (findEvent.status !== 1 || !findEvent) {
+        throw { name: "Bad Request", message: "Event not found" };
+      }
+
+      const countData = await Order.countDocuments({ event: findEvent.id });
+
+      let strStartYear = findEvent.startYear.toString();
+      let date = `${strStartYear.charAt(2)}` + `${strStartYear.charAt(3)}`;
 
       let invoiceNumber = `SS${date}-`;
       if (countData < 10) {
@@ -24,14 +33,16 @@ class UserController {
 
       const findMenu = await Promise.all(
         menus.map(async (el) => {
-          const foundMenu = await Menu.findOne({ _id: el._id })
-            .select([
-              "-updated_at",
-              "-created_at",
-              "-description",
-              "-quantityOrder",
-            ])
+          const foundMenu = await Menu.findOne({
+            _id: el._id,
+            event: findEvent.id,
+          })
+            .select(["-updated_at", "-created_at", "-description"])
             .lean();
+
+          if (!foundMenu) {
+            throw { name: "Not Found", message: "Menu not found" };
+          }
 
           if (el.totalPortion <= 0 || !el.totalPortion) {
             throw {
@@ -40,10 +51,13 @@ class UserController {
             };
           }
           let quantityFound = foundMenu.quantityOrder;
+
           if (!quantityFound) {
             quantityFound = 0;
           }
+
           const totalOrder = quantityFound + el.totalPortion;
+
           if (foundMenu.quantity < totalOrder) {
             throw {
               name: "Bad Request",
@@ -74,6 +88,7 @@ class UserController {
         totalPrice,
         status: 0,
         customer: userId,
+        event: findEvent.id,
         updated_at: new Date(),
         created_at: new Date(),
       };

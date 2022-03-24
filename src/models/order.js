@@ -18,6 +18,10 @@ const orderSchema = new mongoose.Schema({
   totalPrice: {
     type: Number,
   },
+  event: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Events",
+  },
   menus: {
     type: Array,
   },
