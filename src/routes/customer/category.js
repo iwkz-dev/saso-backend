@@ -16,15 +16,8 @@ const CategoryController = require("@controllers/customer/CategoryController");
  *    get:
  *      summary: Return the list of all the categories
  *      tags: [Customer-Category]
- *      security:
- *         - ApiKeyAuth: []
+ *      description: <h1>You have to choose query between status and event, can not do both</h1><br>If you want to show all menus please delete all forms below
  *      parameters:
- *         - in: query
- *           name: flagDate
- *           schema:
- *             type: string
- *           description: Filter for filtering menus depends on year now, if not defined it will show all menus in all events
- *           example: now
  *         - in: query
  *           name: page
  *           schema:
@@ -37,6 +30,17 @@ const CategoryController = require("@controllers/customer/CategoryController");
  *             type: number
  *           description: Number of items will shown in one page
  *           example: 2
+ *         - in: query
+ *           name: status
+ *           schema:
+ *             type: string
+ *           description: Filter for filtering event depends on status of the event. approved / done / draft.
+ *           example: approved
+ *         - in: query
+ *           name: event
+ *           schema:
+ *             type: string
+ *           description: Event id in bson object, if not defined it will show all menus
  *      responses:
  *        "200":
  *          description: OK

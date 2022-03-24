@@ -18,7 +18,7 @@ const { uploadArray } = require("@helpers/multer");
  *    post:
  *      summary: Create Event
  *      tags: [Admin-Event]
- *      description: status = 0 -> draft, status = 1 -> approved, status = 2 -> done
+ *      description: Create event
  *      security:
  *         - ApiKeyAuth: []
  *      requestBody:
@@ -85,16 +85,10 @@ router.post(
  *    get:
  *      summary: Return the list of all the events
  *      tags: [Admin-Event]
- *      description: If you want to show all items please delete all forms below
+ *      description: If you want to show all items please delete all forms below, status = 0 -> draft, status = 1 -> approved, status = 2 -> done
  *      security:
  *         - ApiKeyAuth: []
  *      parameters:
- *         - in: query
- *           name: flagDate
- *           schema:
- *             type: string
- *           description: Filter for filtering events depends on year now, if not defined it will show all events
- *           example: now
  *         - in: query
  *           name: page
  *           schema:
@@ -455,7 +449,7 @@ router.delete("/:id/delete-images/:eTag", EventController.destroyImages);
  * @swagger
  * /admin/event/{id}/{status}/change-status:
  *    patch:
- *      summary: Return detail order
+ *      summary: Change status of event
  *      tags: [Admin-Event]
  *      security:
  *         - ApiKeyAuth: []

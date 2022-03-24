@@ -156,6 +156,7 @@ class EventController {
         started_at: req.body.started_at,
         startYear: getYear[0],
         images: payloadImages.imagesSaved,
+        status: req.body.status,
         updated_at: new Date(),
       };
 
@@ -274,6 +275,13 @@ class EventController {
       }
       if (status === "approved") {
         statusPayload = 1;
+        const findEvent = await Event.findById(id, { status: statusPayload });
+        if (findEvent) {
+          throw {
+            name: "Bad Request",
+            message: "You still have an active event",
+          };
+        }
       }
       if (status === "done") {
         statusPayload = 2;

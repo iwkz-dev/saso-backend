@@ -17,15 +17,7 @@ const EventController = require("@controllers/customer/EventController");
  *      summary: Return the list of all the events
  *      tags: [Customer-Event]
  *      description: If you want to show all items please delete all forms below
- *      security:
- *         - ApiKeyAuth: []
  *      parameters:
- *         - in: query
- *           name: flagDate
- *           schema:
- *             type: string
- *           description: Filter for filtering events depends on year now, if not defined it will show all events
- *           example: now
  *         - in: query
  *           name: page
  *           schema:
@@ -39,11 +31,11 @@ const EventController = require("@controllers/customer/EventController");
  *           description: Number of items will shown in one page
  *           example: 2
  *         - in: query
- *           name: isActive
+ *           name: status
  *           schema:
- *             type: boolean
- *           description: Status of the event
- *           example: true
+ *             type: string
+ *           description: Filter for filtering event depends on status of the event. approved / done / draft
+ *           example: approved
  *      responses:
  *        "200":
  *          description: OK

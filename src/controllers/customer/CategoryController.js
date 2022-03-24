@@ -9,7 +9,7 @@ const { dataPagination } = require("@helpers/dataHelper");
 
 class CategoryController {
   static async getAllCategories(req, res, next) {
-    const { page, limit, flagDate } = req.query;
+    const { page, limit, flagDate, status, event } = req.query;
 
     try {
       const options = {
@@ -26,10 +26,29 @@ class CategoryController {
       const result = await Promise.all(
         await categories.map(async (el) => {
           let filter = { category: el._id };
-          if (flagDate === "now") {
-            const findEvent = await Event.findOne({
-              startYear: { $gte: new Date().getFullYear() },
-            });
+          if (event) {
+            filter.event = event;
+          }
+          if (flagDate === "now" || status) {
+            let statusQuery = "";
+            if (status === "draft") {
+              statusQuery = 0;
+            }
+            if (status === "approved") {
+              statusQuery = 1;
+            }
+            if (status === "done") {
+              statusQuery = 2;
+            }
+            let filterEvent = {};
+
+            if (flagDate) {
+              filterEvent.startYear = { $gte: new Date().getFullYear() };
+            }
+            if (status) {
+              filterEvent.status = statusQuery;
+            }
+            const findEvent = await Event.findOne(filterEvent);
 
             filter.event = findEvent._id;
           }
