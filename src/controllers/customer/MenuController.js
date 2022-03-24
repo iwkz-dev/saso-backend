@@ -40,10 +40,6 @@ class MenuController {
         if (status) {
           filterEvent.status = statusQuery;
         }
-        console.log(
-          "🚀 ~ file: MenuController.js ~ line 36 ~ MenuController ~ getAllMenus ~ filterEvent",
-          filterEvent
-        );
         const findEvent = await Event.findOne(filterEvent);
         filter.event = findEvent._id;
       }
