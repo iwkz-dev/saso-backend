@@ -44,7 +44,7 @@ class MenuController {
   }
 
   static async getAllMenus(req, res, next) {
-    const { page, limit, event, category, flagDate } = req.query;
+    const { page, limit, event, category, flagDate, status } = req.query;
 
     try {
       const options = {
@@ -57,13 +57,29 @@ class MenuController {
       };
 
       let filter = {};
-      if (flagDate === "now") {
-        const findEvent = await Event.findOne({
-          startYear: { $gte: new Date().getFullYear() },
-        });
+      if (flagDate === "now" || status) {
+        let statusQuery = "";
+        if (status === "draft") {
+          statusQuery = 0;
+        }
+        if (status === "approved") {
+          statusQuery = 1;
+        }
+        if (status === "done") {
+          statusQuery = 2;
+        }
+        let filterEvent = {};
+        if (flagDate) {
+          filterEvent.startYear = { $gte: new Date().getFullYear() };
+        }
+        if (status) {
+          filterEvent.status = statusQuery;
+        }
+        const findEvent = await Event.findOne(filterEvent);
 
         filter.event = findEvent._id;
       }
+
       if (event) {
         filter.event = event;
       }

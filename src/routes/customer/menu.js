@@ -16,14 +16,19 @@ const MenuController = require("@controllers/customer/MenuController");
  *    get:
  *      summary: Return the list of all the menus
  *      tags: [Customer-Menu]
- *      description: If you want to show all items please delete all forms below
+ *      description: <h1>You have to choose query between status and event, can not do both</h1><br>If you want to show all items please delete all forms below
  *      parameters:
+ *         - in: query
+ *           name: status
+ *           schema:
+ *             type: string
+ *           description: Filter for filtering event depends on status of the event. approved / done / draft.
+ *           example: approved
  *         - in: query
  *           name: event
  *           schema:
  *             type: string
  *           description: Event id in bson object, if not defined it will show all menus
- *           example: 61c57ee6cca613610e9795b1
  *         - in: query
  *           name: category
  *           schema:
@@ -37,17 +42,17 @@ const MenuController = require("@controllers/customer/MenuController");
  *           description: Number of current page
  *           example: 1
  *         - in: query
- *           name: flagDate
- *           schema:
- *             type: string
- *           description: Filter for filtering menus depends on year now, if not defined it will show all menus
- *           example: now
- *         - in: query
  *           name: limit
  *           schema:
  *             type: number
  *           description: Number of items will shown in one page
  *           example: 2
+ *         - in: query
+ *           name: status
+ *           schema:
+ *             type: string
+ *           description: Filter for filtering event depends on status of the event. approved / done / draft.
+ *           example: approved
  *      responses:
  *        "200":
  *          description: OK

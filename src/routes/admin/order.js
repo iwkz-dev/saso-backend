@@ -68,7 +68,7 @@ router.get("/", OrderController.getAllOrders);
  * @swagger
  * /admin/order/{id}/{status}:
  *    patch:
- *      summary: Return detail order
+ *      summary: Change status order
  *      tags: [Admin-Order]
  *      security:
  *         - ApiKeyAuth: []

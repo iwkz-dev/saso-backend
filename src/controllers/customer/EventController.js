@@ -10,8 +10,18 @@ class EventController {
   static async getAllEvents(req, res, next) {
     // let limit = 3;
     // let page = 1;
-    const { page, limit, flagDate } = req.query;
+    const { page, limit, flagDate, status } = req.query;
     try {
+      let statusQuery = "";
+      if (status === "draft") {
+        statusQuery = 0;
+      }
+      if (status === "approved") {
+        statusQuery = 1;
+      }
+      if (status === "done") {
+        statusQuery = 2;
+      }
       const options = {
         page: page || 1,
         limit: limit || 100000,
@@ -25,6 +35,9 @@ class EventController {
         filter.startYear = { $gte: new Date().getFullYear() };
       }
 
+      if (status) {
+        filter.status = statusQuery;
+      }
       const findEvents = await dataPagination(Event, filter, null, options);
 
       // const findEvents = await Event.find(null, null, {

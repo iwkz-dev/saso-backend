@@ -18,7 +18,7 @@ const { uploadArray } = require("@helpers/multer");
  *    post:
  *      summary: Create Event
  *      tags: [Admin-Event]
- *      description: status = 0 -> upcoming, status = 1 -> ongoing, status = 2 -> finished
+ *      description: Create event
  *      security:
  *         - ApiKeyAuth: []
  *      requestBody:
@@ -85,16 +85,10 @@ router.post(
  *    get:
  *      summary: Return the list of all the events
  *      tags: [Admin-Event]
- *      description: If you want to show all items please delete all forms below
+ *      description: If you want to show all items please delete all forms below, status = 0 -> draft, status = 1 -> approved, status = 2 -> done
  *      security:
  *         - ApiKeyAuth: []
  *      parameters:
- *         - in: query
- *           name: flagDate
- *           schema:
- *             type: string
- *           description: Filter for filtering events depends on year now, if not defined it will show all events
- *           example: now
  *         - in: query
  *           name: page
  *           schema:
@@ -107,6 +101,12 @@ router.post(
  *             type: number
  *           description: Number of items will shown in one page
  *           example: 2
+ *         - in: query
+ *           name: status
+ *           schema:
+ *             type: string
+ *           description: Filter for filtering event depends on status of the event. approved / done / draft
+ *           example: approved
  *      responses:
  *        "200":
  *          description: OK
@@ -444,6 +444,69 @@ router.patch(
  *                error: Validation Error
  */
 router.delete("/:id/delete-images/:eTag", EventController.destroyImages);
+
+/**
+ * @swagger
+ * /admin/event/{id}/{status}/change-status:
+ *    patch:
+ *      summary: Change status of event
+ *      tags: [Admin-Event]
+ *      security:
+ *         - ApiKeyAuth: []
+ *      parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Event id
+ *         example: 623be118159d6ba26eda753c
+ *       - in: path
+ *         name: status
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: status to send, ex => "approved", "draft", "done"
+ *         example: approved
+ *      responses:
+ *        "200":
+ *          description: OK
+ *          content:
+ *             application/json:
+ *               schema:
+ *                  $ref: '#/components/schemas/Event'
+ *        "401":
+ *           description: Invalid Access token
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Invalid Access Token
+ *                error: Invalid Auth
+ *        "404":
+ *           description: Event not found
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Event not found
+ *                error: Not Found
+ *        "403":
+ *           description: No authorization for the Event
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Event not found
+ *                error: Not Found
+ */
+router.patch("/:id/:status/change-status", EventController.changeStatus);
 
 router.post(
   "/upload-image",
