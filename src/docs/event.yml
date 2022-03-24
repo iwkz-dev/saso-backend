@@ -12,6 +12,8 @@ components:
         started_at:
           type: string
           format: date-time
+        status:
+          type: number
         images:
           type: array
           items:

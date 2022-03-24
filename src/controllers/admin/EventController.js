@@ -44,8 +44,18 @@ class EventController {
   static async getAllEvents(req, res, next) {
     // let limit = 3;
     // let page = 1;
-    const { page, limit, flagDate } = req.query;
+    const { page, limit, flagDate, status } = req.query;
     try {
+      let statusQuery = "";
+      if (status === "draft") {
+        statusQuery = 0;
+      }
+      if (status === "approved") {
+        statusQuery = 1;
+      }
+      if (status === "done") {
+        statusQuery = 2;
+      }
       const options = {
         page: page || 1,
         limit: limit || 100000,
@@ -57,6 +67,9 @@ class EventController {
       let filter = {};
       if (flagDate === "now") {
         filter.startYear = { $gte: new Date().getFullYear() };
+      }
+      if (status) {
+        filter.status = statusQuery;
       }
 
       const findEvents = await dataPagination(Event, filter, null, options);
@@ -246,6 +259,33 @@ class EventController {
       } else {
         throw { name: "Bad Request", message: "Image is empty" };
       }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
+  static async changeStatus(req, res, next) {
+    const { id, status } = req.params;
+    try {
+      let statusPayload;
+      if (status === "draft") {
+        statusPayload = 0;
+      }
+      if (status === "approved") {
+        statusPayload = 1;
+      }
+      if (status === "done") {
+        statusPayload = 2;
+      }
+      const updateEvent = await Event.findOneAndUpdate(
+        { _id: id },
+        { status: statusPayload, updated_at: new Date() },
+        { new: true }
+      );
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success("success change status", updateEvent));
     } catch (error) {
       console.log(error);
       next(error);

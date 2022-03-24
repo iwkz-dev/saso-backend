@@ -36,6 +36,7 @@ class UserController {
   static async changeStatus(req, res, next) {
     const { status, id } = req.params;
     try {
+      // 0 = no action
       let statusPayload = 0;
       if (status === "paid") {
         statusPayload = 1;
@@ -49,7 +50,7 @@ class UserController {
 
       const updateOrder = await Order.findOneAndUpdate(
         { _id: id },
-        { status: statusPayload },
+        { status: statusPayload, updated_at: new Date() },
         { new: true }
       );
       res

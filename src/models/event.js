@@ -19,9 +19,9 @@ const eventSchema = new mongoose.Schema({
     type: Number,
   },
   /**
-   * STATUS: 0 -> upcoming
-   * STATUS: 1 -> ongoing
-   * STATUS: 2 -> finished
+   * STATUS: 0 -> draft
+   * STATUS: 1 -> approved
+   * STATUS: 2 -> done
    */
   status: {
     type: Number,
