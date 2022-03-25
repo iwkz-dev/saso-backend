@@ -11,7 +11,6 @@ const cors = require("cors");
 const swaggerUi = require("swagger-ui-express");
 const routers = require("@routes");
 const { openAPIDocs } = require("@configs/swagger");
-const { version } = require("../package.json");
 
 // ! BEST PRACTICE REQUIRE YANG DARI MODULE DIATAS ABIS ITU REQUIRE YANG ADA DI FILE LOCAL
 const app = express();
@@ -26,8 +25,8 @@ app.use(express.json());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openAPIDocs));
 // app.get("/api-docs", );
 
-const apiPrefix = process.env.API_PREFIX;
-const uriPrefix = `${apiPrefix}/${version}`;
+const uriPrefix = process.env.API_PREFIX || "/api/v1";
+console.log(uriPrefix);
 app.use(uriPrefix, routers);
 
 app.use(function (req, res, next) {
