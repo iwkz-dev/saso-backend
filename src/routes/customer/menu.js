@@ -47,12 +47,6 @@ const MenuController = require("@controllers/customer/MenuController");
  *             type: number
  *           description: Number of items will shown in one page
  *           example: 2
- *         - in: query
- *           name: status
- *           schema:
- *             type: string
- *           description: Filter for filtering event depends on status of the event. approved / done / draft.
- *           example: approved
  *      responses:
  *        "200":
  *          description: OK

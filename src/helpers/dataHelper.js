@@ -58,7 +58,6 @@ module.exports = {
       }
       let saved = [];
       let notSaved = [];
-      // ! SAMPAI DISINI CODINGAN ERROR
 
       saved = dataFound.images.filter((image) => eTags.includes(image.eTag));
       notSaved = dataFound.images.filter(
