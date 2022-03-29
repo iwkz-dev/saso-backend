@@ -2,6 +2,7 @@
 
 const httpStatus = require("http-status-codes");
 const Event = require("@models/event");
+const Menu = require("@models/menu");
 const resHelpers = require("@helpers/responseHelpers");
 const { bulkUpload, deleteImages, deleteImage } = require("@helpers/images");
 const {
@@ -119,6 +120,18 @@ class EventController {
       if (deletedEvent.images.length > 0) {
         await deleteImages(deletedEvent.images);
       }
+      // DELETE MENU THAT HAS RELATIONS WITH EVENT
+      const findMenu = await Menu.find({ event: deletedEvent._id });
+
+      if (findMenu) {
+        await Menu.deleteMany({ event: deletedEvent._id });
+        findMenu.forEach(async (el) => {
+          if (el.images.length > 0) {
+            await deleteImages(el.images);
+          }
+        });
+      }
+
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success("success delete data", deletedEvent));
@@ -276,7 +289,7 @@ class EventController {
       if (status === "approved") {
         statusPayload = 1;
         const findEvent = await Event.findById(id, { status: statusPayload });
-        if (findEvent) {
+        if (findEvent.length < 1) {
           throw {
             name: "Bad Request",
             message: "You still have an active event",
