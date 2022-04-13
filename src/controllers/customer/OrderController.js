@@ -31,6 +31,7 @@ class UserController {
         invoiceNumber += `0${countData + 1}`;
       }
 
+      const resetQuantity = [];
       const findMenu = await Promise.all(
         menus.map(async (el) => {
           const foundMenu = await Menu.findOne({
@@ -59,20 +60,36 @@ class UserController {
           const totalOrder = quantityFound + el.totalPortion;
 
           if (foundMenu.quantity < totalOrder) {
-            throw {
+            return {
+              error: true,
               name: "Bad Request",
               message: `Menu '${foundMenu.name}' is out of stock`,
             };
+          } else {
+            resetQuantity.push({ id:foundMenu._id, quantityOrder: foundMenu.quantityOrder });
+            foundMenu["totalPortion"] = el.totalPortion;
+            delete foundMenu.quantity;
+            const payloadMenu = {
+              quantityOrder: totalOrder,
+            };
+            await Menu.findOneAndUpdate({ _id: el._id }, payloadMenu);
+            return foundMenu;
           }
-          foundMenu["totalPortion"] = el.totalPortion;
-          delete foundMenu.quantity;
-          const payloadMenu = {
-            quantityOrder: totalOrder,
-          };
-          await Menu.findOneAndUpdate({ _id: el._id }, payloadMenu);
-          return foundMenu;
         })
       );
+
+      //* CHECK IF THE MENU IS OUT OF STOCK *//
+      findMenu.forEach(findError => {
+        if(findError.error) {
+          resetQuantity.forEach( async (el) => {
+            const test = await Menu.findOneAndUpdate({ _id: el.id }, {quantityOrder: el.quantityOrder}, {new: true});
+          });
+          throw {
+            name: findError.name, 
+            message: findError.message
+          };
+        }
+      })
 
       const totalEachMenu = findMenu.map((el) => {
         return el.price * el.totalPortion;
