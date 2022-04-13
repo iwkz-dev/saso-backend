@@ -25,6 +25,9 @@ const OrderController = require("@controllers/customer/OrderController");
  *            schema:
  *              type: object
  *              properties:
+ *                event:
+ *                  type: string
+ *                  format: uuid
  *                menus:
  *                  type: array
  *                  items:
