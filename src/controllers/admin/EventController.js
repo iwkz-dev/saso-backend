@@ -9,12 +9,15 @@ const {
   dataPagination,
   detailById,
   updateWithImages,
+  firstWordUppercase,
 } = require("@helpers/dataHelper");
 
 class EventController {
   static async create(req, res, next) {
+    const name = await firstWordUppercase(req.body.name);
+
     let payload = {
-      name: req.body.name,
+      name,
       description: req.body.description,
       started_at: req.body.started_at,
       images: req.body.imagesData,
@@ -45,7 +48,7 @@ class EventController {
   static async getAllEvents(req, res, next) {
     // let limit = 3;
     // let page = 1;
-    const { page, limit, flagDate, status } = req.query;
+    const { page, limit, flagDate, status, sort } = req.query;
     try {
       let statusQuery = "";
       if (status === "draft") {
@@ -65,6 +68,22 @@ class EventController {
           method: -1,
         },
       };
+
+      let method;
+      if (sort) {
+        let splittedSort = sort.split(":");
+        if (splittedSort[1] === "desc") {
+          method = -1;
+        }
+        if (splittedSort[1] === "asc") {
+          method = 1;
+        }
+        options.sort = {
+          type: splittedSort[0],
+          method,
+        };
+      }
+
       let filter = {};
       if (flagDate === "now") {
         filter.startYear = { $gte: new Date().getFullYear() };

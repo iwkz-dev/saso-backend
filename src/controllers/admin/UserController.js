@@ -3,12 +3,18 @@
 const httpStatus = require("http-status-codes");
 const User = require("@models/user");
 const resHelpers = require("@helpers/responseHelpers");
-const { dataPagination, detailById } = require("@helpers/dataHelper");
+const {
+  dataPagination,
+  detailById,
+  firstWordUppercase,
+} = require("@helpers/dataHelper");
 
 class UserController {
   static async register(req, res, next) {
+    const name = await firstWordUppercase(req.body.fullname);
+
     const payload = {
-      fullname: req.body.fullname,
+      fullname: name,
       email: req.body.email,
       password: req.body.password,
       isActive: req.body.isActive || false,
@@ -46,7 +52,7 @@ class UserController {
   }
 
   static async getAllUsers(req, res, next) {
-    const { page, limit } = req.query;
+    const { page, limit, sort } = req.query;
 
     try {
       const options = {
@@ -57,6 +63,21 @@ class UserController {
           method: -1,
         },
       };
+
+      let method;
+      if (sort) {
+        let splittedSort = sort.split(":");
+        if (splittedSort[1] === "desc") {
+          method = -1;
+        }
+        if (splittedSort[1] === "asc") {
+          method = 1;
+        }
+        options.sort = {
+          type: splittedSort[0],
+          method,
+        };
+      }
       const findUsers = await dataPagination(
         User,
         { $or: [{ role: 1 }, { role: 2 }] },

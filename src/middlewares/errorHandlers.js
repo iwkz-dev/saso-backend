@@ -25,9 +25,12 @@ async function errorHandler(error, req, res, next) {
         .json(resHelpers.failed(error.message, error.name));
       break;
     case "ValidationError":
+      const keyError = Object.keys(error.errors);
       res
         .status(httpStatus.StatusCodes.BAD_REQUEST)
-        .json(resHelpers.failed(error._message, error.errors));
+        .json(
+          resHelpers.failed(error._message, error.errors[keyError].message)
+        );
       break;
     default:
       res
