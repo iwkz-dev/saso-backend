@@ -83,4 +83,19 @@ module.exports = {
 
     return { imagesSaved, imagesNotSaved };
   },
+
+  firstWordUppercase: async (words) => {
+    if (!words || words.length < 0) {
+      return "";
+    }
+    let wordsArray = words.split(" ");
+
+    for (let i = 0; i < wordsArray.length; i++) {
+      wordsArray[i] =
+        wordsArray[i].charAt(0).toUpperCase() + wordsArray[i].slice(1);
+    }
+
+    const newStr = wordsArray.join(" ");
+    return newStr;
+  },
 };

@@ -11,14 +11,17 @@ const {
   dataPagination,
   detailById,
   updateWithImages,
+  firstWordUppercase,
 } = require("@helpers/dataHelper");
 
 class MenuController {
   // TO DO: update menu, get specific menu based on name, delete specific menu, delete all menu
   // belum ada image
   static async create(req, res, next) {
+    const name = await firstWordUppercase(req.body.name);
+
     const payload = {
-      name: req.body.name,
+      name,
       description: req.body.description,
       quantity: +req.body.quantity,
       quantityOrder: +req.body.quantityOrder || 0,
@@ -44,7 +47,7 @@ class MenuController {
   }
 
   static async getAllMenus(req, res, next) {
-    const { page, limit, event, category, flagDate, status } = req.query;
+    const { page, limit, event, category, flagDate, status, sort } = req.query;
 
     try {
       const options = {
@@ -55,6 +58,21 @@ class MenuController {
           method: -1,
         },
       };
+
+      let method;
+      if (sort) {
+        let splittedSort = sort.split(":");
+        if (splittedSort[1] === "desc") {
+          method = -1;
+        }
+        if (splittedSort[1] === "asc") {
+          method = 1;
+        }
+        options.sort = {
+          type: splittedSort[0],
+          method,
+        };
+      }
 
       let filter = {};
       if (flagDate === "now" || status) {

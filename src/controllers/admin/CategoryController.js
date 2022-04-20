@@ -3,22 +3,31 @@
 const httpStatus = require("http-status-codes");
 const Category = require("@models/category");
 const resHelpers = require("@helpers/responseHelpers");
-const { dataPagination, detailById } = require("@helpers/dataHelper");
+const {
+  dataPagination,
+  detailById,
+  firstWordUppercase,
+} = require("@helpers/dataHelper");
 
 class CategoryController {
   static async create(req, res, next) {
-    const payload = {
-      name: req.body.name,
-      updated_at: new Date(),
-      created_at: new Date(),
-    };
     try {
-      const slug = req.body.name.toLowerCase().replace(" ", "_");
+      const name = await firstWordUppercase(req.body.name);
+      const payload = {
+        name,
+        updated_at: new Date(),
+        created_at: new Date(),
+      };
+      let slug;
+      if (req.body.name) {
+        slug = req.body.name.toLowerCase().replace(" ", "_");
+      }
+      slug = "";
       const findCategory = await Category.findOne({ slug });
       if (findCategory) {
         throw {
           name: "Bad Request",
-          message: "You already have category with name " + req.body.name,
+          message: "You already have category with name: " + req.body.name,
         };
       } else {
         const createCategory = await Category.create(payload);
@@ -33,8 +42,7 @@ class CategoryController {
   }
 
   static async getAllCategories(req, res, next) {
-    const { page, limit } = req.query;
-
+    const { page, limit, sort } = req.query;
     try {
       const options = {
         page: page || 1,
@@ -44,6 +52,22 @@ class CategoryController {
           method: -1,
         },
       };
+
+      let method;
+      if (sort) {
+        let splittedSort = sort.split(":");
+        if (splittedSort[1] === "desc") {
+          method = -1;
+        }
+        if (splittedSort[1] === "asc") {
+          method = 1;
+        }
+        options.sort = {
+          type: splittedSort[0],
+          method,
+        };
+      }
+
       const findCategories = await dataPagination(
         Category,
         null,

@@ -100,6 +100,12 @@ router.post(
  *         - ApiKeyAuth: []
  *      parameters:
  *         - in: query
+ *           name: sort
+ *           schema:
+ *             type: string
+ *           description: Sort criteria depend on key of object data, default updated_at:desc.
+ *           example: updated_at:desc
+ *         - in: query
  *           name: status
  *           schema:
  *             type: string
