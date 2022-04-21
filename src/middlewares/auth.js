@@ -2,6 +2,7 @@
 
 const { jwtVerify } = require("@helpers/jwt");
 const User = require("@models/user");
+const { find } = require("../models/user");
 
 async function authAdmin(req, res, next) {
   // const { access_token: accessToken } = req.headers;
@@ -75,4 +76,35 @@ async function authCustomer(req, res, next) {
   }
 }
 
-module.exports = { authAdmin, authSuperAdmin, authCustomer };
+async function authChangePassword(req, res, next) {
+  const { token } = req.body;
+  try {
+    if (!token) {
+      throw { name: "Invalid Auth", message: "Invalid Token" };
+    } else {
+      const verifiedToken = jwtVerify(token);
+
+      const findUser = await User.findOne({ email: verifiedToken.email });
+      if (!findUser) {
+        throw { name: "Not Found", message: "User not found" };
+      } else {
+        if (token !== findUser.forgetPasswordToken) {
+          throw { name: "Invalid Auth", message: "Invalid Token" };
+        } else {
+          req.body.id = findUser._id;
+          next();
+        }
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+}
+
+module.exports = {
+  authAdmin,
+  authSuperAdmin,
+  authCustomer,
+  authChangePassword,
+};

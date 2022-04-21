@@ -23,6 +23,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "Password is required"],
     minlength: [5, "Your password length should be greater than 5"],
+    select: false,
   },
   phone: {
     type: String,
@@ -40,6 +41,9 @@ const userSchema = new mongoose.Schema({
    */
   role: {
     type: Number,
+  },
+  forgetPasswordToken: {
+    type: String,
   },
   updated_at: {
     type: Date,

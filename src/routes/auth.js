@@ -1,6 +1,7 @@
 "use strict";
 const router = require("express").Router();
 const AuthController = require("@controllers/AuthController");
+const { authChangePassword } = require("@middlewares/auth");
 
 /**
  * @swagger
@@ -65,5 +66,13 @@ const AuthController = require("@controllers/AuthController");
  *               error: Invalid Auth
  */
 router.post("/login", AuthController.login);
+
+router.patch("/forget-password", AuthController.forgetPassword);
+
+router.patch(
+  "/change-password",
+  authChangePassword,
+  AuthController.changePassword
+);
 
 module.exports = router;
