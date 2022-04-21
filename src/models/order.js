@@ -11,9 +11,18 @@ const orderSchema = new mongoose.Schema({
   status: {
     type: Number,
   },
-  customer: {
+  customerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Users",
+  },
+  customerFullname: {
+    type: String,
+  },
+  customerEmail: {
+    type: String,
+  },
+  customerPhone: {
+    type: String,
   },
   totalPrice: {
     type: Number,
@@ -21,6 +30,9 @@ const orderSchema = new mongoose.Schema({
   event: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Events",
+  },
+  note: {
+    type: String,
   },
   menus: {
     type: Array,

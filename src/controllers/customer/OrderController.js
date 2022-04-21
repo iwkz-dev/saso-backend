@@ -3,6 +3,7 @@
 const httpStatus = require("http-status-codes");
 const Order = require("@models/order");
 const Menu = require("@models/menu");
+const User = require("@models/user");
 const Event = require("@models/event");
 const resHelpers = require("@helpers/responseHelpers");
 const { dataPagination, detailById } = require("@helpers/dataHelper");
@@ -66,7 +67,10 @@ class UserController {
               message: `Menu '${foundMenu.name}' is out of stock`,
             };
           } else {
-            resetQuantity.push({ id:foundMenu._id, quantityOrder: foundMenu.quantityOrder });
+            resetQuantity.push({
+              id: foundMenu._id,
+              quantityOrder: foundMenu.quantityOrder,
+            });
             foundMenu["totalPortion"] = el.totalPortion;
             delete foundMenu.quantity;
             const payloadMenu = {
@@ -79,17 +83,21 @@ class UserController {
       );
 
       //* CHECK IF THE MENU IS OUT OF STOCK *//
-      findMenu.forEach(findError => {
-        if(findError.error) {
-          resetQuantity.forEach( async (el) => {
-            const test = await Menu.findOneAndUpdate({ _id: el.id }, {quantityOrder: el.quantityOrder}, {new: true});
+      findMenu.forEach((findError) => {
+        if (findError.error) {
+          resetQuantity.forEach(async (el) => {
+            const test = await Menu.findOneAndUpdate(
+              { _id: el.id },
+              { quantityOrder: el.quantityOrder },
+              { new: true }
+            );
           });
           throw {
-            name: findError.name, 
-            message: findError.message
+            name: findError.name,
+            message: findError.message,
           };
         }
-      })
+      });
 
       const totalEachMenu = findMenu.map((el) => {
         return el.price * el.totalPortion;
@@ -99,12 +107,16 @@ class UserController {
       totalEachMenu.forEach((el) => {
         totalPrice += el;
       });
+      const findUser = await User.findById(userId);
       const payload = {
         invoiceNumber,
         menus: findMenu,
         totalPrice,
         status: 0,
-        customer: userId,
+        customerId: userId,
+        customerFullname: findUser.fullname,
+        customerEmail: findUser.email,
+        customerPhone: findUser.phone,
         event: findEvent.id,
         updated_at: new Date(),
         created_at: new Date(),

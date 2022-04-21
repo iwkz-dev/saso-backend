@@ -7,9 +7,18 @@ components:
           type: string
         invoiceNumber:
           type: string
+        event:
+          type: string
         status:
           type: number
-        customer:
+        customerId:
+          type: string
+          format: uuid
+        customerFullname:
+          type: string
+        customerEmail:
+          type: string
+        customerPhone:
           type: string
         totalPrice:
           type: number
