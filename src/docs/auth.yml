@@ -8,6 +8,10 @@ components:
         email:
           type: string
           format: email
+        phone:
+          type: string
+        forgetPasswordToken:
+          type: string
       example:
         id: 61c039ea37c0ca6cfc731320
         email": customer.iwkz@test.com
@@ -22,3 +26,16 @@ components:
           type: string
         data:
           $ref: "#/components/schemas/DataAuth"
+
+    GenerateToken:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            forgetPasswordToken:
+              type: string

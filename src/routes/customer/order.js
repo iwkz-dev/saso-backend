@@ -30,6 +30,8 @@ const OrderController = require("@controllers/customer/OrderController");
  *                  format: uuid
  *                note:
  *                  type: string
+ *                arrivedAt:
+ *                  type: string
  *                menus:
  *                  type: array
  *                  items:
