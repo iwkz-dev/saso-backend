@@ -67,8 +67,99 @@ const { authChangePassword } = require("@middlewares/auth");
  */
 router.post("/login", AuthController.login);
 
+/**
+ * @swagger
+ * /auth/forget-password:
+ *   patch:
+ *     summary: generate token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       description: Token will be generated for changing password
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *             example:
+ *               email: test@test.com
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *                $ref: '#/components/schemas/GenerateToken'
+ *       "404":
+ *         description: Invalid email or password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               status: failed
+ *               message: User not found
+ *               error: Not Found
+ */
 router.patch("/forget-password", AuthController.forgetPassword);
 
+/**
+ * @swagger
+ * /auth/change-password:
+ *   patch:
+ *     summary: change password from token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       description: Password will be change after token generated
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - password
+ *               - token
+ *             properties:
+ *               password:
+ *                 type: string
+ *               token:
+ *                 type: string
+ *             example:
+ *               password: newpassword
+ *               token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFzcmFAYWRtaW4uY29tIiwiaWF0IjoxNjUwNTMwMDExLCJleHAiOjE2NTA1MzM2MTF9.ltgRiKHofK4Fwn8zNfibX5mqCqScbrNQHgq30Ro2kX4
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *                $ref: '#/components/schemas/AuthTokens'
+ *       "404":
+ *         description: Invalid email or password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               status: failed
+ *               message: User not found
+ *               error: Not Found
+ *       "401":
+ *         description: Invalid email or password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               status: failed
+ *               message: Invalid Token
+ *               error: Invalid Auth
+ */
 router.patch(
   "/change-password",
   authChangePassword,

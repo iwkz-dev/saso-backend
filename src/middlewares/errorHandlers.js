@@ -32,6 +32,11 @@ async function errorHandler(error, req, res, next) {
           resHelpers.failed(error._message, error.errors[keyError].message)
         );
       break;
+    case "TokenExpiredError":
+      res
+        .status(httpStatus.StatusCodes.BAD_REQUEST)
+        .json(resHelpers.failed("Token expired", "JWT token expired"));
+      break;
     default:
       res
         .status(httpStatus.StatusCodes.INTERNAL_SERVER_ERROR)

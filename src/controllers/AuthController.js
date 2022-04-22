@@ -86,7 +86,11 @@ class AuthController {
 
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success update data", updateUser));
+        .json(
+          resHelpers.success("success update data", {
+            forgetPasswordToken: updateUser.forgetPasswordToken,
+          })
+        );
     } catch (error) {
       console.log(error);
       next(error);
