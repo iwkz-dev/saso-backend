@@ -34,6 +34,9 @@ const orderSchema = new mongoose.Schema({
   note: {
     type: String,
   },
+  arrived_at: {
+    type: String,
+  },
   menus: {
     type: Array,
   },

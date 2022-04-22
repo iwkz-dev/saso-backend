@@ -10,7 +10,7 @@ const { dataPagination, detailById } = require("@helpers/dataHelper");
 
 class UserController {
   static async order(req, res, next) {
-    const { menus, event } = req.body;
+    const { menus, event, arrivedAt, note } = req.body;
 
     const { id: userId } = req.user;
     try {
@@ -118,6 +118,8 @@ class UserController {
         customerEmail: findUser.email,
         customerPhone: findUser.phone,
         event: findEvent.id,
+        note: note || "",
+        arrived_at: arrivedAt,
         updated_at: new Date(),
         created_at: new Date(),
       };
