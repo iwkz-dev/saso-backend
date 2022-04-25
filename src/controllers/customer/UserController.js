@@ -3,7 +3,7 @@
 const httpStatus = require("http-status-codes");
 const User = require("@models/user");
 const resHelpers = require("@helpers/responseHelpers");
-const { dataPagination } = require("@helpers/dataHelper");
+const { dataPagination, detailById } = require("@helpers/dataHelper");
 const { jwtSign } = require("@helpers/jwt");
 
 class UserController {
@@ -45,6 +45,22 @@ class UserController {
           .status(httpStatus.StatusCodes.CREATED)
           .json(resHelpers.success("success create an user", result));
       }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
+  static async getUserById(req, res, next) {
+    const { id } = req.user;
+    try {
+      const findUser = await detailById(User, id, "-password");
+      if (!findUser) {
+        throw { name: "Not Found", message: "User not found" };
+      }
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success("success fetch data", findUser));
     } catch (error) {
       console.log(error);
       next(error);

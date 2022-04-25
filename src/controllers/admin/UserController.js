@@ -52,7 +52,7 @@ class UserController {
   }
 
   static async getAllUsers(req, res, next) {
-    const { page, limit, sort } = req.query;
+    const { page, limit, sort, filters } = req.query;
 
     try {
       const options = {
@@ -78,9 +78,14 @@ class UserController {
           method,
         };
       }
+      // ! FILTERING USERS
+      let filter;
+      if (filters) {
+        filter = filters;
+      }
       const findUsers = await dataPagination(
         User,
-        { $or: [{ role: 1 }, { role: 2 }] },
+        filter,
         ["-password"],
         options
       );
