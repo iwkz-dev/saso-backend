@@ -1,7 +1,7 @@
 "use strict";
 const router = require("express").Router();
 const UserController = require("@controllers/customer/UserController");
-const { authSuperAdmin } = require("@middlewares/auth");
+const { authCustomer } = require("@middlewares/auth");
 
 /**
  * @swagger
@@ -67,5 +67,43 @@ const { authSuperAdmin } = require("@middlewares/auth");
  *                error: Validation Error
  */
 router.post("/register", UserController.register);
+
+/**
+ * @swagger
+ * /customer/user/detail:
+ *    get:
+ *      summary: Return detail user of customer
+ *      tags: [Customer-User]
+ *      security:
+ *         - ApiKeyAuth: []
+ *      responses:
+ *        "200":
+ *          description: OK
+ *          content:
+ *             application/json:
+ *               schema:
+ *                  $ref: '#/components/schemas/User'
+ *        "401":
+ *           description: Invalid Access token
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Invalid Access Token
+ *                error: Invalid Auth
+ *        "404":
+ *           description: User not found
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: User not found
+ *                error: Not Found
+ */
+router.get("/detail", authCustomer, UserController.getUserById);
 
 module.exports = router;
