@@ -4,7 +4,7 @@ const httpStatus = require("http-status-codes");
 const User = require("@models/user");
 const resHelpers = require("@helpers/responseHelpers");
 const { mailer } = require("@helpers/nodemailer");
-const { changePasswordTemplate } = require("@helpers/template");
+const { changePasswordTemplate } = require("@helpers/templates");
 const { comparePassword, hashPassword } = require("@helpers/bcrypt");
 const { jwtSign } = require("@helpers/jwt");
 

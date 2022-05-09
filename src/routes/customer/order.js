@@ -174,6 +174,8 @@ router.get("/", OrderController.getAllOrders);
  */
 router.get("/:id/detail", OrderController.getOrderById);
 
+router.post("/:id/:generatePdf", OrderController.generatePdf);
+
 // router.get("/:id/refund", OrderController.orderRefund);
 
 module.exports = router;
