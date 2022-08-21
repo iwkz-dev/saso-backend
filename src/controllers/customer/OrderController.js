@@ -6,7 +6,10 @@ const Menu = require("@models/menu");
 const User = require("@models/user");
 const Event = require("@models/event");
 const resHelpers = require("@helpers/responseHelpers");
+const { invoiceTemplate } = require("@helpers/templates");
+const { pdfGenerator } = require("@helpers/pdfGenerator");
 const { dataPagination, detailById } = require("@helpers/dataHelper");
+const { mailer } = require("@helpers/nodemailer");
 
 class UserController {
   static async order(req, res, next) {
@@ -14,7 +17,7 @@ class UserController {
 
     const { id: userId } = req.user;
     try {
-      //   ! LATER: WILL BE AUTOMATED SS21
+      // ! LATER: WILL BE AUTOMATED SS21
       const findEvent = await Event.findOne({ _id: event });
       if (findEvent.status !== 1 || !findEvent) {
         throw { name: "Bad Request", message: "Event not found" };
@@ -73,6 +76,7 @@ class UserController {
             });
             foundMenu["totalPortion"] = el.totalPortion;
             delete foundMenu.quantity;
+            delete foundMenu.quantityOrder;
             const payloadMenu = {
               quantityOrder: totalOrder,
             };
@@ -126,6 +130,14 @@ class UserController {
 
       const createOrder = await Order.create(payload);
 
+      let template = invoiceTemplate(createOrder);
+      await mailer({
+        from: "noreply@gmail.com",
+        to: createOrder.customerEmail,
+        subject: "Your Order " + createOrder.invoiceNumber,
+        html: template,
+      });
+
       res
         .status(httpStatus.StatusCodes.CREATED)
         .json(resHelpers.success("success create an order", createOrder));
@@ -148,7 +160,7 @@ class UserController {
         },
       };
       let filter = {
-        customer: userId,
+        customerId: userId,
       };
 
       // ! LATER ONLY SHOW THE ACTUAL ORDER OF THE EVENT
@@ -174,7 +186,7 @@ class UserController {
       if (!findOrder) {
         throw { name: "Not Found", message: "Order not found" };
       }
-      if (userId !== findOrder.customer.toString()) {
+      if (userId !== findOrder.customerId.toString()) {
         throw {
           name: "Forbidden",
           message: "You have no authorization to look this order",
@@ -183,6 +195,31 @@ class UserController {
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success("success fetch data", findOrder));
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
+  static async generatePdf(req, res, next) {
+    const { id: orderId } = req.params;
+    const { id: userId } = req.user;
+
+    try {
+      const findOrder = await detailById(Order, orderId, null);
+      if (!findOrder) {
+        throw { name: "Not Found", message: "Order not found" };
+      }
+      if (userId !== findOrder.customerId.toString()) {
+        throw {
+          name: "Forbidden",
+          message: "You have no authorization to look this order",
+        };
+      }
+      let template = invoiceTemplate(findOrder);
+      let pdfData = await pdfGenerator(template);
+      res.setHeader("Content-Type", "application/pdf");
+      res.end(pdfData);
     } catch (error) {
       console.log(error);
       next(error);

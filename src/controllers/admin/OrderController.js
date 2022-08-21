@@ -38,17 +38,34 @@ class UserController {
     try {
       // 0 = no action
       let statusPayload = 0;
+      const findOrder = await Order.findById(id);
+      if (!findOrder) {
+        throw { name: "Not Found", message: "Order not found" };
+      }
+      if (findOrder.status === 2) {
+        throw {
+          name: "Bad Request",
+          message: "Order has been canceled or refund can not be changed",
+        };
+      }
       if (status === "paid") {
         statusPayload = 1;
       }
       if (status === "refund" || status === "cancel") {
         statusPayload = 2;
+        findOrder.menus.forEach(async (el) => {
+          const menuFound = await Menu.findById(el._id);
+          const payloadMenu = {
+            quantityOrder: menuFound.quantityOrder - el.totalPortion,
+          };
+          await Menu.update({ _id: el._id }, payloadMenu);
+        });
       }
       if (status === "done") {
         statusPayload = 3;
       }
 
-      const updateOrder = await Order.findOneAndUpdate(
+      const updateOrder = await Order.update(
         { _id: id },
         { status: statusPayload, updated_at: new Date() },
         { new: true }

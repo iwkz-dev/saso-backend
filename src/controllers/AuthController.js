@@ -3,6 +3,8 @@
 const httpStatus = require("http-status-codes");
 const User = require("@models/user");
 const resHelpers = require("@helpers/responseHelpers");
+const { mailer } = require("@helpers/nodemailer");
+const { changePasswordTemplate } = require("@helpers/templates");
 const { comparePassword, hashPassword } = require("@helpers/bcrypt");
 const { jwtSign } = require("@helpers/jwt");
 
@@ -71,7 +73,9 @@ class AuthController {
       );
 
       const findUser = await User.findOne({ email });
-
+      if (!findUser) {
+        throw { name: "Not Found", message: "User not found" };
+      }
       const updateUser = await User.findOneAndUpdate(
         { _id: findUser._id },
         { forgetPasswordToken },
@@ -84,13 +88,16 @@ class AuthController {
         throw { name: "Not Found", message: "User not found" };
       }
 
-      res
-        .status(httpStatus.StatusCodes.OK)
-        .json(
-          resHelpers.success("success update data", {
-            forgetPasswordToken: updateUser.forgetPasswordToken,
-          })
-        );
+      const forgetPasswordTemplate = changePasswordTemplate(
+        email,
+        forgetPasswordToken
+      );
+      await mailer(forgetPasswordTemplate);
+      res.status(httpStatus.StatusCodes.OK).json(
+        resHelpers.success("success update data", {
+          forgetPasswordToken: updateUser.forgetPasswordToken,
+        })
+      );
     } catch (error) {
       console.log(error);
       next(error);
