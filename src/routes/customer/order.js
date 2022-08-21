@@ -174,6 +174,55 @@ router.get("/", OrderController.getAllOrders);
  */
 router.get("/:id/detail", OrderController.getOrderById);
 
+/**
+ * @swagger
+ * /customer/order/{id}/generatePdf:
+ *    post:
+ *      summary: Return detail order
+ *      tags: [Customer-Order]
+ *      security:
+ *         - ApiKeyAuth: []
+ *      parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Order id
+ *      responses:
+ *        "200":
+ *          description: OK
+ *        "401":
+ *           description: Invalid Access token
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Invalid Access Token
+ *                error: Invalid Auth
+ *        "404":
+ *           description: Order not found
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Order not found
+ *                error: Not Found
+ *        "403":
+ *           description: No authorization for the order
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Order not found
+ *                error: Not Found
+ */
 router.post("/:id/:generatePdf", OrderController.generatePdf);
 
 // router.get("/:id/refund", OrderController.orderRefund);
