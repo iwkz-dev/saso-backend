@@ -1,0 +1,66 @@
+components:
+  schemas:
+    Order:
+      type: object
+      properties:
+        _id:
+          type: string
+        invoiceNumber:
+          type: string
+        event:
+          type: string
+        status:
+          type: number
+        customerId:
+          type: string
+          format: uuid
+        customerFullname:
+          type: string
+        customerEmail:
+          type: string
+        customerPhone:
+          type: string
+        totalPrice:
+          type: number
+        menus:
+          type: array
+          items:
+            type: object
+            properties:
+              _id:
+                type: string
+              name:
+                type: string
+              price:
+                type: number
+              category:
+                type: number
+        updated_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+
+    Orders:
+      type: array
+      items:
+        $ref: "#/components/schemas/Order"
+
+    DataOrder:
+      type: object
+      properties:
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+        data:
+          $ref: "#/components/schemas/Orders"
+
+    ResultOrders:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/DataOrder"

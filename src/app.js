@@ -2,22 +2,35 @@
 
 require("dotenv").config();
 require("module-alias/register");
+require("./config/mongoose");
 
 const express = require("express");
-const routers = require("@routes");
+const createError = require("http-errors");
+const logger = require("morgan");
 const cors = require("cors");
+const swaggerUi = require("swagger-ui-express");
+const routers = require("@routes");
+const { openAPIDocs } = require("@configs/swagger");
 
-// ! LATER
-// const errorHandler = require("./middlewares/errorHandler");
+// ! BEST PRACTICE REQUIRE YANG DARI MODULE DIATAS ABIS ITU REQUIRE YANG ADA DI FILE LOCAL
 const app = express();
-require("./config/mongoose");
+
+app.use(logger("dev"));
 
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// ! LATER
-app.use("/", routers);
-// app.use(errorHandler);
+// SWAGGER
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openAPIDocs));
+// app.get("/api-docs", );
+
+const uriPrefix = process.env.API_PREFIX || "/api/v1";
+console.log(uriPrefix);
+app.use(uriPrefix, routers);
+
+app.use(function (req, res, next) {
+  next(createError(404));
+});
 
 module.exports = app;

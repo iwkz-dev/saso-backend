@@ -1,0 +1,62 @@
+components:
+  schemas:
+    Menu:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+          format: uuid
+        event:
+          type: string
+          format: uuid
+        description:
+          type: string
+        quantity:
+          type: number
+        price:
+          type: number
+        updated_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+
+    Menus:
+      type: array
+      items:
+        $ref: "#/components/schemas/Menu"
+
+    DataMenu:
+      type: object
+      properties:
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+        data:
+          $ref: "#/components/schemas/Menus"
+
+    ResultMenus:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/DataMenu"
+
+    ResultBulkMenus:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        count:
+          type: number
+        data:
+          $ref: "#/components/schemas/Menus"

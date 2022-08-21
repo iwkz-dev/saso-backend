@@ -1,0 +1,29 @@
+components:
+  schemas:
+    Pagination:
+      type: object
+      properties:
+        maxPage:
+          type: number
+        currentPage:
+          type: number
+        limit:
+          type: number
+        count:
+          type: number
+
+    Error:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        error:
+          type: string
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

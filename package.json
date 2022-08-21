@@ -1,9 +1,10 @@
 {
   "name": "saso-api",
-  "version": "1.0.0",
+  "version": "v1",
   "description": "Saso API v1",
   "main": "app.js",
   "scripts": {
+    "setup": "npm i && cp .env.example .env",
     "start": "NODE_ENV=development npx nodemon bin/www",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -21,17 +22,29 @@
     "@routes": "src/routes"
   },
   "dependencies": {
+    "axios": "^0.24.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "form-data": "^4.0.0",
     "http-errors": "^1.8.1",
     "http-status-codes": "^2.1.4",
     "jsonwebtoken": "^8.5.1",
     "module-alias": "^2.2.2",
     "mongodb": "^4.2.0",
     "mongoose": "^6.0.13",
+    "morgan": "^1.10.0",
     "multer": "^1.4.3",
-    "uuid": "^8.3.2"
+    "nodemailer": "^6.7.3",
+    "puppeteer": "^13.6.0",
+    "qrcode": "^1.5.0",
+    "read-excel-file": "^5.2.28",
+    "sharp": "^0.29.3",
+    "swagger-jsdoc": "^6.1.0",
+    "swagger-ui-express": "^4.3.0",
+    "uuid": "^8.3.2",
+    "validator": "^13.7.0",
+    "xlsx": "^0.18.2"
   },
   "devDependencies": {
     "dotenv": "^10.0.0",

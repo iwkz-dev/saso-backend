@@ -1,0 +1,41 @@
+components:
+  schemas:
+    DataAuth:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        forgetPasswordToken:
+          type: string
+      example:
+        id: 61c039ea37c0ca6cfc731320
+        email": customer.iwkz@test.com
+        accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxYzAzOWVhMzdjMGNhNmNmYzczMTMyMCIsImVtYWlsIjoiY3VzdG9tZXIuaXdrekB0ZXN0LmNvbSIsInJvbGUiOjMsImlhdCI6MTY0MDA2MTcyNX0.YonDN87jAqxBVSnuYUdi8uzID3OR9oHLwRt6trWFjG0
+
+    AuthTokens:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/DataAuth"
+
+    GenerateToken:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            forgetPasswordToken:
+              type: string
