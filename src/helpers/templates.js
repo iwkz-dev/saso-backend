@@ -6,47 +6,50 @@ function generateBodyMenu(data) {
     <tr>
       <td style="padding-top: 0;">
         <table width="560" align="center" cellpadding="0" cellspacing="0" border="0"
-            class="devicewidthinner" style="border-bottom: 1px solid #eeeeee;">
-            <tbody>
-                <tr>
-                    <td rowspan="4" style="padding-right: 10px; padding-bottom: 10px;">
-                        <img style="height: 80px; width: 85px" src="${
-                          el.images[0].imageUrl
-                        }"
-                            alt="Product Image" />
-                    </td>
-                    <td colspan="2"
-                        style="font-size: 14px; font-weight: bold; color: #666666; padding-bottom: 5px;">
-                        ${el.name}
-                    </td>
-                </tr>
-                <tr>
-                    <td
-                        style="font-size: 14px; line-height: 18px; color: #757575; width: 440px;">
-                        Quantity: ${el.totalPortion}
-                    </td>
-                    <td style="width: 130px;"></td>
-                </tr>
-                <tr>
-                    <td style="font-size: 14px; line-height: 18px; color: #757575;">
-                    </td>
-                    <td
-                        style="font-size: 14px; line-height: 18px; color: #757575; text-align: right;">
-                        € ${el.price.toLocaleString("de-DE")} Per Item
-                    </td>
-                </tr>
-                <tr>
-                    <td
-                        style="font-size: 14px; line-height: 18px; color: #757575; padding-bottom: 10px;">
-                    </td>
-                    <td
-                        style="font-size: 14px; line-height: 18px; color: #757575; text-align: right; padding-bottom: 10px;">
-                        <b style="color: #666666;">€ ${(
-                          el.price * el.totalPortion
-                        ).toLocaleString("de-DE")}</b> Total
-                    </td>
-                </tr>
-            </tbody>
+          class="devicewidthinner" style="border-bottom: 1px solid #eeeeee;"
+        >
+          <tbody>
+            <tr>
+              <td rowspan="4" style="padding-right: 10px; padding-bottom: 10px;">
+                <img style="height: 80px; width: 85px" src="${
+                  el.images.length > 0
+                    ? el.images[0].imageUrl
+                    : `https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-15.png`
+                }"
+                    alt="Product Image" />
+              </td>
+              <td colspan="2"
+                  style="font-size: 14px; font-weight: bold; color: #666666; padding-bottom: 5px;">
+                  ${el.name}
+              </td>
+            </tr>
+            <tr>
+              <td
+                  style="font-size: 14px; line-height: 18px; color: #757575; width: 440px;">
+                  Quantity: ${el.totalPortion}
+              </td>
+              <td style="width: 130px;"></td>
+            </tr>
+            <tr>
+              <td style="font-size: 14px; line-height: 18px; color: #757575;">
+              </td>
+              <td
+                  style="font-size: 14px; line-height: 18px; color: #757575; text-align: right;">
+                  € ${el.price.toLocaleString("de-DE")} Per Item
+              </td>
+            </tr>
+            <tr>
+              <td
+                  style="font-size: 14px; line-height: 18px; color: #757575; padding-bottom: 10px;">
+              </td>
+              <td
+                  style="font-size: 14px; line-height: 18px; color: #757575; text-align: right; padding-bottom: 10px;">
+                  <b style="color: #666666;">€ ${(
+                    el.price * el.totalPortion
+                  ).toLocaleString("de-DE")}</b> Total
+              </td>
+            </tr>
+          </tbody>
         </table>
       </td>
     </tr>

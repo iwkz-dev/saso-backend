@@ -9,6 +9,7 @@ const resHelpers = require("@helpers/responseHelpers");
 const { invoiceTemplate } = require("@helpers/templates");
 const { pdfGenerator } = require("@helpers/pdfGenerator");
 const { dataPagination, detailById } = require("@helpers/dataHelper");
+const { mailer } = require("@helpers/nodemailer");
 
 class UserController {
   static async order(req, res, next) {
@@ -16,7 +17,7 @@ class UserController {
 
     const { id: userId } = req.user;
     try {
-      //   ! LATER: WILL BE AUTOMATED SS21
+      // ! LATER: WILL BE AUTOMATED SS21
       const findEvent = await Event.findOne({ _id: event });
       if (findEvent.status !== 1 || !findEvent) {
         throw { name: "Bad Request", message: "Event not found" };
@@ -75,6 +76,7 @@ class UserController {
             });
             foundMenu["totalPortion"] = el.totalPortion;
             delete foundMenu.quantity;
+            delete foundMenu.quantityOrder;
             const payloadMenu = {
               quantityOrder: totalOrder,
             };
@@ -127,6 +129,14 @@ class UserController {
       };
 
       const createOrder = await Order.create(payload);
+
+      let template = invoiceTemplate(createOrder);
+      await mailer({
+        from: "noreply@gmail.com",
+        to: createOrder.customerEmail,
+        subject: "Your Order " + createOrder.invoiceNumber,
+        html: template,
+      });
 
       res
         .status(httpStatus.StatusCodes.CREATED)

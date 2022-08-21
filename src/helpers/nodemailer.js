@@ -1,5 +1,6 @@
 const nodemailer = require("nodemailer");
 
+// ! LATER: BEST PRACTICE FOR FLOW CHANGE PASSWORD
 async function mailer(template) {
   let mailConfig;
   if (
@@ -9,9 +10,13 @@ async function mailer(template) {
     // all emails are delivered to destination
     mailConfig = {
       service: "gmail",
+      host: "smtp.gmail.com",
+      secure: false,
       auth: {
-        user: process.env.EMAIL_NODEMAILER,
-        pass: process.env.PASSWORD_EMAIL_NODEMAILER,
+        // user: process.env.EMAIL_NODEMAILER,
+        // pass: process.env.PASSWORD_EMAIL_NODEMAILER,
+        user: process.env.EMAIL_NODEMAILER_GMAIL,
+        pass: process.env.PASSWORD_EMAIL_NODEMAILER_GMAIL,
       },
     };
   } else {
