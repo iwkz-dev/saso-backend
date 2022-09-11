@@ -2,7 +2,10 @@ const puppeteer = require("puppeteer");
 
 module.exports = {
   pdfGenerator: async function (html = "") {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ["--disable-dev-shm-usage"],
+    });
     const page = await browser.newPage();
 
     await page.setContent(html);
