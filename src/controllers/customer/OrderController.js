@@ -221,8 +221,14 @@ class UserController {
       res.setHeader("Content-Type", "application/pdf");
       res.end(pdfData);
     } catch (error) {
-      console.log(error);
-      next(error);
+      if (error.name) {
+        res
+          .status(httpStatus.StatusCodes.OK)
+          .json(resHelpers.success("success download pdf"));
+      } else {
+        console.log(error.name);
+        next(error);
+      }
     }
   }
 }
