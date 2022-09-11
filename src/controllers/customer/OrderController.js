@@ -219,7 +219,7 @@ class UserController {
       let template = invoiceTemplate(findOrder);
       let pdfData = await pdfGenerator(template);
       res.setHeader("Content-Type", "application/pdf");
-      res.end(pdfData);
+      res.send(pdfData);
     } catch (error) {
       // if (error.name) {
       //   res
