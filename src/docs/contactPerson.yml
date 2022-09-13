@@ -1,0 +1,45 @@
+components:
+  schemas:
+    ContactPerson:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        phoneNumber:
+          type: string
+        type:
+          type: number
+        event:
+          type: string
+          format: uuid
+        updated_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+
+    ContactPersons:
+      type: array
+      items:
+        $ref: "#/components/schemas/ContactPerson"
+
+    DataContactPerson:
+      type: object
+      properties:
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+        data:
+          $ref: "#/components/schemas/ContactPersons"
+
+    ResultUsers:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/DataContactPerson"

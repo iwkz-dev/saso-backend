@@ -12,7 +12,7 @@ class ContactPersonController {
     let payload = {
       name,
       phoneNumber: req.body.phoneNumber,
-      type: req.body.type || 1,
+      type: req.body.type || 0,
       event: req.body.event || null,
       updated_at: new Date(),
       created_at: new Date(),
@@ -110,7 +110,7 @@ class ContactPersonController {
     let payload = {
       name,
       phoneNumber: req.body.phoneNumber,
-      type: req.body.type || 1,
+      type: req.body.type || 0,
       event: req.body.event || null,
       updated_at: new Date(),
     };
