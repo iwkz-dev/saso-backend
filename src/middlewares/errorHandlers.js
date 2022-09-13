@@ -26,11 +26,21 @@ async function errorHandler(error, req, res, next) {
       break;
     case "ValidationError":
       const keyError = Object.keys(error.errors);
-      res
-        .status(httpStatus.StatusCodes.BAD_REQUEST)
-        .json(
-          resHelpers.failed(error._message, error.errors[keyError].message)
-        );
+      if (keyError.length > 1) {
+        let errors = "";
+        keyError.forEach((el) => {
+          errors += `${error.errors[el].message};`;
+        });
+        res
+          .status(httpStatus.StatusCodes.BAD_REQUEST)
+          .json(resHelpers.failed(error._message, errors));
+      } else {
+        res
+          .status(httpStatus.StatusCodes.BAD_REQUEST)
+          .json(
+            resHelpers.failed(error._message, error.errors[keyError].message)
+          );
+      }
       break;
     case "TokenExpiredError":
       res
@@ -39,10 +49,6 @@ async function errorHandler(error, req, res, next) {
       break;
     case "MongoServerError":
       if (error.code === 11000) {
-        console.log(
-          "🚀 ~ file: errorHandlers.js ~ line 46 ~ errorHandler ~ error",
-          error.keyValue
-        );
         const getKeyValue = error.keyValue;
         const newKeyValue = Object.keys(getKeyValue);
         res
