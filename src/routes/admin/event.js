@@ -18,7 +18,7 @@ const { uploadArray } = require("@helpers/multer");
  *    post:
  *      summary: Create Event
  *      tags: [Admin-Event]
- *      description: Create event
+ *      description: Create event p.s usageNote is Verwendungszweck
  *      security:
  *         - ApiKeyAuth: []
  *      requestBody:
@@ -38,6 +38,16 @@ const { uploadArray } = require("@helpers/multer");
  *                started_at:
  *                  type: string
  *                  format: date-time
+ *                iban:
+ *                  type: string
+ *                bic:
+ *                  type: string
+ *                bankName:
+ *                  type: string
+ *                paypal:
+ *                  type: string
+ *                usageNote:
+ *                  type: string
  *                imageUrls:
  *                  type: array
  *                  maxItems: 5
@@ -261,6 +271,16 @@ router.delete("/:id", EventController.destroy);
  *                started_at:
  *                  type: string
  *                  format: date-time
+ *                iban:
+ *                  type: string
+ *                paypal:
+ *                  type: string
+ *                bic:
+ *                  type: string
+ *                bankName:
+ *                  type: string
+ *                usageNote:
+ *                  type: string
  *                imageUrls:
  *                  type: array
  *                  maxItems: 5

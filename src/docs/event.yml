@@ -14,6 +14,16 @@ components:
           format: date-time
         status:
           type: number
+        iban:
+          type: string
+        bic:
+          type: string
+        bankName:
+          type: string
+        paypal:
+          type: string
+        usageNote:
+          type: string
         images:
           type: array
           items:

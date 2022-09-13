@@ -7,6 +7,7 @@ const eventSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, "Name is required"],
+    unique: true,
   },
   description: {
     type: String,
@@ -25,6 +26,21 @@ const eventSchema = new mongoose.Schema({
    */
   status: {
     type: Number,
+  },
+  iban: {
+    type: String,
+  },
+  bic: {
+    type: String,
+  },
+  bankName: {
+    type: String,
+  },
+  paypal: {
+    type: String,
+  },
+  usageNote: {
+    type: String,
   },
   images: {
     type: Array,

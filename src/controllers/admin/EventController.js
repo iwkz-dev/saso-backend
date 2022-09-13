@@ -22,6 +22,11 @@ class EventController {
       started_at: req.body.started_at,
       images: req.body.imagesData,
       status: 0,
+      iban: req.body.iban || "",
+      bic: req.body.bic || "",
+      bankName: req.body.bankName || "",
+      paypal: req.body.paypal || "",
+      usageNote: req.body.usageNote || "",
       updated_at: new Date(),
       created_at: new Date(),
     };
@@ -188,6 +193,11 @@ class EventController {
         started_at: req.body.started_at,
         startYear: getYear[0],
         images: payloadImages.imagesSaved,
+        iban: req.body.iban || "",
+        bic: req.body.bic || "",
+        bankName: req.body.bankName || "",
+        paypal: req.body.paypal || "",
+        usageNote: req.body.usageNote || "",
         status: req.body.status,
         updated_at: new Date(),
       };
