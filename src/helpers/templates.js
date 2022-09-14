@@ -455,16 +455,6 @@ module.exports = {
                                             </tr>
                                             <tr>
                                                 <td
-                                                    style="width: 55%; font-size: 14px; font-weight: bold; line-height: 18px; color: #1b1b1b; padding-bottom: 10px;">
-                                                    Status
-                                                </td>
-                                                <td
-                                                    style="width: 45%; font-size: 14px; font-weight: bold; line-height: 18px; color: #1b1b1b; padding-bottom: 10px;">
-                                                    ${statusString}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td
                                                     style="width: 55%; font-size: 16px; font-weight: bold; color: #1b1b1b; padding-bottom: 5px;">
                                                     Fullname
                                                 </td>
