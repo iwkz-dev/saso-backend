@@ -533,38 +533,52 @@ module.exports = {
                                             <tr>
                                                 <td
                                                     style="width: 55%; font-size: 14px; line-height: 18px; color: #666666;">
-                                                    Bank Name:
+                                                    Bank Name: ${
+                                                      data.eventData.bankName ||
+                                                      "-"
+                                                    }
                                                 </td>
                                                 <td
                                                     style="width: 45%; font-size: 14px; line-height: 18px; color: #666666;">
-                                                    Account Name:
+                                                    Account Name: Indonesischer Weisheits- und Kulturzentrum e.V.
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <td
                                                     style="width: 55%; font-size: 14px; line-height: 18px; color: #666666;">
-                                                    Bank Address:
+                                                    IBAN: ${
+                                                      data.eventData.iban || "-"
+                                                    }
                                                 </td>
                                                 <td
                                                     style="width: 45%; font-size: 14px; line-height: 18px; color: #666666;">
-                                                    Account Number:
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td
-                                                    style="width: 55%; font-size: 14px; line-height: 18px; color: #666666; padding-bottom: 10px;">
-                                                    Bank Code:
-                                                </td>
-                                                <td
-                                                    style="width: 45%; font-size: 14px; line-height: 18px; color: #666666; padding-bottom: 10px;">
-                                                    SWIFT Code:
+                                                    BIC: ${
+                                                      data.eventData.bic || "-"
+                                                    }
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <td colspan="2"
+                                                  style="width: 55%; font-size: 16px; font-weight: bold; line-height: 18px; color: #666666; padding: 10px 0px;">
+                                                  Payment Method (Paypal) : ${
+                                                    data.eventData.paypal || "-"
+                                                  }
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                              <td colspan="2"
+                                              style="width: 55%; font-size: 14px; line-height: 18px; color: #666666;">
+                                               Verwendungszweck : ${
+                                                 data.eventData.usageNote || "-"
+                                               }
+                                              </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2"
                                                     style="width: 100%; text-align: center; font-style: italic; font-size: 13px; font-weight: 600; color: #666666; padding: 15px 0; border-top: 1px solid #eeeeee;">
-                                                    <b style="font-size: 14px;">Note:</b> Lorem ipsum dolor sit amet,
-                                                    consectetur adipiscing elit
+                                                    <b style="font-size: 14px;">Note:</b> ${
+                                                      data.note || "-"
+                                                    }
                                                 </td>
                                             </tr>
                                         </tbody>

@@ -129,8 +129,12 @@ class UserController {
       };
 
       const createOrder = await Order.create(payload);
+      const dataEmail = {
+        ...createOrder._doc,
+        eventData: { ...findEvent._doc },
+      };
 
-      let template = invoiceTemplate(createOrder);
+      let template = invoiceTemplate(dataEmail);
       await mailer({
         from: "noreply@gmail.com",
         to: createOrder.customerEmail,
