@@ -3,78 +3,12 @@ const router = require("express").Router();
 const UserController = require("@controllers/admin/UserController");
 const { authSuperAdmin } = require("@middlewares/auth");
 
-// router.use(authSuperAdmin);
-
 /**
  * @swagger
  * tags:
  *   name: Admin-User
  *   description: CRUD operation User
  */
-
-/**
- * @swagger
- * /admin/user/create:
- *    post:
- *      summary: Create user
- *      tags: [Admin-User]
- *      security:
- *         - ApiKeyAuth: []
- *      requestBody:
- *        required: true
- *        content:
- *          application/json:
- *            schema:
- *              type: object
- *              required:
- *                 - fullname
- *                 - email
- *                 - password
- *                 - phone
- *              properties:
- *                fullname:
- *                  type: string
- *                email:
- *                  type: string
- *                  format: email
- *                password:
- *                  type: string
- *                  format: password
- *                isActive:
- *                  type: boolean
- *                role:
- *                  type: number
- *                phone:
- *                  type: string
- *      responses:
- *        "201":
- *          description: CREATED
- *          content:
- *             application/json:
- *               schema:
- *                  $ref: '#/components/schemas/User'
- *        "401":
- *           description: Invalid Access token
- *           content:
- *             application/json:
- *               schema:
- *                 $ref: '#/components/schemas/Error'
- *               example:
- *                status: failed
- *                message: Invalid Access Token
- *                error: Invalid Auth
- *        "400":
- *           description: Validations Error
- *           content:
- *             application/json:
- *               schema:
- *                 $ref: '#/components/schemas/Error'
- *               example:
- *                status: failed
- *                message: Validation Error
- *                error: Validation Error
- */
-router.post("/create", UserController.register);
 
 /**
  * @swagger
@@ -174,6 +108,72 @@ router.get("/", UserController.getAllUsers);
  *                error: Not Found
  */
 router.get("/:id/detail", UserController.getUserById);
+
+router.use(authSuperAdmin);
+
+/**
+ * @swagger
+ * /admin/user/create:
+ *    post:
+ *      summary: Create user
+ *      tags: [Admin-User]
+ *      security:
+ *         - ApiKeyAuth: []
+ *      requestBody:
+ *        required: true
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              required:
+ *                 - fullname
+ *                 - email
+ *                 - password
+ *                 - phone
+ *              properties:
+ *                fullname:
+ *                  type: string
+ *                email:
+ *                  type: string
+ *                  format: email
+ *                password:
+ *                  type: string
+ *                  format: password
+ *                isActive:
+ *                  type: boolean
+ *                role:
+ *                  type: number
+ *                phone:
+ *                  type: string
+ *      responses:
+ *        "201":
+ *          description: CREATED
+ *          content:
+ *             application/json:
+ *               schema:
+ *                  $ref: '#/components/schemas/User'
+ *        "401":
+ *           description: Invalid Access token
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Invalid Access Token
+ *                error: Invalid Auth
+ *        "400":
+ *           description: Validations Error
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Validation Error
+ *                error: Validation Error
+ */
+router.post("/create", UserController.register);
 
 /**
  * @swagger

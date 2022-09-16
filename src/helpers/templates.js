@@ -268,7 +268,7 @@ module.exports = {
                               <w:anchorlock/>
                               <center style="color:#ffffff;font-family:sans-serif;font-size:15px;">Verify Email</center>
                             </v:roundrect><![endif]-->
-                            <a href='https://saso.iwkz.de/change-password/${token}' class="button button--blue">Change Password</a>
+                            <a href='${PROD_API_URL}/change-password/${token}' class="button button--blue">Change Password</a>
                             </div>
                           </td>
                         </tr>
