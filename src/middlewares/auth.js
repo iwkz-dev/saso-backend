@@ -7,6 +7,10 @@ const { find } = require("../models/user");
 async function authAdmin(req, res, next) {
   // const { access_token: accessToken } = req.headers;
   const { authorization } = req.headers;
+  console.log(
+    "🚀 ~ file: auth.js ~ line 10 ~ authAdmin ~ authorization",
+    authorization
+  );
   const accessToken = authorization && authorization.split(" ")[1];
 
   try {
@@ -16,6 +20,10 @@ async function authAdmin(req, res, next) {
       const verifiedAccessToken = jwtVerify(accessToken);
 
       const findUser = await User.findById(verifiedAccessToken.id);
+      console.log(
+        "🚀 ~ file: auth.js ~ line 19 ~ authAdmin ~ findUser",
+        findUser
+      );
       if (!findUser || findUser.role === 3) {
         throw { name: "Invalid Auth", message: "Invalid Access Token" };
       } else {
