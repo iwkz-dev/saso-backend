@@ -522,45 +522,40 @@ module.exports = {
                                             </tr>
                                             <tr>
                                                 <td
-                                                    style="width: 55%; font-size: 14px; line-height: 18px; color: #666666;">
-                                                    Bank Name: ${
+                                                    style="width: 55%; font-size: 14px; line-height: 18px; color: #666666; padding: 12px 0">
+                                                    Bank Name: <span style="font-weight: 600;">
+                                                    ${
                                                       data.eventData.bankName ||
                                                       "-"
                                                     }
+                                                    </span>
                                                 </td>
                                                 <td
-                                                    style="width: 45%; font-size: 14px; line-height: 18px; color: #666666;">
-                                                    Account Name: Indonesischer Weisheits- und Kulturzentrum e.V.
+                                                    style="width: 45%; font-size: 14px; line-height: 18px; color: #666666; padding: 12px 0">
+                                                    Account Name: <span style="font-weight: 600;">Indonesischer Weisheits- und Kulturzentrum e.V.</span>
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <td
-                                                    style="width: 55%; font-size: 14px; line-height: 18px; color: #666666;">
-                                                    IBAN: ${
+                                                    style="width: 55%; font-size: 14px; line-height: 18px; color: #666666; padding: 12px 0">
+                                                    IBAN: <span style="font-weight: 600;">${
                                                       data.eventData.iban || "-"
                                                     }
+                                                    </span>
                                                 </td>
                                                 <td
-                                                    style="width: 45%; font-size: 14px; line-height: 18px; color: #666666;">
-                                                    BIC: ${
+                                                    style="width: 45%; font-size: 14px; line-height: 18px; color: #666666; padding: 12px 0">
+                                                    BIC: <span style="font-weight: 600;">${
                                                       data.eventData.bic || "-"
-                                                    }
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td colspan="2"
-                                                  style="width: 55%; font-size: 16px; font-weight: bold; line-height: 18px; color: #666666; padding: 10px 0px;">
-                                                  Payment Method (Paypal) : ${
-                                                    data.eventData.paypal || "-"
-                                                  }
+                                                    }</span>
                                                 </td>
                                             </tr>
                                             <tr>
                                               <td colspan="2"
-                                              style="width: 55%; font-size: 14px; line-height: 18px; color: #666666;">
-                                               Verwendungszweck : ${
-                                                 data.eventData.usageNote || "-"
-                                               }
+                                              style="width: 100%; text-align: center; font-size: 14px; color: #666666; padding: 12px 0">
+                                               Verwendungszweck : <span style="font-weight: 600;">${
+                                                 data.invoiceNumber || "-"
+                                               }</span>
                                               </td>
                                             </tr>
                                             <tr>
