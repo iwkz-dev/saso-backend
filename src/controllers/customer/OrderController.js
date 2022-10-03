@@ -33,6 +33,8 @@ class UserController {
         invoiceNumber += `00${countData + 1}`;
       } else if (countData < 100) {
         invoiceNumber += `0${countData + 1}`;
+      } else {
+        invoiceNumber += `${countData + 1}`;
       }
 
       const resetQuantity = [];
