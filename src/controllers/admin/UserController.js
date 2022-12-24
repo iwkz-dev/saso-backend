@@ -1,13 +1,13 @@
-"use strict";
+'use strict';
 
-const httpStatus = require("http-status-codes");
-const User = require("@models/user");
-const resHelpers = require("@helpers/responseHelpers");
+const httpStatus = require('http-status-codes');
+const User = require('@models/user');
+const resHelpers = require('@helpers/responseHelpers');
 const {
   dataPagination,
   detailById,
   firstWordUppercase,
-} = require("@helpers/dataHelper");
+} = require('@helpers/dataHelper');
 
 class UserController {
   static async register(req, res, next) {
@@ -27,7 +27,7 @@ class UserController {
       const findEmail = await User.findOne({ email: req.body.email });
 
       if (findEmail) {
-        throw { name: "Bad Request", message: "Email is already registered" };
+        throw { name: 'Bad Request', message: 'Email is already registered' };
       } else {
         const createUser = await User.create(payload);
         const result = {
@@ -43,7 +43,7 @@ class UserController {
 
         res
           .status(httpStatus.StatusCodes.CREATED)
-          .json(resHelpers.success("success create an user", result));
+          .json(resHelpers.success('success create an user', result));
       }
     } catch (error) {
       console.log(error);
@@ -60,18 +60,18 @@ class UserController {
         page: page || 1,
         limit: limit || 100000,
         sort: {
-          type: "updated_at",
+          type: 'updated_at',
           method: -1,
         },
       };
 
       let method;
       if (sort) {
-        let splittedSort = sort.split(":");
-        if (splittedSort[1] === "desc") {
+        const splittedSort = sort.split(':');
+        if (splittedSort[1] === 'desc') {
           method = -1;
         }
-        if (splittedSort[1] === "asc") {
+        if (splittedSort[1] === 'asc') {
           method = 1;
         }
         options.sort = {
@@ -92,7 +92,7 @@ class UserController {
       const findUsers = await dataPagination(
         User,
         filter,
-        ["-password"],
+        ['-password'],
         options
       );
       // const findUsers = await User.find()
@@ -100,7 +100,7 @@ class UserController {
       //   .sort({ updated_at: -1 });
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success fetch data", findUsers));
+        .json(resHelpers.success('success fetch data', findUsers));
     } catch (error) {
       console.log(error);
       next(error);
@@ -110,13 +110,13 @@ class UserController {
   static async getUserById(req, res, next) {
     const { id } = req.params;
     try {
-      const findUser = await detailById(User, id, "-password");
+      const findUser = await detailById(User, id, '-password');
       if (!findUser) {
-        throw { name: "Not Found", message: "User not found" };
+        throw { name: 'Not Found', message: 'User not found' };
       }
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success fetch data", findUser));
+        .json(resHelpers.success('success fetch data', findUser));
     } catch (error) {
       console.log(error);
       next(error);
@@ -128,16 +128,17 @@ class UserController {
     try {
       const deletedUser = await User.findOneAndDelete({ _id: id });
       if (!deletedUser) {
-        throw { name: "Not Found", message: "User not found" };
+        throw { name: 'Not Found', message: 'User not found' };
       }
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success delete data", deletedUser));
+        .json(resHelpers.success('success delete data', deletedUser));
     } catch (error) {
       console.log(error);
       next(error);
     }
   }
+
   static async changeActive(req, res, next) {
     const { id } = req.params;
     const payload = {
@@ -147,21 +148,21 @@ class UserController {
     try {
       const updatedUser = await User.findOneAndUpdate({ _id: id }, payload, {
         new: true,
-      }).select("-password");
+      }).select('-password');
       if (!updatedUser) {
-        throw { name: "Not Found", message: "User not found" };
+        throw { name: 'Not Found', message: 'User not found' };
       }
 
-      let msg = "";
-      if (payload.isActive === "true") {
-        msg += "active";
+      let msg = '';
+      if (payload.isActive === 'true') {
+        msg += 'active';
       } else {
-        msg += "inactive";
+        msg += 'inactive';
       }
 
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("User is " + msg, updatedUser));
+        .json(resHelpers.success(`User is ${msg}`, updatedUser));
     } catch (error) {
       console.log(error);
       next(error);
@@ -177,9 +178,9 @@ class UserController {
     try {
       const updatedUser = await User.findOneAndUpdate({ _id: id }, payload, {
         new: true,
-      }).select("-password");
+      }).select('-password');
       if (!updatedUser) {
-        throw { name: "Not Found", message: "User not found" };
+        throw { name: 'Not Found', message: 'User not found' };
       }
 
       res

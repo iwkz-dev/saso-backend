@@ -1,7 +1,8 @@
-"use strict";
-const router = require("express").Router();
-const AuthController = require("@controllers/AuthController");
-const { authChangePassword } = require("@middlewares/auth");
+'use strict';
+
+const router = require('express').Router();
+const AuthController = require('@controllers/AuthController');
+const { authChangePassword } = require('@middlewares/auth');
 
 /**
  * @swagger
@@ -65,7 +66,7 @@ const { authChangePassword } = require("@middlewares/auth");
  *               message: Email / Password is wrong
  *               error: Invalid Auth
  */
-router.post("/login", AuthController.login);
+router.post('/login', AuthController.login);
 
 /**
  * @swagger
@@ -106,7 +107,7 @@ router.post("/login", AuthController.login);
  *               message: User not found
  *               error: Not Found
  */
-router.patch("/forget-password", AuthController.forgetPassword);
+router.patch('/forget-password', AuthController.forgetPassword);
 
 /**
  * @swagger
@@ -161,7 +162,7 @@ router.patch("/forget-password", AuthController.forgetPassword);
  *               error: Invalid Auth
  */
 router.patch(
-  "/change-password",
+  '/change-password',
   authChangePassword,
   AuthController.changePassword
 );

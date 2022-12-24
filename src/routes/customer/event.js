@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-const router = require("express").Router();
-const EventController = require("@controllers/customer/EventController");
+const router = require('express').Router();
+const EventController = require('@controllers/customer/EventController');
 
 /**
  * @swagger
@@ -60,6 +60,6 @@ const EventController = require("@controllers/customer/EventController");
  *               schema:
  *                 $ref: '#/components/schemas/Error'
  */
-router.get("/", EventController.getAllEvents);
+router.get('/', EventController.getAllEvents);
 
 module.exports = router;

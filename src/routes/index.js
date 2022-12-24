@@ -1,59 +1,62 @@
-"use strict";
+'use strict';
 
-const router = require("express").Router();
+const router = require('express').Router();
 
-const authRouter = require("@routes/auth");
-const { errorHandler } = require("@middlewares/errorHandlers");
-const { authAdmin, authCustomer } = require("@middlewares/auth");
-const UserController = require("@controllers/admin/UserController");
+const authRouter = require('@routes/auth');
+const { errorHandler } = require('@middlewares/errorHandlers');
+const { authAdmin, authCustomer } = require('@middlewares/auth');
+const UserController = require('@controllers/admin/UserController');
 
-router.get("/", (req, res) => {
-  res.send("You are connected to this app");
+router.get('/', (req, res) => {
+  res.send('You are connected to this app');
 });
 
 const routerListAdmin = {
-  "/event": "admin/event",
-  "/user": "admin/user",
-  "/menu": "admin/menu",
-  "/category": "admin/category",
-  "/order": "admin/order",
-  "/contact-person": "admin/contactPerson",
+  '/event': 'admin/event',
+  '/user': 'admin/user',
+  '/menu': 'admin/menu',
+  '/category': 'admin/category',
+  '/order': 'admin/order',
+  '/contact-person': 'admin/contactPerson',
 };
 
 const routerListCustomer = {
-  "/user": "customer/user",
-  "/menu": "customer/menu",
-  "/event": "customer/event",
-  "/category": "customer/category",
+  '/user': 'customer/user',
+  '/menu': 'customer/menu',
+  '/event': 'customer/event',
+  '/category': 'customer/category',
 };
 
 const routerListCustomerAuth = {
-  "/order": "customer/order",
+  '/order': 'customer/order',
 };
 
 // ADMIN AUTH
-for (let item in routerListAdmin) {
+for (const item in routerListAdmin) {
   router.use(
-    "/admin" + item,
+    `/admin${item}`,
     authAdmin,
-    require("@routes/" + routerListAdmin[item])
+    // eslint-disable-next-line global-require, import/no-dynamic-require
+    require(`@routes/${routerListAdmin[item]}`)
   );
 }
 
 // USER NO AUTH
-for (let item in routerListCustomer) {
+for (const item in routerListCustomer) {
   router.use(
-    "/customer" + item,
-    require("@routes/" + routerListCustomer[item])
+    `/customer${item}`,
+    // eslint-disable-next-line global-require, import/no-dynamic-require
+    require(`@routes/${routerListCustomer[item]}`)
   );
 }
 
 // USER AUTH
-for (let item in routerListCustomerAuth) {
+for (const item in routerListCustomerAuth) {
   router.use(
-    "/customer" + item,
+    `/customer${item}`,
     authCustomer,
-    require("@routes/" + routerListCustomerAuth[item])
+    // eslint-disable-next-line global-require, import/no-dynamic-require
+    require(`@routes/${routerListCustomerAuth[item]}`)
   );
 }
 
@@ -134,9 +137,9 @@ for (let item in routerListCustomerAuth) {
  *                message: Validation Error
  *                error: Validation Error
  */
-router.post("/admin/register", UserController.register);
+router.post('/admin/register', UserController.register);
 
-router.use("/auth", authRouter);
+router.use('/auth', authRouter);
 
 router.use(errorHandler);
 

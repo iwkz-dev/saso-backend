@@ -1,10 +1,10 @@
-"use strict";
+'use strict';
 
-const httpStatus = require("http-status-codes");
-const Menu = require("@models/menu");
-const Event = require("@models/event");
-const resHelpers = require("@helpers/responseHelpers");
-const { dataPagination } = require("@helpers/dataHelper");
+const httpStatus = require('http-status-codes');
+const Menu = require('@models/menu');
+const Event = require('@models/event');
+const resHelpers = require('@helpers/responseHelpers');
+const { dataPagination } = require('@helpers/dataHelper');
 
 class MenuController {
   static async getAllMenus(req, res, next) {
@@ -15,25 +15,25 @@ class MenuController {
         page: page || 1,
         limit: limit || 100000,
         sort: {
-          type: "updated_at",
+          type: 'updated_at',
           method: -1,
         },
       };
 
-      let filter = {};
-      if (flagDate === "now" || status) {
-        let statusQuery = "";
-        if (status === "draft") {
+      const filter = {};
+      if (flagDate === 'now' || status) {
+        let statusQuery = '';
+        if (status === 'draft') {
           statusQuery = 0;
         }
-        if (status === "approved") {
+        if (status === 'approved') {
           statusQuery = 1;
         }
-        if (status === "done") {
+        if (status === 'done') {
           statusQuery = 2;
         }
 
-        let filterEvent = {};
+        const filterEvent = {};
         if (flagDate) {
           filterEvent.startYear = { $gte: new Date().getFullYear() };
         }
@@ -53,7 +53,7 @@ class MenuController {
       const findMenu = await dataPagination(Menu, filter, null, options);
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success fetch data", findMenu));
+        .json(resHelpers.success('success fetch data', findMenu));
     } catch (error) {
       console.log(error);
       next(error);

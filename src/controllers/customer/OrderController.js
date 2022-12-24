@@ -1,15 +1,15 @@
-"use strict";
+'use strict';
 
-const httpStatus = require("http-status-codes");
-const Order = require("@models/order");
-const Menu = require("@models/menu");
-const User = require("@models/user");
-const Event = require("@models/event");
-const resHelpers = require("@helpers/responseHelpers");
-const { invoiceTemplate } = require("@helpers/templates");
-const { pdfGenerator } = require("@helpers/pdfGenerator");
-const { dataPagination, detailById } = require("@helpers/dataHelper");
-const { mailer } = require("@helpers/nodemailer");
+const httpStatus = require('http-status-codes');
+const Order = require('@models/order');
+const Menu = require('@models/menu');
+const User = require('@models/user');
+const Event = require('@models/event');
+const resHelpers = require('@helpers/responseHelpers');
+const { invoiceTemplate } = require('@helpers/templates');
+const { pdfGenerator } = require('@helpers/pdfGenerator');
+const { dataPagination, detailById } = require('@helpers/dataHelper');
+const { mailer } = require('@helpers/nodemailer');
 
 class UserController {
   static async order(req, res, next) {
@@ -20,13 +20,13 @@ class UserController {
       // ! LATER: WILL BE AUTOMATED SS21
       const findEvent = await Event.findOne({ _id: event });
       if (findEvent.status !== 1 || !findEvent) {
-        throw { name: "Bad Request", message: "Event not found" };
+        throw { name: 'Bad Request', message: 'Event not found' };
       }
 
       const countData = await Order.countDocuments({ event: findEvent.id });
 
-      let strStartYear = findEvent.startYear.toString();
-      let date = `${strStartYear.charAt(2)}` + `${strStartYear.charAt(3)}`;
+      const strStartYear = findEvent.startYear.toString();
+      const date = `${strStartYear.charAt(2)}${strStartYear.charAt(3)}`;
 
       let invoiceNumber = `SS${date}-`;
       if (countData < 10) {
@@ -44,16 +44,16 @@ class UserController {
             _id: el._id,
             event: findEvent.id,
           })
-            .select(["-updated_at", "-created_at", "-description"])
+            .select(['-updated_at', '-created_at', '-description'])
             .lean();
 
           if (!foundMenu) {
-            throw { name: "Not Found", message: "Menu not found" };
+            throw { name: 'Not Found', message: 'Menu not found' };
           }
 
           if (el.totalPortion <= 0 || !el.totalPortion) {
             throw {
-              name: "Bad Request",
+              name: 'Bad Request',
               message: `Portion should be greater 0`,
             };
           }
@@ -68,7 +68,7 @@ class UserController {
           if (foundMenu.quantity < totalOrder) {
             return {
               error: true,
-              name: "Bad Request",
+              name: 'Bad Request',
               message: `Menu '${foundMenu.name}' is out of stock`,
             };
           } else {
@@ -76,7 +76,7 @@ class UserController {
               id: foundMenu._id,
               quantityOrder: foundMenu.quantityOrder,
             });
-            foundMenu["totalPortion"] = el.totalPortion;
+            foundMenu.totalPortion = el.totalPortion;
             delete foundMenu.quantity;
             delete foundMenu.quantityOrder;
             const payloadMenu = {
@@ -105,9 +105,7 @@ class UserController {
         }
       });
 
-      const totalEachMenu = findMenu.map((el) => {
-        return el.price * el.totalPortion;
-      });
+      const totalEachMenu = findMenu.map((el) => el.price * el.totalPortion);
 
       let totalPrice = 0;
       totalEachMenu.forEach((el) => {
@@ -124,7 +122,7 @@ class UserController {
         customerEmail: findUser.email,
         customerPhone: findUser.phone,
         event: findEvent.id,
-        note: note || "",
+        note: note || '',
         arrived_at: arrivedAt,
         updated_at: new Date(),
         created_at: new Date(),
@@ -136,17 +134,17 @@ class UserController {
         eventData: { ...findEvent._doc },
       };
 
-      let template = invoiceTemplate(dataEmail);
+      const template = invoiceTemplate(dataEmail);
       await mailer({
-        from: "noreply@gmail.com",
+        from: 'noreply@gmail.com',
         to: createOrder.customerEmail,
-        subject: "Your Order " + createOrder.invoiceNumber,
+        subject: `Your Order ${createOrder.invoiceNumber}`,
         html: template,
       });
 
       res
         .status(httpStatus.StatusCodes.CREATED)
-        .json(resHelpers.success("success create an order", createOrder));
+        .json(resHelpers.success('success create an order', createOrder));
     } catch (error) {
       console.log(error);
       next(error);
@@ -161,11 +159,11 @@ class UserController {
         page: page || 1,
         limit: limit || 100000,
         sort: {
-          type: "updated_at",
+          type: 'updated_at',
           method: -1,
         },
       };
-      let filter = {
+      const filter = {
         customerId: userId,
       };
 
@@ -176,7 +174,7 @@ class UserController {
       const findOrdersById = await dataPagination(Order, filter, null, options);
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success fetch data", findOrdersById));
+        .json(resHelpers.success('success fetch data', findOrdersById));
     } catch (error) {
       console.log(error);
       next(error);
@@ -190,17 +188,17 @@ class UserController {
     try {
       const findOrder = await detailById(Order, orderId, null);
       if (!findOrder) {
-        throw { name: "Not Found", message: "Order not found" };
+        throw { name: 'Not Found', message: 'Order not found' };
       }
       if (userId !== findOrder.customerId.toString()) {
         throw {
-          name: "Forbidden",
-          message: "You have no authorization to look this order",
+          name: 'Forbidden',
+          message: 'You have no authorization to look this order',
         };
       }
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success fetch data", findOrder));
+        .json(resHelpers.success('success fetch data', findOrder));
     } catch (error) {
       console.log(error);
       next(error);
@@ -214,17 +212,17 @@ class UserController {
     try {
       const findOrder = await detailById(Order, orderId, null);
       if (!findOrder) {
-        throw { name: "Not Found", message: "Order not found" };
+        throw { name: 'Not Found', message: 'Order not found' };
       }
       if (userId !== findOrder.customerId.toString()) {
         throw {
-          name: "Forbidden",
-          message: "You have no authorization to look this order",
+          name: 'Forbidden',
+          message: 'You have no authorization to look this order',
         };
       }
-      let template = invoiceTemplate(findOrder);
-      let pdfData = await pdfGenerator(template);
-      res.setHeader("Content-Type", "application/pdf");
+      const template = invoiceTemplate(findOrder);
+      const pdfData = await pdfGenerator(template);
+      res.setHeader('Content-Type', 'application/pdf');
       res.send(pdfData);
     } catch (error) {
       // if (error.name) {

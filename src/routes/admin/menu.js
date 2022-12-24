@@ -1,9 +1,9 @@
-"use strict";
+'use strict';
 
-const router = require("express").Router();
-const MenuController = require("@controllers/admin/MenuController");
-const imageKit = require("@middlewares/imageKit");
-const { uploadArray, uploadFileXls } = require("@helpers/multer");
+const router = require('express').Router();
+const MenuController = require('@controllers/admin/MenuController');
+const imageKit = require('@middlewares/imageKit');
+const { uploadArray, uploadFileXls } = require('@helpers/multer');
 
 /**
  * @swagger
@@ -83,8 +83,8 @@ const { uploadArray, uploadFileXls } = require("@helpers/multer");
  *                error: Validation Error
  */
 router.post(
-  "/",
-  uploadArray("imageUrls", 5),
+  '/',
+  uploadArray('imageUrls', 5),
   imageKit.imgKitUploadMulti,
   MenuController.create
 );
@@ -164,7 +164,7 @@ router.post(
  *               schema:
  *                 $ref: '#/components/schemas/Error'
  */
-router.get("/", MenuController.getAllMenus);
+router.get('/', MenuController.getAllMenus);
 
 /**
  * @swagger
@@ -209,7 +209,7 @@ router.get("/", MenuController.getAllMenus);
  *                message: Menu not found
  *                error: Not Found
  */
-router.get("/:id/detail", MenuController.getMenuById);
+router.get('/:id/detail', MenuController.getMenuById);
 
 /**
  * @swagger
@@ -254,7 +254,7 @@ router.get("/:id/detail", MenuController.getMenuById);
  *                message: Menu not found
  *                error: Not Found
  */
-router.delete("/:id", MenuController.destroy);
+router.delete('/:id', MenuController.destroy);
 
 /**
  * @swagger
@@ -349,8 +349,8 @@ router.delete("/:id", MenuController.destroy);
  *                error: Validation Error
  */
 router.put(
-  "/:id",
-  uploadArray("imageUrls", 5),
+  '/:id',
+  uploadArray('imageUrls', 5),
   imageKit.imgKitUploadMulti,
   MenuController.update
 );
@@ -419,7 +419,7 @@ router.put(
  *                message: Validation Error
  *                error: Validation Error
  */
-router.patch("/:id/add-quantity", MenuController.addQuantity);
+router.patch('/:id/add-quantity', MenuController.addQuantity);
 
 /**
  * @swagger
@@ -485,7 +485,7 @@ router.patch("/:id/add-quantity", MenuController.addQuantity);
  *                message: Validation Error
  *                error: Validation Error
  */
-router.patch("/:id/subs-quantity", MenuController.subsQuantity);
+router.patch('/:id/subs-quantity', MenuController.subsQuantity);
 
 /**
  * @swagger
@@ -554,8 +554,8 @@ router.patch("/:id/subs-quantity", MenuController.subsQuantity);
  *                error: Validation Error
  */
 router.patch(
-  "/:id/upload-images",
-  uploadArray("imageUrls", 5),
+  '/:id/upload-images',
+  uploadArray('imageUrls', 5),
   imageKit.imgKitUploadMulti,
   MenuController.uploadImages
 );
@@ -619,7 +619,7 @@ router.patch(
  *                message: Validation Error
  *                error: Validation Error
  */
-router.delete("/:id/delete-images/:eTag", MenuController.destroyImages);
+router.delete('/:id/delete-images/:eTag', MenuController.destroyImages);
 
 /**
  * @swagger
@@ -683,6 +683,6 @@ router.delete("/:id/delete-images/:eTag", MenuController.destroyImages);
  *                message: Validation Error
  *                error: Validation Error
  */
-router.post("/bulkCreate", uploadFileXls("file"), MenuController.bulkCreate);
+router.post('/bulkCreate', uploadFileXls('file'), MenuController.bulkCreate);
 
 module.exports = router;

@@ -1,7 +1,6 @@
-"use strict";
+'use strict';
 
-const mongoose = require("mongoose");
-const { ObjectId } = require("bson");
+const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
   invoiceNumber: {
@@ -13,7 +12,7 @@ const orderSchema = new mongoose.Schema({
   },
   customerId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Users",
+    ref: 'Users',
   },
   customerFullname: {
     type: String,
@@ -29,7 +28,7 @@ const orderSchema = new mongoose.Schema({
   },
   event: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Events",
+    ref: 'Events',
   },
   note: {
     type: String,
@@ -48,5 +47,5 @@ const orderSchema = new mongoose.Schema({
   },
 });
 
-const Order = mongoose.model("Order", orderSchema);
+const Order = mongoose.model('Order', orderSchema);
 module.exports = Order;

@@ -1,7 +1,6 @@
-"use strict";
+'use strict';
 
-const mongoose = require("mongoose");
-const { ObjectId } = require("bson");
+const mongoose = require('mongoose');
 
 const imageSchema = new mongoose.Schema({
   fileName: {
@@ -27,5 +26,5 @@ const imageSchema = new mongoose.Schema({
   },
 });
 
-const Image = mongoose.model("Image", imageSchema);
+const Image = mongoose.model('Image', imageSchema);
 module.exports = Image;

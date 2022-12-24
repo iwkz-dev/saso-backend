@@ -1,9 +1,9 @@
-"use strict";
+'use strict';
 
-const httpStatus = require("http-status-codes");
-const Event = require("@models/event");
-const resHelpers = require("@helpers/responseHelpers");
-const { dataPagination, getOneData } = require("@helpers/dataHelper");
+const httpStatus = require('http-status-codes');
+const Event = require('@models/event');
+const resHelpers = require('@helpers/responseHelpers');
+const { dataPagination, getOneData } = require('@helpers/dataHelper');
 
 class EventController {
   // -1 for descending & 1 for ascending
@@ -12,26 +12,26 @@ class EventController {
     // let page = 1;
     const { page, limit, flagDate, status } = req.query;
     try {
-      let statusQuery = "";
-      if (status === "draft") {
+      let statusQuery = '';
+      if (status === 'draft') {
         statusQuery = 0;
       }
-      if (status === "approved") {
+      if (status === 'approved') {
         statusQuery = 1;
       }
-      if (status === "done") {
+      if (status === 'done') {
         statusQuery = 2;
       }
       const options = {
         page: page || 1,
         limit: limit || 100000,
         sort: {
-          type: "updated_at",
+          type: 'updated_at',
           method: -1,
         },
       };
-      let filter = {};
-      if (flagDate === "now") {
+      const filter = {};
+      if (flagDate === 'now') {
         filter.startYear = { $gte: new Date().getFullYear() };
       }
 
@@ -50,7 +50,7 @@ class EventController {
       // .sort({ updated_at: -1 });
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success fetch data", findEvents));
+        .json(resHelpers.success('success fetch data', findEvents));
     } catch (error) {
       console.log(error);
       next(error);

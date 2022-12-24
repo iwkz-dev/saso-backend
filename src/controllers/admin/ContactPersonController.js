@@ -1,15 +1,15 @@
-"use strict";
+'use strict';
 
-const httpStatus = require("http-status-codes");
-const ContactPerson = require("@models/contactPerson");
-const resHelpers = require("@helpers/responseHelpers");
-const { dataPagination, firstWordUppercase } = require("@helpers/dataHelper");
+const httpStatus = require('http-status-codes');
+const ContactPerson = require('@models/contactPerson');
+const resHelpers = require('@helpers/responseHelpers');
+const { dataPagination, firstWordUppercase } = require('@helpers/dataHelper');
 
 class ContactPersonController {
   static async create(req, res, next) {
     const name = await firstWordUppercase(req.body.name);
 
-    let payload = {
+    const payload = {
       name,
       phoneNumber: req.body.phoneNumber,
       type: req.body.type || 0,
@@ -25,7 +25,7 @@ class ContactPersonController {
         .status(httpStatus.StatusCodes.CREATED)
         .json(
           resHelpers.success(
-            "success create an contact person",
+            'success create an contact person',
             createContactPerson
           )
         );
@@ -43,18 +43,18 @@ class ContactPersonController {
         page: page || 1,
         limit: limit || 100000,
         sort: {
-          type: "updated_at",
+          type: 'updated_at',
           method: -1,
         },
       };
 
       let method;
       if (sort) {
-        let splittedSort = sort.split(":");
-        if (splittedSort[1] === "desc") {
+        const splittedSort = sort.split(':');
+        if (splittedSort[1] === 'desc') {
           method = -1;
         }
-        if (splittedSort[1] === "asc") {
+        if (splittedSort[1] === 'asc') {
           method = 1;
         }
         options.sort = {
@@ -63,7 +63,7 @@ class ContactPersonController {
         };
       }
 
-      let filter = {};
+      const filter = {};
       if (event) {
         filter.event = event;
       }
@@ -80,12 +80,13 @@ class ContactPersonController {
 
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success fetch data", findContactPersons));
+        .json(resHelpers.success('success fetch data', findContactPersons));
     } catch (error) {
       console.log(error);
       next(error);
     }
   }
+
   static async destroy(req, res, next) {
     const { id } = req.params;
     try {
@@ -93,21 +94,22 @@ class ContactPersonController {
         _id: id,
       });
       if (!deletedContactPerson) {
-        throw { name: "Not Found", message: "Contact Person not found" };
+        throw { name: 'Not Found', message: 'Contact Person not found' };
       }
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success delete data", deletedContactPerson));
+        .json(resHelpers.success('success delete data', deletedContactPerson));
     } catch (error) {
       console.log(error);
       next(error);
     }
   }
+
   static async update(req, res, next) {
     const { id } = req.params;
     const name = await firstWordUppercase(req.body.name);
 
-    let payload = {
+    const payload = {
       name,
       phoneNumber: req.body.phoneNumber,
       type: req.body.type || 0,
@@ -124,12 +126,12 @@ class ContactPersonController {
       );
 
       if (!updatedContactPerson) {
-        throw { name: "Not Found", message: "Contact Person not found" };
+        throw { name: 'Not Found', message: 'Contact Person not found' };
       }
 
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success update data", updatedContactPerson));
+        .json(resHelpers.success('success update data', updatedContactPerson));
     } catch (error) {
       console.log(error);
       next(error);

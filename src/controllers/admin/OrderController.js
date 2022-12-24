@@ -1,32 +1,32 @@
-"use strict";
+'use strict';
 
-const httpStatus = require("http-status-codes");
-const Order = require("@models/order");
-const Menu = require("@models/menu");
-const resHelpers = require("@helpers/responseHelpers");
-const { dataPagination } = require("@helpers/dataHelper");
+const httpStatus = require('http-status-codes');
+const Order = require('@models/order');
+const Menu = require('@models/menu');
+const resHelpers = require('@helpers/responseHelpers');
+const { dataPagination } = require('@helpers/dataHelper');
 
 class UserController {
   static async getAllOrders(req, res, next) {
-    const { page, limit, flagDate, invoiceNumber } = req.query;
+    const { page, limit, invoiceNumber } = req.query;
     try {
       const options = {
         page: page || 1,
         limit: limit || 100000,
         sort: {
-          type: "updated_at",
+          type: 'updated_at',
           method: -1,
         },
       };
 
-      let filter = {};
+      const filter = {};
       if (invoiceNumber) {
-        filter.invoiceNumber = { $regex: ".*" + invoiceNumber + ".*" };
+        filter.invoiceNumber = { $regex: `.*${invoiceNumber}.*` };
       }
       const findAllOrders = await dataPagination(Order, filter, null, options);
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success fetch data", findAllOrders));
+        .json(resHelpers.success('success fetch data', findAllOrders));
     } catch (error) {
       console.log(error);
       next(error);
@@ -40,18 +40,18 @@ class UserController {
       let statusPayload = 0;
       const findOrder = await Order.findById(id);
       if (!findOrder) {
-        throw { name: "Not Found", message: "Order not found" };
+        throw { name: 'Not Found', message: 'Order not found' };
       }
       if (findOrder.status === 2) {
         throw {
-          name: "Bad Request",
-          message: "Order has been canceled or refund can not be changed",
+          name: 'Bad Request',
+          message: 'Order has been canceled or refund can not be changed',
         };
       }
-      if (status === "paid") {
+      if (status === 'paid') {
         statusPayload = 1;
       }
-      if (status === "refund" || status === "cancel") {
+      if (status === 'refund' || status === 'cancel') {
         statusPayload = 2;
         findOrder.menus.forEach(async (el) => {
           const menuFound = await Menu.findById(el._id);
@@ -61,7 +61,7 @@ class UserController {
           await Menu.update({ _id: el._id }, payloadMenu);
         });
       }
-      if (status === "done") {
+      if (status === 'done') {
         statusPayload = 3;
       }
 
@@ -72,7 +72,7 @@ class UserController {
       );
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success change status", updateOrder));
+        .json(resHelpers.success('success change status', updateOrder));
     } catch (error) {
       console.log(error);
       next(error);

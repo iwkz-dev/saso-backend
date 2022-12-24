@@ -1,7 +1,8 @@
-"use strict";
-const router = require("express").Router();
-const UserController = require("@controllers/customer/UserController");
-const { authCustomer } = require("@middlewares/auth");
+'use strict';
+
+const router = require('express').Router();
+const UserController = require('@controllers/customer/UserController');
+const { authCustomer } = require('@middlewares/auth');
 
 /**
  * @swagger
@@ -66,7 +67,7 @@ const { authCustomer } = require("@middlewares/auth");
  *                message: Validation Error
  *                error: Validation Error
  */
-router.post("/register", UserController.register);
+router.post('/register', UserController.register);
 
 /**
  * @swagger
@@ -104,6 +105,6 @@ router.post("/register", UserController.register);
  *                message: User not found
  *                error: Not Found
  */
-router.get("/detail", authCustomer, UserController.getUserById);
+router.get('/detail', authCustomer, UserController.getUserById);
 
 module.exports = router;

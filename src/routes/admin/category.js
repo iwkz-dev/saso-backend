@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-const router = require("express").Router();
-const CategoryController = require("@controllers/admin/CategoryController");
+const router = require('express').Router();
+const CategoryController = require('@controllers/admin/CategoryController');
 
 /**
  * @swagger
@@ -57,7 +57,7 @@ const CategoryController = require("@controllers/admin/CategoryController");
  *                message: Validation Error
  *                error: Validation Error
  */
-router.post("/", CategoryController.create);
+router.post('/', CategoryController.create);
 
 /**
  * @swagger
@@ -98,7 +98,7 @@ router.post("/", CategoryController.create);
  *               schema:
  *                 $ref: '#/components/schemas/Error'
  */
-router.get("/", CategoryController.getAllCategories);
+router.get('/', CategoryController.getAllCategories);
 
 /**
  * @swagger
@@ -143,7 +143,7 @@ router.get("/", CategoryController.getAllCategories);
  *                message: Menu not found
  *                error: Not Found
  */
-router.get("/:id/detail", CategoryController.getCategoryById);
+router.get('/:id/detail', CategoryController.getCategoryById);
 
 /**
  * @swagger
@@ -209,7 +209,7 @@ router.get("/:id/detail", CategoryController.getCategoryById);
  *                message: Validation Error
  *                error: Validation Error
  */
-router.put("/:id", CategoryController.update);
+router.put('/:id', CategoryController.update);
 
 /**
  * @swagger
@@ -254,6 +254,6 @@ router.put("/:id", CategoryController.update);
  *                message: Category not found
  *                error: Not Found
  */
-router.delete("/:id", CategoryController.delete);
+router.delete('/:id', CategoryController.delete);
 
 module.exports = router;

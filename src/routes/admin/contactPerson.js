@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-const router = require("express").Router();
-const ContactPersonController = require("@controllers/admin/ContactPersonController");
+const router = require('express').Router();
+const ContactPersonController = require('@controllers/admin/ContactPersonController');
 /**
  * @swagger
  * tags:
@@ -65,7 +65,7 @@ const ContactPersonController = require("@controllers/admin/ContactPersonControl
  *                message: Validation Error
  *                error: Validation Error
  */
-router.post("/", ContactPersonController.create);
+router.post('/', ContactPersonController.create);
 
 /**
  * @swagger
@@ -129,7 +129,7 @@ router.post("/", ContactPersonController.create);
  *               schema:
  *                 $ref: '#/components/schemas/Error'
  */
-router.get("/", ContactPersonController.getAllContactPersons);
+router.get('/', ContactPersonController.getAllContactPersons);
 
 /**
  * @swagger
@@ -174,7 +174,7 @@ router.get("/", ContactPersonController.getAllContactPersons);
  *                message: Menu not found
  *                error: Not Found
  */
-router.delete("/:id", ContactPersonController.destroy);
+router.delete('/:id', ContactPersonController.destroy);
 
 /**
  * @swagger
@@ -238,6 +238,6 @@ router.delete("/:id", ContactPersonController.destroy);
  *                message: Validation Error
  *                error: Validation Error
  */
-router.put("/:id", ContactPersonController.update);
+router.put('/:id', ContactPersonController.update);
 
 module.exports = router;

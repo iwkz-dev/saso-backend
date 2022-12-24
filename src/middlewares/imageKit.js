@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-const axios = require("axios");
-const FormData = require("form-data");
+const axios = require('axios');
+const FormData = require('form-data');
 
 async function imgKitUploadMulti(req, res, next) {
   if (!req.files) {
@@ -13,35 +13,35 @@ async function imgKitUploadMulti(req, res, next) {
       Promise.all(
         req.files.map((el) => {
           const typeFile =
-            el.originalname.split(".")[el.originalname.split(".").length - 1];
-          if (typeFile === "jpg" || typeFile === "png" || typeFile === "jpeg") {
+            el.originalname.split('.')[el.originalname.split('.').length - 1];
+          if (typeFile === 'jpg' || typeFile === 'png' || typeFile === 'jpeg') {
             if (el.size < 2000000) {
-              let encodePrivateKey = Buffer.from(
+              const encodePrivateKey = Buffer.from(
                 `${process.env.IMGKIT_PRIVATE_KEY}:`,
-                "utf-8"
-              ).toString("base64");
+                'utf-8'
+              ).toString('base64');
 
-              let imgBufferEncoded = el.buffer.toString("base64");
+              const imgBufferEncoded = el.buffer.toString('base64');
 
-              let formData = new FormData();
-              let date = new Date();
+              const formData = new FormData();
+              const date = new Date();
               let day = date.getDate();
               if (day < 10) {
                 day = `0${day}`;
               }
-              let year = date.getFullYear();
+              const year = date.getFullYear();
               let month = date.getMonth() + 1;
               if (month < 10) {
                 month = `0${month}`;
               }
-              formData.append("file", imgBufferEncoded);
+              formData.append('file', imgBufferEncoded);
               formData.append(
-                "fileName",
+                'fileName',
                 `${year}${month}${day}_${el.originalname}`
               );
 
               return axios.post(
-                "https://upload.imagekit.io/api/v1/files/upload",
+                'https://upload.imagekit.io/api/v1/files/upload',
                 formData,
                 {
                   headers: {
@@ -51,17 +51,17 @@ async function imgKitUploadMulti(req, res, next) {
                 }
               );
             } else {
-              throw { name: "Bad Request", message: "File size is too big" };
+              throw { name: 'Bad Request', message: 'File size is too big' };
             }
           } else {
             throw {
-              name: "Bad Request",
-              message: "The type file is incorrect",
+              name: 'Bad Request',
+              message: 'The type file is incorrect',
             };
           }
         })
       ).then((result) => {
-        let imagesData = [];
+        const imagesData = [];
 
         result.forEach((el) => {
           imagesData.push({

@@ -1,47 +1,50 @@
-"use strict";
+'use strict';
 
-const mongoose = require("mongoose");
-const { ObjectId } = require("bson");
+const mongoose = require('mongoose');
+
+function arrayLimit(val) {
+  return val.length <= 5;
+}
 
 const menuSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, "Name is required"],
+    required: [true, 'Name is required'],
   },
   description: {
     type: String,
-    required: [true, "Description is required"],
+    required: [true, 'Description is required'],
   },
   quantity: {
     type: Number,
-    min: [0, "Cannot be lower than 0"],
-    required: [true, "Quantity is required"],
+    min: [0, 'Cannot be lower than 0'],
+    required: [true, 'Quantity is required'],
   },
   quantityOrder: {
     type: Number,
-    min: [0, "Cannot be lower than 0"],
-    required: [true, "Quantity is required"],
+    min: [0, 'Cannot be lower than 0'],
+    required: [true, 'Quantity is required'],
   },
   event: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Events",
+    ref: 'Events',
   },
   price: {
     type: Number,
-    min: [0, "Cannot be lower than 0"],
-    required: [true, "Quantity is required"],
+    min: [0, 'Cannot be lower than 0'],
+    required: [true, 'Quantity is required'],
     currency: {
       type: String,
-      default: "EUR",
+      default: 'EUR',
     },
   },
   images: {
     type: Array,
-    validate: [arrayLimit, "{PATH} exceeds the limit of 5"],
+    validate: [arrayLimit, '{PATH} exceeds the limit of 5'],
   },
   category: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Categories",
+    ref: 'Categories',
   },
   updated_at: {
     type: Date,
@@ -50,8 +53,6 @@ const menuSchema = new mongoose.Schema({
     type: Date,
   },
 });
-function arrayLimit(val) {
-  return val.length <= 5;
-}
-const Menu = mongoose.model("Menu", menuSchema);
+
+const Menu = mongoose.model('Menu', menuSchema);
 module.exports = Menu;

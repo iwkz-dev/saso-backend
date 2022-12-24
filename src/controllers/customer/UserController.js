@@ -1,10 +1,10 @@
-"use strict";
+'use strict';
 
-const httpStatus = require("http-status-codes");
-const User = require("@models/user");
-const resHelpers = require("@helpers/responseHelpers");
-const { dataPagination, detailById } = require("@helpers/dataHelper");
-const { jwtSign } = require("@helpers/jwt");
+const httpStatus = require('http-status-codes');
+const User = require('@models/user');
+const resHelpers = require('@helpers/responseHelpers');
+const { dataPagination, detailById } = require('@helpers/dataHelper');
+const { jwtSign } = require('@helpers/jwt');
 
 class UserController {
   static async register(req, res, next) {
@@ -22,7 +22,7 @@ class UserController {
       const findEmail = await User.findOne({ email: req.body.email });
 
       if (findEmail) {
-        throw { name: "Bad Request", message: "Email is already registered" };
+        throw { name: 'Bad Request', message: 'Email is already registered' };
       } else {
         const createUser = await User.create(payload);
         const result = {
@@ -43,7 +43,7 @@ class UserController {
         result.accessToken = accessToken;
         res
           .status(httpStatus.StatusCodes.CREATED)
-          .json(resHelpers.success("success create an user", result));
+          .json(resHelpers.success('success create an user', result));
       }
     } catch (error) {
       console.log(error);
@@ -54,13 +54,13 @@ class UserController {
   static async getUserById(req, res, next) {
     const { id } = req.user;
     try {
-      const findUser = await detailById(User, id, "-password");
+      const findUser = await detailById(User, id, '-password');
       if (!findUser) {
-        throw { name: "Not Found", message: "User not found" };
+        throw { name: 'Not Found', message: 'User not found' };
       }
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success fetch data", findUser));
+        .json(resHelpers.success('success fetch data', findUser));
     } catch (error) {
       console.log(error);
       next(error);

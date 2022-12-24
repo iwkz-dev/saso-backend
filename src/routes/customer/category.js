@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-const router = require("express").Router();
-const CategoryController = require("@controllers/customer/CategoryController");
+const router = require('express').Router();
+const CategoryController = require('@controllers/customer/CategoryController');
 
 /**
  * @swagger
@@ -65,6 +65,6 @@ const CategoryController = require("@controllers/customer/CategoryController");
  *               schema:
  *                 $ref: '#/components/schemas/Error'
  */
-router.get("/", CategoryController.getAllCategories);
+router.get('/', CategoryController.getAllCategories);
 
 module.exports = router;

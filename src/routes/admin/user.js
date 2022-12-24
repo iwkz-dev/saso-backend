@@ -1,7 +1,8 @@
-"use strict";
-const router = require("express").Router();
-const UserController = require("@controllers/admin/UserController");
-const { authSuperAdmin } = require("@middlewares/auth");
+'use strict';
+
+const router = require('express').Router();
+const UserController = require('@controllers/admin/UserController');
+const { authSuperAdmin } = require('@middlewares/auth');
 
 /**
  * @swagger
@@ -62,7 +63,7 @@ const { authSuperAdmin } = require("@middlewares/auth");
  *               schema:
  *                 $ref: '#/components/schemas/Error'
  */
-router.get("/", UserController.getAllUsers);
+router.get('/', UserController.getAllUsers);
 
 /**
  * @swagger
@@ -107,7 +108,7 @@ router.get("/", UserController.getAllUsers);
  *                message: User not found
  *                error: Not Found
  */
-router.get("/:id/detail", UserController.getUserById);
+router.get('/:id/detail', UserController.getUserById);
 
 router.use(authSuperAdmin);
 
@@ -173,7 +174,7 @@ router.use(authSuperAdmin);
  *                message: Validation Error
  *                error: Validation Error
  */
-router.post("/create", UserController.register);
+router.post('/create', UserController.register);
 
 /**
  * @swagger
@@ -218,7 +219,7 @@ router.post("/create", UserController.register);
  *                message: User not found
  *                error: Not Found
  */
-router.delete("/:id", UserController.delete);
+router.delete('/:id', UserController.delete);
 
 /**
  * @swagger
@@ -272,7 +273,7 @@ router.delete("/:id", UserController.delete);
  *                message: User not found
  *                error: Not Found
  */
-router.patch("/:id/change-active", UserController.changeActive);
+router.patch('/:id/change-active', UserController.changeActive);
 
 /**
  * @swagger
@@ -326,6 +327,6 @@ router.patch("/:id/change-active", UserController.changeActive);
  *                message: User not found
  *                error: Not Found
  */
-router.patch("/:id/change-role", UserController.changeRole);
+router.patch('/:id/change-role', UserController.changeRole);
 
 module.exports = router;

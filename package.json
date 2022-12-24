@@ -6,8 +6,24 @@
   "scripts": {
     "setup": "npm i && cp .env.example .env",
     "start": "NODE_ENV=development npx nodemon bin/www",
+    "lint": "npm run lint:js",
+    "lint:eslint": "eslint --ignore-path .gitignore",
+    "lint:eslint:fiz": "eslint --ignore-path .gitignore --fix",
+    "lint:js": "npm run lint:eslint -- . ",
+    "lint:staged": "lint-staged",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "lint-staged": {
+    "*.js": [
+      "npm run lint:eslint:fix",
+      "git add --force"
+    ],
+    "*.json": [
+      "prettier --write",
+      "git add --force"
+    ]
+  },
+  "pre-commit": "lint:staged",
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -48,6 +64,13 @@
   },
   "devDependencies": {
     "dotenv": "^10.0.0",
-    "nodemon": "^2.0.15"
+    "eslint": "^8.30.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "lint-staged": "^13.1.0",
+    "nodemon": "^2.0.15",
+    "prettier": "^2.8.1"
   }
 }

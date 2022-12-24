@@ -1,23 +1,22 @@
-"use strict";
+'use strict';
 
-const mongoose = require("mongoose");
-const { ObjectId } = require("bson");
+const mongoose = require('mongoose');
 
 const contactPersonSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, "Name is required"],
+    required: [true, 'Name is required'],
   },
   phoneNumber: {
     type: String,
-    required: [true, "Phone Number is required"],
+    required: [true, 'Phone Number is required'],
   },
   type: {
     type: Number,
   },
   event: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Events",
+    ref: 'Events',
   },
   updated_at: {
     type: Date,
@@ -27,5 +26,5 @@ const contactPersonSchema = new mongoose.Schema({
   },
 });
 
-const contactPerson = mongoose.model("contactPerson", contactPersonSchema);
+const contactPerson = mongoose.model('contactPerson', contactPersonSchema);
 module.exports = contactPerson;

@@ -35,7 +35,7 @@ function generateBodyMenu(data) {
               </td>
               <td
                   style="font-size: 14px; line-height: 18px; color: #757575; text-align: right;">
-                  € ${el.price.toLocaleString("de-DE")} Per Item
+                  € ${el.price.toLocaleString('de-DE')} Per Item
               </td>
             </tr>
             <tr>
@@ -46,7 +46,7 @@ function generateBodyMenu(data) {
                   style="font-size: 14px; line-height: 18px; color: #757575; text-align: right; padding-bottom: 10px;">
                   <b style="color: #666666;">€ ${(
                     el.price * el.totalPortion
-                  ).toLocaleString("de-DE")}</b> Total
+                  ).toLocaleString('de-DE')}</b> Total
               </td>
             </tr>
           </tbody>
@@ -58,11 +58,11 @@ function generateBodyMenu(data) {
   return body;
 }
 module.exports = {
-  changePasswordTemplate: function (email, token) {
+  changePasswordTemplate(email, token) {
     return {
-      from: "noreply@gmail.com",
+      from: 'noreply@gmail.com',
       to: `${email}`,
-      subject: "Change Password",
+      subject: 'Change Password',
       html: `
   
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -303,32 +303,32 @@ module.exports = {
     };
   },
 
-  invoiceTemplate: function (data) {
+  invoiceTemplate(data) {
     const options = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     };
-    let dateLocalCreatedAt = data.created_at.toLocaleDateString(
+    const dateLocalCreatedAt = data.created_at.toLocaleDateString(
       undefined,
       options
     );
-    let statusString = "";
+    let statusString = '';
     if (data.status === 0) {
-      statusString = "Not Paid";
+      statusString = 'Not Paid';
     }
 
     if (data.status === 1) {
-      statusString = "Paid";
+      statusString = 'Paid';
     }
 
     if (data.status === 2) {
-      statusString = "Cancelled";
+      statusString = 'Cancelled';
     }
 
     if (data.status === 3) {
-      statusString = "Done";
+      statusString = 'Done';
     }
     return `
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -526,7 +526,7 @@ module.exports = {
                                                     Bank Name: <span style="font-weight: 600;">
                                                     ${
                                                       data.eventData.bankName ||
-                                                      "-"
+                                                      '-'
                                                     }
                                                     </span>
                                                 </td>
@@ -539,14 +539,14 @@ module.exports = {
                                                 <td
                                                     style="width: 55%; font-size: 14px; line-height: 18px; color: #666666; padding: 12px 0">
                                                     IBAN: <span style="font-weight: 600;">${
-                                                      data.eventData.iban || "-"
+                                                      data.eventData.iban || '-'
                                                     }
                                                     </span>
                                                 </td>
                                                 <td
                                                     style="width: 45%; font-size: 14px; line-height: 18px; color: #666666; padding: 12px 0">
                                                     BIC: <span style="font-weight: 600;">${
-                                                      data.eventData.bic || "-"
+                                                      data.eventData.bic || '-'
                                                     }</span>
                                                 </td>
                                             </tr>
@@ -554,7 +554,7 @@ module.exports = {
                                               <td colspan="2"
                                               style="width: 100%; text-align: center; font-size: 14px; color: #666666; padding: 12px 0">
                                                Verwendungszweck : <span style="font-weight: 600;">${
-                                                 data.invoiceNumber || "-"
+                                                 data.invoiceNumber || '-'
                                                }</span>
                                               </td>
                                             </tr>
@@ -562,7 +562,7 @@ module.exports = {
                                                 <td colspan="2"
                                                     style="width: 100%; text-align: center; font-style: italic; font-size: 13px; font-weight: 600; color: #666666; padding: 15px 0; border-top: 1px solid #eeeeee;">
                                                     <b style="font-size: 14px;">Note:</b> ${
-                                                      data.note || "-"
+                                                      data.note || '-'
                                                     }
                                                 </td>
                                             </tr>

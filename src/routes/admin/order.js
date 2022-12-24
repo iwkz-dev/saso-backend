@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-const router = require("express").Router();
-const OrderController = require("@controllers/admin/OrderController");
+const router = require('express').Router();
+const OrderController = require('@controllers/admin/OrderController');
 
 /**
  * @swagger
@@ -62,7 +62,7 @@ const OrderController = require("@controllers/admin/OrderController");
  *               schema:
  *                 $ref: '#/components/schemas/Error'
  */
-router.get("/", OrderController.getAllOrders);
+router.get('/', OrderController.getAllOrders);
 
 /**
  * @swagger
@@ -125,6 +125,6 @@ router.get("/", OrderController.getAllOrders);
  *                message: Order not found
  *                error: Not Found
  */
-router.patch("/:id/:status", OrderController.changeStatus);
+router.patch('/:id/:status', OrderController.changeStatus);
 
 module.exports = router;
