@@ -46,7 +46,6 @@ class UserController {
           })
             .select(['-updated_at', '-created_at', '-description'])
             .lean();
-
           if (!foundMenu) {
             throw { name: 'Not Found', message: 'Menu not found' };
           }

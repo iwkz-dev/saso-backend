@@ -8,7 +8,7 @@
     "start": "NODE_ENV=development npx nodemon bin/www",
     "lint": "npm run lint:js",
     "lint:eslint": "eslint --ignore-path .gitignore",
-    "lint:eslint:fiz": "eslint --ignore-path .gitignore --fix",
+    "lint:eslint:fix": "eslint --ignore-path .gitignore --fix",
     "lint:js": "npm run lint:eslint -- . ",
     "lint:staged": "lint-staged",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -71,6 +71,7 @@
     "eslint-plugin-prettier": "^4.2.1",
     "lint-staged": "^13.1.0",
     "nodemon": "^2.0.15",
+    "pre-commit": "^1.2.2",
     "prettier": "^2.8.1"
   }
 }
