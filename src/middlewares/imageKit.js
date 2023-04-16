@@ -39,6 +39,7 @@ async function imgKitUploadMulti(req, res, next) {
                 'fileName',
                 `${year}${month}${day}_${el.originalname}`
               );
+              formData.append('folder', '/SASO/');
 
               return axios.post(
                 'https://upload.imagekit.io/api/v1/files/upload',
