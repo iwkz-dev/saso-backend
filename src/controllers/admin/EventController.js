@@ -345,7 +345,6 @@ class EventController {
   // ! LATER BAKAL KEHAPUS
   static async uploadImage(req, res, next) {
     try {
-      console.log(req.body.imageUrls);
       res.send('testing ke controller');
     } catch (error) {
       console.log(error);

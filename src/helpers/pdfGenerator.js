@@ -11,7 +11,6 @@ module.exports = {
     await page.setContent(html);
     const pdfBuffer = await page.pdf({ printBackground: true });
 
-    console.log('success create pdf');
     await page.close();
     await browser.close();
 

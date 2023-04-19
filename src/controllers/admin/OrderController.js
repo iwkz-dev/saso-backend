@@ -28,7 +28,6 @@ class UserController {
         filter.event = event;
       }
 
-      console.log(filter);
       const findAllOrders = await dataPagination(Order, filter, null, options);
       res
         .status(httpStatus.StatusCodes.OK)

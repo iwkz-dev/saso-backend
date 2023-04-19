@@ -71,7 +71,6 @@ async function imgKitUploadMulti(req, res, next) {
             fileName: el.data.name,
           });
         });
-        console.log(imagesData);
         req.body.imagesData = imagesData;
         next();
       });
