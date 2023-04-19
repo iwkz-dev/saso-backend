@@ -8,7 +8,7 @@ const { dataPagination } = require('@helpers/dataHelper');
 
 class UserController {
   static async getAllOrders(req, res, next) {
-    const { page, limit, invoiceNumber } = req.query;
+    const { page, limit, invoiceNumber, event } = req.query;
     try {
       const options = {
         page: page || 1,
@@ -23,6 +23,12 @@ class UserController {
       if (invoiceNumber) {
         filter.invoiceNumber = { $regex: `.*${invoiceNumber}.*` };
       }
+
+      if (event) {
+        filter.event = event;
+      }
+
+      console.log(filter);
       const findAllOrders = await dataPagination(Order, filter, null, options);
       res
         .status(httpStatus.StatusCodes.OK)
