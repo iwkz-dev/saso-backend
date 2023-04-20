@@ -11,6 +11,9 @@ const menuSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Name is required'],
   },
+  barcode: {
+    type: String,
+  },
   description: {
     type: String,
     required: [true, 'Description is required'],
