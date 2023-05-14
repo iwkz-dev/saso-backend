@@ -15,7 +15,9 @@ async function authAdmin(req, res, next) {
     } else {
       const verifiedAccessToken = jwtVerify(accessToken);
 
-      const findUser = await User.findById(verifiedAccessToken.id);
+      const findUser = await User.find({
+        id: verifiedAccessToken.id,
+      });
 
       if (!findUser || findUser.role === 3) {
         throw { name: 'Invalid Auth', message: 'Invalid Access Token' };
@@ -40,7 +42,9 @@ async function authSuperAdmin(req, res, next) {
     } else {
       const verifiedAccessToken = jwtVerify(accessToken);
 
-      const findUser = await User.findById(verifiedAccessToken.id);
+      const findUser = await User.find({
+        id: verifiedAccessToken.id,
+      });
       if (!findUser || findUser.role !== 1) {
         throw { name: 'Invalid Auth', message: 'Invalid Access Token' };
       } else {
@@ -63,7 +67,9 @@ async function authCustomer(req, res, next) {
     } else {
       const verifiedAccessToken = jwtVerify(accessToken);
 
-      const findUser = await User.findById(verifiedAccessToken.id);
+      const findUser = await User.find({
+        id: verifiedAccessToken.id,
+      });
       if (!findUser || findUser.role !== 3) {
         throw { name: 'Invalid Auth', message: 'Invalid Access Token' };
       } else {
