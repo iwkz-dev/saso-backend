@@ -63,4 +63,43 @@ const MenuController = require('@controllers/customer/MenuController');
  */
 router.get('/', MenuController.getAllMenus);
 
+/**
+ * @swagger
+ * /customer/menu/{id}/detail:
+ *    get:
+ *      summary: Return detail menu
+ *      tags: [Customer-Menu]
+ *      parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Menu id
+ *      responses:
+ *        "200":
+ *          description: OK
+ *          content:
+ *             application/json:
+ *               schema:
+ *                  $ref: '#/components/schemas/Menu'
+ *        "404":
+ *           description: Menu not found
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Menu not found
+ *                error: Not Found
+ *         "500":
+ *           description: Error 500
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ */
+router.get('/:id/detail', MenuController.getMenuById);
+
 module.exports = router;
