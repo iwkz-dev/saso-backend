@@ -93,12 +93,16 @@ router.get('/', MenuController.getAllMenus);
  *                status: failed
  *                message: Menu not found
  *                error: Not Found
- *         "500":
+ *        "500":
  *           description: Error 500
  *           content:
  *             application/json:
  *               schema:
  *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Menu not found
+ *                error: Not Found
  */
 router.get('/:id/detail', MenuController.getMenuById);
 
