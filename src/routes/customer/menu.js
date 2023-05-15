@@ -106,4 +106,6 @@ router.get('/', MenuController.getAllMenus);
  */
 router.get('/:id/detail', MenuController.getMenuById);
 
+router.get('/:barcode/detail-barcode', MenuController.getMenuByBarcode);
+
 module.exports = router;
