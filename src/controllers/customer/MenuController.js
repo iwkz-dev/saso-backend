@@ -4,7 +4,11 @@ const httpStatus = require('http-status-codes');
 const Menu = require('@models/menu');
 const Event = require('@models/event');
 const resHelpers = require('@helpers/responseHelpers');
-const { dataPagination, detailById } = require('@helpers/dataHelper');
+const {
+  dataPagination,
+  detailById,
+  detailByBarcode,
+} = require('@helpers/dataHelper');
 
 class MenuController {
   static async getAllMenus(req, res, next) {
@@ -67,6 +71,26 @@ class MenuController {
       const findMenu = await detailById(Menu, menuId, null);
       if (!findMenu) {
         throw { name: 'Not Found', message: 'Menu not found' };
+      }
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success('success fetch data', findMenu));
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
+  static async getMenuByBarcode(req, res, next) {
+    const { barcode } = req.params;
+
+    try {
+      const findMenu = await detailByBarcode(Menu, barcode, null);
+      if (findMenu.length <= 0) {
+        throw {
+          name: 'Not Found',
+          message: `Menu with barcode '${barcode}' is not found`,
+        };
       }
       res
         .status(httpStatus.StatusCodes.OK)

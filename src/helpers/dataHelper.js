@@ -43,6 +43,15 @@ module.exports = {
     return findDetail;
   },
 
+  detailByBarcode: async (model, barcode, selected) => {
+    const findDetail = await model
+      .find({
+        barcode,
+      })
+      .select(selected);
+    return findDetail;
+  },
+
   updateWithImages: async (options) => {
     const { imagesData, bodyETags, dataFound } = options;
 
