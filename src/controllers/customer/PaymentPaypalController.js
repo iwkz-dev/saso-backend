@@ -28,12 +28,12 @@ const generateAccessToken = async () => {
 const createOrder = async (req, res, next) => {
   const { access_token: accessToken } = await generateAccessToken();
   const url = `${paypalEndpointUrl}/v2/checkout/orders`;
+
+  // TODO: change me
   const data = {
     intent: 'CAPTURE',
     purchase_units: [
       {
-        custom: '123123',
-        invoice_id: '123123',
         description: 'Pembelian Toko orderId-123123',
         amount: {
           currency_code: currencyCode,
@@ -59,13 +59,9 @@ const createOrder = async (req, res, next) => {
 };
 
 const capturePayment = async (req, res, next) => {
-  console.log('asda');
   const { orderId } = req.params;
-  console.log(orderId);
   const { access_token: accessToken } = await generateAccessToken();
   const url = `${paypalEndpointUrl}/v2/checkout/orders/${orderId}/capture`;
-
-  console.log({ orderId, url });
 
   const response = await axios({
     url,
