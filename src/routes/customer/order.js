@@ -223,7 +223,7 @@ router.get('/:id/detail', OrderController.getOrderById);
  *                message: Order not found
  *                error: Not Found
  */
-router.post('/:id/:generatePdf', OrderController.generatePdf);
+router.post('/:id/generatePdf', OrderController.generatePdf);
 
 // router.get("/:id/refund", OrderController.orderRefund);
 
