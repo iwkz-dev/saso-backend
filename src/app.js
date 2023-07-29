@@ -16,6 +16,9 @@ const { openAPIDocs } = require('@configs/swagger');
 // ! BEST PRACTICE REQUIRE YANG DARI MODULE DIATAS ABIS ITU REQUIRE YANG ADA DI FILE LOCAL
 const app = express();
 
+// paypal payment test
+app.get('/', (req, res) => res.sendFile(`${__dirname}/paypal.html`));
+
 app.use(logger('dev'));
 
 app.use(cors());
