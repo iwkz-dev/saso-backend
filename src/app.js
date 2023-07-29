@@ -12,6 +12,7 @@ const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
 const routers = require('@routes');
 const { openAPIDocs } = require('@configs/swagger');
+const { startJobs } = require('./controllers/jobs');
 
 // ! BEST PRACTICE REQUIRE YANG DARI MODULE DIATAS ABIS ITU REQUIRE YANG ADA DI FILE LOCAL
 const app = express();
@@ -36,5 +37,7 @@ app.use(uriPrefix, routers);
 app.use((req, res, next) => {
   next(createError(404));
 });
+
+startJobs();
 
 module.exports = app;

@@ -33,7 +33,9 @@ class CategoryController {
         const createCategory = await Category.create(payload);
         res
           .status(httpStatus.StatusCodes.CREATED)
-          .json(resHelpers.success('success create an event', createCategory));
+          .json(
+            resHelpers.success('success create an category', createCategory)
+          );
       }
     } catch (error) {
       console.log(error);

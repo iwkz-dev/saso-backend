@@ -55,7 +55,7 @@ class MenuController {
         page: page || 1,
         limit: limit || 100000,
         sort: {
-          type: 'updated_at',
+          type: 'created_at',
           method: -1,
         },
       };
