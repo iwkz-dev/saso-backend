@@ -174,6 +174,10 @@ router.get('/', OrderController.getAllOrders);
  */
 router.get('/:id/detail', OrderController.getOrderById);
 
+router.delete('/:id', OrderController.onDeleteOrder);
+
+router.post('/:id/approve', OrderController.approveOrder);
+
 /**
  * @swagger
  * /customer/order/{id}/generatePdf:

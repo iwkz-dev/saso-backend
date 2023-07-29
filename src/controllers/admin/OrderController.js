@@ -6,7 +6,7 @@ const Menu = require('@models/menu');
 const resHelpers = require('@helpers/responseHelpers');
 const { dataPagination } = require('@helpers/dataHelper');
 
-class UserController {
+class OrderController {
   static async getAllOrders(req, res, next) {
     const { page, limit, invoiceNumber, event } = req.query;
     try {
@@ -85,4 +85,4 @@ class UserController {
   }
 }
 
-module.exports = UserController;
+module.exports = OrderController;

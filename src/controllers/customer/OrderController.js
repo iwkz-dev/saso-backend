@@ -1,5 +1,6 @@
 'use strict';
 
+const mongoose = require('mongoose');
 const httpStatus = require('http-status-codes');
 const Order = require('@models/order');
 const Menu = require('@models/menu');
@@ -9,14 +10,17 @@ const resHelpers = require('@helpers/responseHelpers');
 const { invoiceTemplate } = require('@helpers/templates');
 const { pdfGenerator } = require('@helpers/pdfGenerator');
 const { dataPagination, detailById } = require('@helpers/dataHelper');
-const { mailer } = require('@helpers/nodemailer');
+const { createOrderPaypal } = require('../../helpers/paymentHelper');
+// const { mailer } = require('@helpers/nodemailer');
 
 class OrderController {
   static async order(req, res, next) {
     const { menus, event, arrivedAt, note } = req.body;
-
     const { id: userId } = req.user;
+
+    const session = await mongoose.startSession();
     try {
+      session.startTransaction();
       // ! LATER: WILL BE AUTOMATED SS21
       const findEvent = await Event.findOne({ _id: event });
       if (findEvent.status !== 1 || !findEvent) {
@@ -129,12 +133,19 @@ class OrderController {
       };
 
       const createOrder = await Order.create(payload);
+      const paypalResponse = await createOrderPaypal(invoiceNumber, totalPrice);
+
+      /*
+
+      Replace this while on approve or create new api to call this!!!!
+
       const dataEmail = {
         ...createOrder._doc,
         eventData: { ...findEvent._doc },
       };
 
       const template = invoiceTemplate(dataEmail);
+
       await mailer({
         from: 'noreply@gmail.com',
         to: createOrder.customerEmail,
@@ -142,9 +153,82 @@ class OrderController {
         html: template,
       });
 
+      */
+
+      res.status(httpStatus.StatusCodes.CREATED).json(
+        resHelpers.success('success create an order', {
+          createOrder,
+          paypalResponse,
+        })
+      );
+      await session.commitTransaction();
+    } catch (error) {
+      await session.abortTransaction();
+      console.log(error);
+      next(error);
+    } finally {
+      await session.endSession();
+    }
+  }
+
+  static async onDeleteOrder(req, res, next) {
+    const { id: orderId } = req.params;
+    try {
+      const findOrder = await Order.findById(orderId);
+      if (!findOrder) {
+        throw { name: 'Not Found', message: 'Order not found' };
+      }
+
+      findOrder.menus.forEach(async (el) => {
+        const menuFound = await Menu.findById(el._id);
+        const payloadMenu = {
+          quantityOrder: menuFound.quantityOrder - el.totalPortion,
+        };
+        await Menu.update({ _id: el._id }, payloadMenu);
+      });
+
+      const deletedOrder = await Order.findOneAndDelete({ _id: orderId });
+
       res
-        .status(httpStatus.StatusCodes.CREATED)
-        .json(resHelpers.success('success create an order', createOrder));
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success('success remove order', deletedOrder));
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
+  static async approveOrder(req, res, next) {
+    const { id } = req.params;
+    try {
+      // 0 = no action
+      const newStatus = 1;
+      const findOrder = await Order.findById(id);
+      if (!findOrder) {
+        throw { name: 'Not Found', message: 'Order not found' };
+      }
+      if (findOrder.status === 2) {
+        throw {
+          name: 'Bad Request',
+          message: 'Order has been canceled or refund can not be changed',
+        };
+      }
+
+      if (findOrder.status !== 0) {
+        throw {
+          name: 'Bad Request',
+          message: 'Order can not be approved',
+        };
+      }
+
+      const updateOrder = await Order.update(
+        { _id: id },
+        { status: newStatus, updated_at: new Date() },
+        { new: true }
+      );
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success('success change status', updateOrder));
     } catch (error) {
       console.log(error);
       next(error);

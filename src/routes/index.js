@@ -25,7 +25,6 @@ const routerListCustomer = {
   '/menu': 'customer/menu',
   '/event': 'customer/event',
   '/category': 'customer/category',
-  '/payment': 'customer/payment',
 };
 
 const routerListCustomerAuth = {
