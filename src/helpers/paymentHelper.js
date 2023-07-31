@@ -39,7 +39,7 @@ const createOrderPaypal = async (orderId, value) => {
     intent: 'CAPTURE',
     purchase_units: [
       {
-        description: `Invoice number: ${orderId} `,
+        description: `Invoice number: ${orderId}`,
         amount: {
           currency_code: getCurrencyCode(),
           value,

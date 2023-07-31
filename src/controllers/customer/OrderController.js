@@ -10,12 +10,13 @@ const resHelpers = require('@helpers/responseHelpers');
 const { invoiceTemplate } = require('@helpers/templates');
 const { pdfGenerator } = require('@helpers/pdfGenerator');
 const { dataPagination, detailById } = require('@helpers/dataHelper');
-const { createOrderPaypal } = require('../../helpers/paymentHelper');
+const { createOrderPaypal } = require('@helpers/paymentHelper');
+const PaymentType = require('@models/paymentType');
 // const { mailer } = require('@helpers/nodemailer');
 
 class OrderController {
   static async order(req, res, next) {
-    const { menus, event, arrivedAt, note } = req.body;
+    const { menus, event, arrivedAt, note, paymentType } = req.body;
     const { id: userId } = req.user;
 
     const session = await mongoose.startSession();
@@ -92,11 +93,15 @@ class OrderController {
         })
       );
 
+      const findPaymentType = await PaymentType.findOne({
+        type: paymentType,
+      });
+
       //* CHECK IF THE MENU IS OUT OF STOCK *//
       findMenu.forEach((findError) => {
         if (findError.error) {
           resetQuantity.forEach(async (el) => {
-            const test = await Menu.findOneAndUpdate(
+            await Menu.findOneAndUpdate(
               { _id: el.id },
               { quantityOrder: el.quantityOrder },
               { new: true }
@@ -130,11 +135,15 @@ class OrderController {
         arrived_at: arrivedAt,
         updated_at: new Date(),
         created_at: new Date(),
+        paymentType: findPaymentType.id,
       };
 
       const createOrder = await Order.create(payload);
-      const paypalResponse = await createOrderPaypal(invoiceNumber, totalPrice);
 
+      let paymentResponse;
+      if (findPaymentType.type === 'paypal') {
+        paymentResponse = await createOrderPaypal(invoiceNumber, totalPrice);
+      }
       /*
 
       Replace this while on approve or create new api to call this!!!!
@@ -158,7 +167,7 @@ class OrderController {
       res.status(httpStatus.StatusCodes.CREATED).json(
         resHelpers.success('success create an order', {
           createOrder,
-          paypalResponse,
+          paymentResponse,
         })
       );
       await session.commitTransaction();

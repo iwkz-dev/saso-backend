@@ -23,6 +23,10 @@ const orderSchema = new mongoose.Schema({
   customerPhone: {
     type: String,
   },
+  paymentType: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'PaymentTypes',
+  },
   totalPrice: {
     type: Number,
   },
