@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-const router = require("express").Router();
-const OrderController = require("@controllers/customer/OrderController");
+const router = require('express').Router();
+const OrderController = require('@controllers/customer/OrderController');
 
 /**
  * @swagger
@@ -69,7 +69,7 @@ const OrderController = require("@controllers/customer/OrderController");
  *                message: Validation Error
  *                error: Validation Error
  */
-router.post("/", OrderController.order);
+router.post('/', OrderController.order);
 
 /**
  * @swagger
@@ -117,7 +117,7 @@ router.post("/", OrderController.order);
  *               schema:
  *                 $ref: '#/components/schemas/Error'
  */
-router.get("/", OrderController.getAllOrders);
+router.get('/', OrderController.getAllOrders);
 
 /**
  * @swagger
@@ -172,7 +172,11 @@ router.get("/", OrderController.getAllOrders);
  *                message: Order not found
  *                error: Not Found
  */
-router.get("/:id/detail", OrderController.getOrderById);
+router.get('/:id/detail', OrderController.getOrderById);
+
+router.delete('/:id', OrderController.onDeleteOrder);
+
+router.post('/:id/approve', OrderController.approveOrder);
 
 /**
  * @swagger
@@ -223,7 +227,7 @@ router.get("/:id/detail", OrderController.getOrderById);
  *                message: Order not found
  *                error: Not Found
  */
-router.post("/:id/:generatePdf", OrderController.generatePdf);
+router.post('/:id/generatePdf', OrderController.generatePdf);
 
 // router.get("/:id/refund", OrderController.orderRefund);
 

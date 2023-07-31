@@ -1,9 +1,9 @@
-"use strict";
+'use strict';
 
-const router = require("express").Router();
-const EventController = require("@controllers/admin/EventController");
-const imageKit = require("@middlewares/imageKit");
-const { uploadArray } = require("@helpers/multer");
+const router = require('express').Router();
+const EventController = require('@controllers/admin/EventController');
+const imageKit = require('@middlewares/imageKit');
+const { uploadArray } = require('@helpers/multer');
 
 /**
  * @swagger
@@ -18,7 +18,7 @@ const { uploadArray } = require("@helpers/multer");
  *    post:
  *      summary: Create Event
  *      tags: [Admin-Event]
- *      description: Create event
+ *      description: Create event p.s usageNote is Verwendungszweck
  *      security:
  *         - ApiKeyAuth: []
  *      requestBody:
@@ -38,6 +38,16 @@ const { uploadArray } = require("@helpers/multer");
  *                started_at:
  *                  type: string
  *                  format: date-time
+ *                iban:
+ *                  type: string
+ *                bic:
+ *                  type: string
+ *                bankName:
+ *                  type: string
+ *                paypal:
+ *                  type: string
+ *                usageNote:
+ *                  type: string
  *                imageUrls:
  *                  type: array
  *                  maxItems: 5
@@ -73,8 +83,8 @@ const { uploadArray } = require("@helpers/multer");
  *                error: Validation Error
  */
 router.post(
-  "/",
-  uploadArray("imageUrls", 5),
+  '/',
+  uploadArray('imageUrls', 5),
   imageKit.imgKitUploadMulti,
   EventController.create
 );
@@ -137,7 +147,7 @@ router.post(
  *               schema:
  *                 $ref: '#/components/schemas/Error'
  */
-router.get("/", EventController.getAllEvents);
+router.get('/', EventController.getAllEvents);
 
 /**
  * @swagger
@@ -182,7 +192,7 @@ router.get("/", EventController.getAllEvents);
  *                message: Event not found
  *                error: Not Found
  */
-router.get("/:id/detail", EventController.getEventById);
+router.get('/:id/detail', EventController.getEventById);
 
 /**
  * @swagger
@@ -227,7 +237,7 @@ router.get("/:id/detail", EventController.getEventById);
  *                message: Event not found
  *                error: Not Found
  */
-router.delete("/:id", EventController.destroy);
+router.delete('/:id', EventController.destroy);
 
 /**
  * @swagger
@@ -261,6 +271,16 @@ router.delete("/:id", EventController.destroy);
  *                started_at:
  *                  type: string
  *                  format: date-time
+ *                iban:
+ *                  type: string
+ *                paypal:
+ *                  type: string
+ *                bic:
+ *                  type: string
+ *                bankName:
+ *                  type: string
+ *                usageNote:
+ *                  type: string
  *                imageUrls:
  *                  type: array
  *                  maxItems: 5
@@ -311,8 +331,8 @@ router.delete("/:id", EventController.destroy);
  *                error: Validation Error
  */
 router.put(
-  "/:id",
-  uploadArray("imageUrls", 5),
+  '/:id',
+  uploadArray('imageUrls', 5),
   imageKit.imgKitUploadMulti,
   EventController.update
 );
@@ -384,8 +404,8 @@ router.put(
  *                error: Validation Error
  */
 router.patch(
-  "/:id/upload-images",
-  uploadArray("imageUrls", 5),
+  '/:id/upload-images',
+  uploadArray('imageUrls', 5),
   imageKit.imgKitUploadMulti,
   EventController.uploadImages
 );
@@ -449,7 +469,7 @@ router.patch(
  *                message: Validation Error
  *                error: Validation Error
  */
-router.delete("/:id/delete-images/:eTag", EventController.destroyImages);
+router.delete('/:id/delete-images/:eTag', EventController.destroyImages);
 
 /**
  * @swagger
@@ -512,11 +532,11 @@ router.delete("/:id/delete-images/:eTag", EventController.destroyImages);
  *                message: Event not found
  *                error: Not Found
  */
-router.patch("/:id/:status/change-status", EventController.changeStatus);
+router.patch('/:id/:status/change-status', EventController.changeStatus);
 
 router.post(
-  "/upload-image",
-  uploadArray("imageUrls", 5),
+  '/upload-image',
+  uploadArray('imageUrls', 5),
   imageKit.imgKitUploadMulti,
   EventController.uploadImage
 );

@@ -1,18 +1,18 @@
-"use strict";
+'use strict';
 
-const httpStatus = require("http-status-codes");
-const Menu = require("@models/menu");
-const readXlsxFile = require("read-excel-file/node");
-const Event = require("@models/event");
-const Category = require("@models/category");
-const resHelpers = require("@helpers/responseHelpers");
-const { bulkUpload, deleteImages, deleteImage } = require("@helpers/images");
+const httpStatus = require('http-status-codes');
+const Menu = require('@models/menu');
+const readXlsxFile = require('read-excel-file/node');
+const Event = require('@models/event');
+const Category = require('@models/category');
+const resHelpers = require('@helpers/responseHelpers');
+const { bulkUpload, deleteImages, deleteImage } = require('@helpers/images');
 const {
   dataPagination,
   detailById,
   updateWithImages,
   firstWordUppercase,
-} = require("@helpers/dataHelper");
+} = require('@helpers/dataHelper');
 
 class MenuController {
   // TO DO: update menu, get specific menu based on name, delete specific menu, delete all menu
@@ -22,6 +22,7 @@ class MenuController {
 
     const payload = {
       name,
+      barcode: req.body.barcode ?? '',
       description: req.body.description,
       quantity: +req.body.quantity,
       quantityOrder: +req.body.quantityOrder || 0,
@@ -35,11 +36,11 @@ class MenuController {
     try {
       const createMenu = await Menu.create(payload);
       if (req.body.imagesData) {
-        await bulkUpload(req.body.imagesData, createMenu._id, "menu");
+        await bulkUpload(req.body.imagesData, createMenu._id, 'menu');
       }
       res
         .status(httpStatus.StatusCodes.CREATED)
-        .json(resHelpers.success("success create a menu", createMenu));
+        .json(resHelpers.success('success create a menu', createMenu));
     } catch (error) {
       console.log(error);
       next(error);
@@ -54,18 +55,18 @@ class MenuController {
         page: page || 1,
         limit: limit || 100000,
         sort: {
-          type: "updated_at",
+          type: 'created_at',
           method: -1,
         },
       };
 
       let method;
       if (sort) {
-        let splittedSort = sort.split(":");
-        if (splittedSort[1] === "desc") {
+        const splittedSort = sort.split(':');
+        if (splittedSort[1] === 'desc') {
           method = -1;
         }
-        if (splittedSort[1] === "asc") {
+        if (splittedSort[1] === 'asc') {
           method = 1;
         }
         options.sort = {
@@ -74,19 +75,19 @@ class MenuController {
         };
       }
 
-      let filter = {};
-      if (flagDate === "now" || status) {
-        let statusQuery = "";
-        if (status === "draft") {
+      const filter = {};
+      if (flagDate === 'now' || status) {
+        let statusQuery = '';
+        if (status === 'draft') {
           statusQuery = 0;
         }
-        if (status === "approved") {
+        if (status === 'approved') {
           statusQuery = 1;
         }
-        if (status === "done") {
+        if (status === 'done') {
           statusQuery = 2;
         }
-        let filterEvent = {};
+        const filterEvent = {};
         if (flagDate) {
           filterEvent.startYear = { $gte: new Date().getFullYear() };
         }
@@ -108,7 +109,7 @@ class MenuController {
       const findMenu = await dataPagination(Menu, filter, null, options);
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success fetch data", findMenu));
+        .json(resHelpers.success('success fetch data', findMenu));
     } catch (error) {
       console.log(error);
       next(error);
@@ -120,11 +121,11 @@ class MenuController {
     try {
       const findMenu = await detailById(Menu, id, null);
       if (!findMenu) {
-        throw { name: "Not Found", message: "Menu not found" };
+        throw { name: 'Not Found', message: 'Menu not found' };
       }
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success fetch data", findMenu));
+        .json(resHelpers.success('success fetch data', findMenu));
     } catch (error) {
       console.log(error);
       next(error);
@@ -137,7 +138,7 @@ class MenuController {
     try {
       const deletedMenu = await Menu.findOneAndDelete({ _id: id });
       if (!deletedMenu) {
-        throw { name: "Not Found", message: "Menu not found" };
+        throw { name: 'Not Found', message: 'Menu not found' };
       }
 
       if (deletedMenu.images.length > 0) {
@@ -146,7 +147,7 @@ class MenuController {
 
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success delete data", deletedMenu));
+        .json(resHelpers.success('success delete data', deletedMenu));
     } catch (error) {
       console.log(error);
       next(error);
@@ -159,7 +160,7 @@ class MenuController {
     try {
       const findMenu = await detailById(Menu, id, null);
       if (!findMenu) {
-        throw { name: "Not Found", message: `Menu not found` };
+        throw { name: 'Not Found', message: `Menu not found` };
       }
       const options = {
         imagesData: req.body.imagesData,
@@ -170,12 +171,13 @@ class MenuController {
       const payloadImages = await updateWithImages(options);
       if (payloadImages.imagesSaved.length > 5) {
         await deleteImages(req.body.imagesData);
-        throw { name: "Bad Request", message: "The limit of image is 5" };
+        throw { name: 'Bad Request', message: 'The limit of image is 5' };
       }
       await deleteImages(payloadImages.imagesNotSaved);
 
       const payload = {
         name: req.body.name,
+        barcode: req.body.barcode ?? '',
         description: req.body.description,
         price: +req.body.price,
         category: req.body.category,
@@ -190,16 +192,16 @@ class MenuController {
       });
 
       if (!updatedMenu) {
-        throw { name: "Not Found", message: "Menu not found" };
+        throw { name: 'Not Found', message: 'Menu not found' };
       }
 
       if (req.body.imagesData) {
-        await bulkUpload(req.body.imagesData, findMenu._id, "menu");
+        await bulkUpload(req.body.imagesData, findMenu._id, 'menu');
       }
 
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success update data", updatedMenu));
+        .json(resHelpers.success('success update data', updatedMenu));
     } catch (error) {
       console.log(error);
       next(error);
@@ -212,7 +214,7 @@ class MenuController {
       const findMenu = await Menu.findById(id);
 
       if (!findMenu) {
-        throw { name: "Not Found", message: "Menu not found" };
+        throw { name: 'Not Found', message: 'Menu not found' };
       }
       const totalQuantity = findMenu.quantity + +req.body.quantity;
       const payload = {
@@ -224,7 +226,7 @@ class MenuController {
       });
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success add quantity menu", updatedMenu));
+        .json(resHelpers.success('success add quantity menu', updatedMenu));
     } catch (error) {
       console.log(error);
       next(error);
@@ -237,7 +239,7 @@ class MenuController {
       const findMenu = await Menu.findById(id);
 
       if (!findMenu) {
-        throw { name: "Not Found", message: "Menu not found" };
+        throw { name: 'Not Found', message: 'Menu not found' };
       }
       const totalQuantity = findMenu.quantity - +req.body.quantity;
       const payload = {
@@ -250,7 +252,7 @@ class MenuController {
       res
         .status(httpStatus.StatusCodes.OK)
         .json(
-          resHelpers.success("success substract quantity menu", updatedMenu)
+          resHelpers.success('success substract quantity menu', updatedMenu)
         );
     } catch (error) {
       console.log(error);
@@ -264,13 +266,13 @@ class MenuController {
       const findMenu = await Menu.findById(id);
 
       if (!findMenu) {
-        throw { name: "Not Found", message: "Menu not found" };
+        throw { name: 'Not Found', message: 'Menu not found' };
       }
       if (findMenu.images.length > 4) {
-        throw { name: "Bad Request", message: "You can only upload 5 images" };
+        throw { name: 'Bad Request', message: 'You can only upload 5 images' };
       }
 
-      let imagesPayload = [...findMenu.images];
+      const imagesPayload = [...findMenu.images];
       req.body.imagesData.forEach((el) => {
         imagesPayload.push(el);
       });
@@ -285,13 +287,13 @@ class MenuController {
       });
 
       if (req.body.imagesData) {
-        await bulkUpload(req.body.imagesData, findMenu._id, "menu");
+        await bulkUpload(req.body.imagesData, findMenu._id, 'menu');
       }
 
       res
         .status(httpStatus.StatusCodes.OK)
         .json(
-          resHelpers.success("success add images to the menu", updateMenuImages)
+          resHelpers.success('success add images to the menu', updateMenuImages)
         );
     } catch (error) {
       console.log(error);
@@ -306,13 +308,13 @@ class MenuController {
       const findMenu = await Menu.findById(id);
 
       if (!findMenu) {
-        throw { name: "Not Found", message: "Menu not found" };
+        throw { name: 'Not Found', message: 'Menu not found' };
       }
 
-      let imagesPayload = [];
+      const imagesPayload = [];
 
       if (findMenu.images.length > 0) {
-        await deleteImage("menu", eTag);
+        await deleteImage('menu', eTag);
         findMenu.images.forEach((el) => {
           if (el.eTag !== eTag) {
             imagesPayload.push(el);
@@ -328,9 +330,9 @@ class MenuController {
         });
         res
           .status(httpStatus.StatusCodes.CREATED)
-          .json(resHelpers.success("success destroy an image", updatedMenu));
+          .json(resHelpers.success('success destroy an image', updatedMenu));
       } else {
-        throw { name: "Bad Request", message: "Image is empty" };
+        throw { name: 'Bad Request', message: 'Image is empty' };
       }
     } catch (error) {
       console.log(error);
@@ -340,7 +342,7 @@ class MenuController {
 
   static async bulkCreate(req, res, next) {
     try {
-      const xlsxRead = await readXlsxFile("./uploads/" + req.file.filename);
+      const xlsxRead = await readXlsxFile(`./uploads/${req.file.filename}`);
       const sliceXlsx = xlsxRead.slice(1);
 
       const bulkPayload = await Promise.all(
@@ -352,12 +354,12 @@ class MenuController {
             item.event = findEvent._id;
           } else {
             throw {
-              name: "Bad Request",
+              name: 'Bad Request',
               message:
-                "You have no event for this year, please create an event first",
+                'You have no event for this year, please create an event first',
             };
           }
-          const slug = item[4].toLowerCase().replace(" ", "_");
+          const slug = item[4].toLowerCase().replace(' ', '_');
           const findCategories = await Category.findOne({ slug });
           if (!findCategories) {
             const categoryPayload = {
@@ -384,7 +386,7 @@ class MenuController {
       const createBulkMenus = await Menu.insertMany(bulkPayload);
       res
         .status(httpStatus.StatusCodes.CREATED)
-        .json(resHelpers.success("success create a menu", createBulkMenus));
+        .json(resHelpers.success('success create a menu', createBulkMenus));
     } catch (error) {
       console.log(error);
       next(error);

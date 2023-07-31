@@ -1,15 +1,15 @@
-"use strict";
+'use strict';
 
 let resFormat;
 
 module.exports = {
-  success: function (message, data) {
+  success(message, data) {
     const count = data != null ? data.length : 0;
     resFormat = {
-      status: count === 0 ? "false" : "success",
-      message: message,
-      count: count,
-      data: data,
+      status: count === 0 ? 'false' : 'success',
+      message,
+      count,
+      data,
     };
 
     if (data === null || count === 0) {
@@ -20,26 +20,26 @@ module.exports = {
     return resFormat;
   },
 
-  successCompleteForm: function (message, data) {
+  successCompleteForm(message, data) {
     const count = data != null ? data.length : 0;
     resFormat = {
-      status: "success",
-      message: message,
-      count: count,
-      data: data,
+      status: 'success',
+      message,
+      count,
+      data,
     };
 
     return resFormat;
   },
 
-  OK: function (message, data) {
+  OK(message, data) {
     const count = data != null ? data.length : 0;
 
     resFormat = {
-      status: "OK",
-      message: message,
-      count: count,
-      data: data,
+      status: 'OK',
+      message,
+      count,
+      data,
     };
 
     if (data === null || count === 0) {
@@ -50,10 +50,11 @@ module.exports = {
     return resFormat;
   },
 
-  failed: function (message, error) {
+  failed(message, error) {
+    // eslint-disable-next-line no-return-assign
     return (resFormat = {
-      status: "failed",
-      message: message,
+      status: 'failed',
+      message,
       error: error.message ? error.message : error,
     });
   },

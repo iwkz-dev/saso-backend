@@ -1,13 +1,13 @@
-"use strict";
+'use strict';
 
-const httpStatus = require("http-status-codes");
-const Category = require("@models/category");
-const resHelpers = require("@helpers/responseHelpers");
+const httpStatus = require('http-status-codes');
+const Category = require('@models/category');
+const resHelpers = require('@helpers/responseHelpers');
 const {
   dataPagination,
   detailById,
   firstWordUppercase,
-} = require("@helpers/dataHelper");
+} = require('@helpers/dataHelper');
 
 class CategoryController {
   static async create(req, res, next) {
@@ -20,20 +20,22 @@ class CategoryController {
       };
       let slug;
       if (req.body.name) {
-        slug = req.body.name.toLowerCase().replace(" ", "_");
+        slug = req.body.name.toLowerCase().replace(' ', '_');
       }
-      slug = "";
+      slug = '';
       const findCategory = await Category.findOne({ slug });
       if (findCategory) {
         throw {
-          name: "Bad Request",
-          message: "You already have category with name: " + req.body.name,
+          name: 'Bad Request',
+          message: `You already have category with name: ${req.body.name}`,
         };
       } else {
         const createCategory = await Category.create(payload);
         res
           .status(httpStatus.StatusCodes.CREATED)
-          .json(resHelpers.success("success create an event", createCategory));
+          .json(
+            resHelpers.success('success create an category', createCategory)
+          );
       }
     } catch (error) {
       console.log(error);
@@ -48,18 +50,18 @@ class CategoryController {
         page: page || 1,
         limit: limit || 100000,
         sort: {
-          type: "updated_at",
+          type: 'updated_at',
           method: -1,
         },
       };
 
       let method;
       if (sort) {
-        let splittedSort = sort.split(":");
-        if (splittedSort[1] === "desc") {
+        const splittedSort = sort.split(':');
+        if (splittedSort[1] === 'desc') {
           method = -1;
         }
-        if (splittedSort[1] === "asc") {
+        if (splittedSort[1] === 'asc') {
           method = 1;
         }
         options.sort = {
@@ -76,7 +78,7 @@ class CategoryController {
       );
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success fetch data", findCategories));
+        .json(resHelpers.success('success fetch data', findCategories));
     } catch (error) {
       console.log(error);
       next(error);
@@ -88,11 +90,11 @@ class CategoryController {
     try {
       const findCategory = await detailById(Category, id, null);
       if (!findCategory) {
-        throw { name: "Not Found", message: "Category not found" };
+        throw { name: 'Not Found', message: 'Category not found' };
       }
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success fetch data", findCategory));
+        .json(resHelpers.success('success fetch data', findCategory));
     } catch (error) {
       console.log(error);
       next(error);
@@ -102,7 +104,7 @@ class CategoryController {
   static async update(req, res, next) {
     const payload = {
       name: req.body.name,
-      slug: req.body.name.toLowerCase().replace(" ", "_"),
+      slug: req.body.name.toLowerCase().replace(' ', '_'),
       updated_at: new Date(),
     };
 
@@ -114,11 +116,11 @@ class CategoryController {
         { new: true }
       );
       if (!updatedCategory) {
-        throw { name: "Not Found", message: "Category not found" };
+        throw { name: 'Not Found', message: 'Category not found' };
       }
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success update data", updatedCategory));
+        .json(resHelpers.success('success update data', updatedCategory));
     } catch (error) {
       console.log(error);
       next(error);
@@ -131,11 +133,11 @@ class CategoryController {
     try {
       const deletedCategory = await Category.findOneAndDelete({ _id: id });
       if (!deletedCategory) {
-        throw { name: "Not Found", message: "Category not found" };
+        throw { name: 'Not Found', message: 'Category not found' };
       }
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success delete data", deletedCategory));
+        .json(resHelpers.success('success delete data', deletedCategory));
     } catch (error) {
       console.log(error);
       next(error);

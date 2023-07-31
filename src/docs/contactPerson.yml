@@ -1,35 +1,19 @@
 components:
   schemas:
-    Event:
+    ContactPerson:
       type: object
       properties:
-        _id:
+        id:
           type: string
         name:
           type: string
-        description:
+        phoneNumber:
           type: string
-        started_at:
-          type: string
-          format: date-time
-        status:
+        type:
           type: number
-        iban:
+        event:
           type: string
-        bic:
-          type: string
-        bankName:
-          type: string
-        paypal:
-          type: string
-        usageNote:
-          type: string
-        images:
-          type: array
-          items:
-            type: string
-        startYear:
-          type: number
+          format: uuid
         updated_at:
           type: string
           format: date-time
@@ -37,20 +21,20 @@ components:
           type: string
           format: date-time
 
-    Events:
+    ContactPersons:
       type: array
       items:
-        $ref: "#/components/schemas/Event"
+        $ref: "#/components/schemas/ContactPerson"
 
-    DataEvent:
+    DataContactPerson:
       type: object
       properties:
         pagination:
           $ref: "#/components/schemas/Pagination"
         data:
-          $ref: "#/components/schemas/Events"
+          $ref: "#/components/schemas/ContactPersons"
 
-    ResultEvents:
+    ResultUsers:
       type: object
       properties:
         status:
@@ -58,4 +42,4 @@ components:
         message:
           type: string
         data:
-          $ref: "#/components/schemas/DataEvent"
+          $ref: "#/components/schemas/DataContactPerson"

@@ -1,21 +1,21 @@
-"use strict";
+'use strict';
 
-async function pagination(count, limit, page) {
+async function onPagination(count, limit, page) {
   const totalPage = Math.ceil(count / limit);
   const pagination = {
     maxPage: totalPage,
     currentPage: page,
-    limit: limit,
-    count: count,
+    limit,
+    count,
   };
   return pagination;
 }
 
 module.exports = {
   dataPagination: async (model, filter, select, query) => {
-    let page = query.page ? parseInt(query.page) : 1;
-    let limit = query.limit ? parseInt(query.limit) : null;
-    let options = {
+    const page = query.page ? parseInt(query.page, 10) : 1;
+    const limit = query.limit ? parseInt(query.limit, 10) : null;
+    const options = {
       limit: limit * 1,
       skip: (page - 1) * limit,
       sort: null,
@@ -29,7 +29,7 @@ module.exports = {
     const findData = await model.find(filter, null, options).select(select);
 
     const countData = await model.countDocuments(filter);
-    const getPagination = await pagination(countData, options.limit, page);
+    const getPagination = await onPagination(countData, options.limit, page);
 
     const result = {
       pagination: getPagination,
@@ -43,15 +43,24 @@ module.exports = {
     return findDetail;
   },
 
+  detailByBarcode: async (model, barcode, selected) => {
+    const findDetail = await model
+      .find({
+        barcode,
+      })
+      .select(selected);
+    return findDetail;
+  },
+
   updateWithImages: async (options) => {
     const { imagesData, bodyETags, dataFound } = options;
 
-    let imagesSaved = [...imagesData];
+    const imagesSaved = [...imagesData];
     let eTags;
-    let imagesNotSaved = [];
+    const imagesNotSaved = [];
 
     if (bodyETags) {
-      if (typeof bodyETags === "string") {
+      if (typeof bodyETags === 'string') {
         eTags = [bodyETags];
       } else {
         eTags = [...bodyETags];
@@ -86,16 +95,16 @@ module.exports = {
 
   firstWordUppercase: async (words) => {
     if (!words || words.length < 0) {
-      return "";
+      return '';
     }
-    let wordsArray = words.split(" ");
+    const wordsArray = words.split(' ');
 
     for (let i = 0; i < wordsArray.length; i++) {
       wordsArray[i] =
         wordsArray[i].charAt(0).toUpperCase() + wordsArray[i].slice(1);
     }
 
-    const newStr = wordsArray.join(" ");
+    const newStr = wordsArray.join(' ');
     return newStr;
   },
 };

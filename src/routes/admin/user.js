@@ -1,9 +1,8 @@
-"use strict";
-const router = require("express").Router();
-const UserController = require("@controllers/admin/UserController");
-const { authSuperAdmin } = require("@middlewares/auth");
+'use strict';
 
-router.use(authSuperAdmin);
+const router = require('express').Router();
+const UserController = require('@controllers/admin/UserController');
+const { authSuperAdmin } = require('@middlewares/auth');
 
 /**
  * @swagger
@@ -11,6 +10,107 @@ router.use(authSuperAdmin);
  *   name: Admin-User
  *   description: CRUD operation User
  */
+
+/**
+ * @swagger
+ * /admin/user:
+ *    get:
+ *      summary: Return the list of all the users
+ *      tags: [Admin-User]
+ *      security:
+ *         - ApiKeyAuth: []
+ *      description: If you want to show all items please delete all forms below
+ *      parameters:
+ *         - in: query
+ *           name: sort
+ *           schema:
+ *             type: string
+ *           description: Sort criteria depend on key of object data, default updated_at:desc.
+ *           example: updated_at:desc
+ *         - in: query
+ *           name: page
+ *           schema:
+ *             type: number
+ *           description: Number of current page
+ *           example: 1
+ *         - in: query
+ *           name: limit
+ *           schema:
+ *             type: number
+ *           description: Number of items will shown in one page
+ *           example: 2
+ *      responses:
+ *        "200":
+ *          description: OK
+ *          content:
+ *             application/json:
+ *               schema:
+ *                  $ref: '#/components/schemas/ResultUsers'
+ *        "401":
+ *           description: Invalid Access token
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Invalid Access Token
+ *                error: Invalid Auth
+ *        "500":
+ *           description: Error 500
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ */
+router.get('/', UserController.getAllUsers);
+
+/**
+ * @swagger
+ * /admin/user/{id}/detail:
+ *    get:
+ *      summary: Return detail user
+ *      tags: [Admin-User]
+ *      security:
+ *         - ApiKeyAuth: []
+ *      parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User id
+ *      responses:
+ *        "200":
+ *          description: OK
+ *          content:
+ *             application/json:
+ *               schema:
+ *                  $ref: '#/components/schemas/User'
+ *        "401":
+ *           description: Invalid Access token
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Invalid Access Token
+ *                error: Invalid Auth
+ *        "404":
+ *           description: User not found
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: User not found
+ *                error: Not Found
+ */
+router.get('/:id/detail', UserController.getUserById);
+
+router.use(authSuperAdmin);
 
 /**
  * @swagger
@@ -74,106 +174,7 @@ router.use(authSuperAdmin);
  *                message: Validation Error
  *                error: Validation Error
  */
-router.post("/create", UserController.register);
-
-/**
- * @swagger
- * /admin/user:
- *    get:
- *      summary: Return the list of all the users
- *      tags: [Admin-User]
- *      security:
- *         - ApiKeyAuth: []
- *      description: If you want to show all items please delete all forms below
- *      parameters:
- *         - in: query
- *           name: sort
- *           schema:
- *             type: string
- *           description: Sort criteria depend on key of object data, default updated_at:desc.
- *           example: updated_at:desc
- *         - in: query
- *           name: page
- *           schema:
- *             type: number
- *           description: Number of current page
- *           example: 1
- *         - in: query
- *           name: limit
- *           schema:
- *             type: number
- *           description: Number of items will shown in one page
- *           example: 2
- *      responses:
- *        "200":
- *          description: OK
- *          content:
- *             application/json:
- *               schema:
- *                  $ref: '#/components/schemas/ResultUsers'
- *        "401":
- *           description: Invalid Access token
- *           content:
- *             application/json:
- *               schema:
- *                 $ref: '#/components/schemas/Error'
- *               example:
- *                status: failed
- *                message: Invalid Access Token
- *                error: Invalid Auth
- *        "500":
- *           description: Error 500
- *           content:
- *             application/json:
- *               schema:
- *                 $ref: '#/components/schemas/Error'
- */
-router.get("/", UserController.getAllUsers);
-
-/**
- * @swagger
- * /admin/user/{id}/detail:
- *    get:
- *      summary: Return detail user
- *      tags: [Admin-User]
- *      security:
- *         - ApiKeyAuth: []
- *      parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: User id
- *      responses:
- *        "200":
- *          description: OK
- *          content:
- *             application/json:
- *               schema:
- *                  $ref: '#/components/schemas/User'
- *        "401":
- *           description: Invalid Access token
- *           content:
- *             application/json:
- *               schema:
- *                 $ref: '#/components/schemas/Error'
- *               example:
- *                status: failed
- *                message: Invalid Access Token
- *                error: Invalid Auth
- *        "404":
- *           description: User not found
- *           content:
- *             application/json:
- *               schema:
- *                 $ref: '#/components/schemas/Error'
- *               example:
- *                status: failed
- *                message: User not found
- *                error: Not Found
- */
-router.get("/:id/detail", UserController.getUserById);
+router.post('/create', UserController.register);
 
 /**
  * @swagger
@@ -218,7 +219,7 @@ router.get("/:id/detail", UserController.getUserById);
  *                message: User not found
  *                error: Not Found
  */
-router.delete("/:id", UserController.delete);
+router.delete('/:id', UserController.delete);
 
 /**
  * @swagger
@@ -272,7 +273,7 @@ router.delete("/:id", UserController.delete);
  *                message: User not found
  *                error: Not Found
  */
-router.patch("/:id/change-active", UserController.changeActive);
+router.patch('/:id/change-active', UserController.changeActive);
 
 /**
  * @swagger
@@ -326,6 +327,6 @@ router.patch("/:id/change-active", UserController.changeActive);
  *                message: User not found
  *                error: Not Found
  */
-router.patch("/:id/change-role", UserController.changeRole);
+router.patch('/:id/change-role', UserController.changeRole);
 
 module.exports = router;

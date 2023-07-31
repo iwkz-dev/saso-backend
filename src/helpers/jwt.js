@@ -1,14 +1,15 @@
-"use strict";
+'use strict';
 
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
+
 module.exports = {
   jwtSign: (payload, expired) => {
-    let accessToken = jwt.sign(payload, process.env.SECRET_KEY, expired);
+    const accessToken = jwt.sign(payload, process.env.SECRET_KEY, expired);
     return accessToken;
   },
 
-  jwtVerify: (access_token) => {
-    const payload = jwt.verify(access_token, process.env.SECRET_KEY);
+  jwtVerify: (accessToken) => {
+    const payload = jwt.verify(accessToken, process.env.SECRET_KEY);
     return payload;
   },
 };

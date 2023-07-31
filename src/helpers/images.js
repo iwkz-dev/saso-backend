@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-const Image = require("@models/image");
-const axios = require("axios");
+const Image = require('@models/image');
+const axios = require('axios');
 
 module.exports = {
   bulkUpload: async (payload, id, type) => {
@@ -15,11 +15,11 @@ module.exports = {
       await Image.insertMany(payload);
     } catch (error) {
       console.log(error);
-      throw { name: "Failed upload", message: "Failed upload images" };
+      throw { name: 'Failed upload', message: 'Failed upload images' };
     }
   },
   deleteImages: async (data) => {
-    let fileIdImages = [];
+    const fileIdImages = [];
     if (data.length > 0) {
       data.forEach(async (el) => {
         fileIdImages.push(el.eTag);
@@ -27,13 +27,13 @@ module.exports = {
           eTag: el.eTag,
         });
       });
-      let encodePrivateKey = Buffer.from(
+      const encodePrivateKey = Buffer.from(
         `${process.env.IMGKIT_PRIVATE_KEY}:`,
-        "utf-8"
-      ).toString("base64");
+        'utf-8'
+      ).toString('base64');
 
       await axios.post(
-        "https://api.imagekit.io/v1/files/batch/deleteByFileIds",
+        'https://api.imagekit.io/v1/files/batch/deleteByFileIds',
         { fileIds: fileIdImages },
         {
           headers: {
@@ -44,25 +44,25 @@ module.exports = {
     }
   },
   deleteImage: async (model, eTag) => {
-    let fileIdImages = [eTag];
+    const fileIdImages = [eTag];
     // if (data.images.length > 0) {
 
     const imageFound = await Image.findOne({
-      eTag: eTag,
+      eTag,
     });
     if (!imageFound || imageFound.type !== model) {
-      throw { name: "Not Found", message: "Image not found" };
+      throw { name: 'Not Found', message: 'Image not found' };
     }
     await Image.deleteOne({
-      eTag: eTag,
+      eTag,
     });
-    let encodePrivateKey = Buffer.from(
+    const encodePrivateKey = Buffer.from(
       `${process.env.IMGKIT_PRIVATE_KEY}:`,
-      "utf-8"
-    ).toString("base64");
+      'utf-8'
+    ).toString('base64');
 
     await axios.post(
-      "https://api.imagekit.io/v1/files/batch/deleteByFileIds",
+      'https://api.imagekit.io/v1/files/batch/deleteByFileIds',
       { fileIds: fileIdImages },
       {
         headers: {

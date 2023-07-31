@@ -1,43 +1,48 @@
-"use strict";
+'use strict';
 
-const httpStatus = require("http-status-codes");
-const Event = require("@models/event");
-const Menu = require("@models/menu");
-const resHelpers = require("@helpers/responseHelpers");
-const { bulkUpload, deleteImages, deleteImage } = require("@helpers/images");
+const httpStatus = require('http-status-codes');
+const Event = require('@models/event');
+const Menu = require('@models/menu');
+const resHelpers = require('@helpers/responseHelpers');
+const { bulkUpload, deleteImages, deleteImage } = require('@helpers/images');
 const {
   dataPagination,
   detailById,
   updateWithImages,
   firstWordUppercase,
-} = require("@helpers/dataHelper");
+} = require('@helpers/dataHelper');
 
 class EventController {
   static async create(req, res, next) {
     const name = await firstWordUppercase(req.body.name);
 
-    let payload = {
+    const payload = {
       name,
       description: req.body.description,
       started_at: req.body.started_at,
       images: req.body.imagesData,
       status: 0,
+      iban: req.body.iban || '',
+      bic: req.body.bic || '',
+      bankName: req.body.bankName || '',
+      paypal: req.body.paypal || '',
+      usageNote: req.body.usageNote || '',
       updated_at: new Date(),
       created_at: new Date(),
     };
 
     try {
-      const getYear = req.body.started_at.split("-");
+      const getYear = req.body.started_at.split('-');
       payload.startYear = getYear[0];
       // if(req.body.started_at) {}
       const createEvent = await Event.create(payload);
       if (req.body.imagesData) {
-        await bulkUpload(req.body.imagesData, createEvent._id, "event");
+        await bulkUpload(req.body.imagesData, createEvent._id, 'event');
       }
 
       res
         .status(httpStatus.StatusCodes.CREATED)
-        .json(resHelpers.success("success create an event", createEvent));
+        .json(resHelpers.success('success create an event', createEvent));
     } catch (error) {
       console.log(error);
       next(error);
@@ -50,32 +55,32 @@ class EventController {
     // let page = 1;
     const { page, limit, flagDate, status, sort } = req.query;
     try {
-      let statusQuery = "";
-      if (status === "draft") {
+      let statusQuery = '';
+      if (status === 'draft') {
         statusQuery = 0;
       }
-      if (status === "approved") {
+      if (status === 'approved') {
         statusQuery = 1;
       }
-      if (status === "done") {
+      if (status === 'done') {
         statusQuery = 2;
       }
       const options = {
         page: page || 1,
         limit: limit || 100000,
         sort: {
-          type: "updated_at",
+          type: 'updated_at',
           method: -1,
         },
       };
 
       let method;
       if (sort) {
-        let splittedSort = sort.split(":");
-        if (splittedSort[1] === "desc") {
+        const splittedSort = sort.split(':');
+        if (splittedSort[1] === 'desc') {
           method = -1;
         }
-        if (splittedSort[1] === "asc") {
+        if (splittedSort[1] === 'asc') {
           method = 1;
         }
         options.sort = {
@@ -84,8 +89,8 @@ class EventController {
         };
       }
 
-      let filter = {};
-      if (flagDate === "now") {
+      const filter = {};
+      if (flagDate === 'now') {
         filter.startYear = { $gte: new Date().getFullYear() };
       }
       if (status) {
@@ -104,7 +109,7 @@ class EventController {
       // .sort({ updated_at: -1 });
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success fetch data", findEvents));
+        .json(resHelpers.success('success fetch data', findEvents));
     } catch (error) {
       console.log(error);
       next(error);
@@ -116,11 +121,11 @@ class EventController {
       const { id } = req.params;
       const findEvent = await detailById(Event, id, null);
       if (!findEvent) {
-        throw { name: "Not Found", message: "Event not found" };
+        throw { name: 'Not Found', message: 'Event not found' };
       }
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success fetch data", findEvent));
+        .json(resHelpers.success('success fetch data', findEvent));
     } catch (error) {
       console.log(error);
       next(error);
@@ -132,7 +137,7 @@ class EventController {
     try {
       const deletedEvent = await Event.findOneAndDelete({ _id: id });
       if (!deletedEvent) {
-        throw { name: "Not Found", message: "Event not found" };
+        throw { name: 'Not Found', message: 'Event not found' };
       }
       // DELETE PHOTO FROM DATABASE AND IMAGEKIT
       // ? ATAU MAU TETEP DISIMPEN?
@@ -153,7 +158,7 @@ class EventController {
 
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success delete data", deletedEvent));
+        .json(resHelpers.success('success delete data', deletedEvent));
     } catch (error) {
       console.log(error);
       next(error);
@@ -166,7 +171,7 @@ class EventController {
       const findEvent = await detailById(Event, id, null);
 
       if (!findEvent) {
-        throw { name: "Not Found", message: `Event not found` };
+        throw { name: 'Not Found', message: `Event not found` };
       }
       const options = {
         imagesData: req.body.imagesData,
@@ -176,18 +181,23 @@ class EventController {
       const payloadImages = await updateWithImages(options);
       if (payloadImages.imagesSaved.length > 5) {
         await deleteImages(req.body.imagesData);
-        throw { name: "Bad Request", message: "The limit of image is 5" };
+        throw { name: 'Bad Request', message: 'The limit of image is 5' };
       }
       await deleteImages(payloadImages.imagesNotSaved);
 
-      const getYear = req.body.started_at.split("-");
+      const getYear = req.body.started_at.split('-');
 
-      let payload = {
+      const payload = {
         name: req.body.name,
         description: req.body.description,
         started_at: req.body.started_at,
         startYear: getYear[0],
         images: payloadImages.imagesSaved,
+        iban: req.body.iban || '',
+        bic: req.body.bic || '',
+        bankName: req.body.bankName || '',
+        paypal: req.body.paypal || '',
+        usageNote: req.body.usageNote || '',
         status: req.body.status,
         updated_at: new Date(),
       };
@@ -196,15 +206,15 @@ class EventController {
         new: true,
       });
       if (!updatedEvent) {
-        throw { name: "Not Found", message: "Event not found" };
+        throw { name: 'Not Found', message: 'Event not found' };
       }
 
       if (req.body.imagesData) {
-        await bulkUpload(req.body.imagesData, findEvent._id, "event");
+        await bulkUpload(req.body.imagesData, findEvent._id, 'event');
       }
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success update data", updatedEvent));
+        .json(resHelpers.success('success update data', updatedEvent));
     } catch (error) {
       console.log(error);
       next(error);
@@ -218,12 +228,12 @@ class EventController {
       const findEvent = await Event.findById(id);
 
       if (!findEvent) {
-        throw { name: "Not Found", message: "Event not found" };
+        throw { name: 'Not Found', message: 'Event not found' };
       }
       if (findEvent.images.length > 4) {
-        throw { name: "Bad Request", message: "You can only upload 5 images" };
+        throw { name: 'Bad Request', message: 'You can only upload 5 images' };
       }
-      let imagesPayload = [...findEvent.images];
+      const imagesPayload = [...findEvent.images];
       req.body.imagesData.forEach((el) => {
         imagesPayload.push(el);
       });
@@ -238,14 +248,14 @@ class EventController {
       });
 
       if (req.body.imagesData) {
-        await bulkUpload(req.body.imagesData, findEvent._id, "event");
+        await bulkUpload(req.body.imagesData, findEvent._id, 'event');
       }
 
       res
         .status(httpStatus.StatusCodes.OK)
         .json(
           resHelpers.success(
-            "success add images to the Event",
+            'success add images to the Event',
             updateEventImages
           )
         );
@@ -262,13 +272,13 @@ class EventController {
       const findEvent = await Event.findById(id);
 
       if (!findEvent) {
-        throw { name: "Not Found", message: "Event not found" };
+        throw { name: 'Not Found', message: 'Event not found' };
       }
 
-      let imagesPayload = [];
+      const imagesPayload = [];
 
       if (findEvent.images.length > 0) {
-        await deleteImage("event", eTag);
+        await deleteImage('event', eTag);
         findEvent.images.forEach((el) => {
           if (el.eTag !== eTag) {
             imagesPayload.push(el);
@@ -288,9 +298,9 @@ class EventController {
         );
         res
           .status(httpStatus.StatusCodes.CREATED)
-          .json(resHelpers.success("success destroy an image", updatedEvent));
+          .json(resHelpers.success('success destroy an image', updatedEvent));
       } else {
-        throw { name: "Bad Request", message: "Image is empty" };
+        throw { name: 'Bad Request', message: 'Image is empty' };
       }
     } catch (error) {
       console.log(error);
@@ -302,20 +312,20 @@ class EventController {
     const { id, status } = req.params;
     try {
       let statusPayload;
-      if (status === "draft") {
+      if (status === 'draft') {
         statusPayload = 0;
       }
-      if (status === "approved") {
+      if (status === 'approved') {
         statusPayload = 1;
         const findEvent = await Event.findById(id, { status: statusPayload });
         if (findEvent.length < 1) {
           throw {
-            name: "Bad Request",
-            message: "You still have an active event",
+            name: 'Bad Request',
+            message: 'You still have an active event',
           };
         }
       }
-      if (status === "done") {
+      if (status === 'done') {
         statusPayload = 2;
       }
       const updateEvent = await Event.findOneAndUpdate(
@@ -325,7 +335,7 @@ class EventController {
       );
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success change status", updateEvent));
+        .json(resHelpers.success('success change status', updateEvent));
     } catch (error) {
       console.log(error);
       next(error);
@@ -335,8 +345,7 @@ class EventController {
   // ! LATER BAKAL KEHAPUS
   static async uploadImage(req, res, next) {
     try {
-      console.log(req.body.imageUrls);
-      res.send("testing ke controller");
+      res.send('testing ke controller');
     } catch (error) {
       console.log(error);
     }

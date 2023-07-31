@@ -1,12 +1,11 @@
-"use strict";
+'use strict';
 
-const mongoose = require("mongoose");
-const { ObjectId } = require("bson");
+const mongoose = require('mongoose');
 
 const categorySchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, "Name is required"],
+    required: [true, 'Name is required'],
   },
   slug: {
     type: String,
@@ -20,9 +19,9 @@ const categorySchema = new mongoose.Schema({
 });
 
 // ! HOOKS
-categorySchema.pre("save", async function () {
+categorySchema.pre('save', async function () {
   const category = this;
-  category.slug = category.name.toLowerCase().replace(" ", "_");
+  category.slug = category.name.toLowerCase().replace(' ', '_');
 });
-const Category = mongoose.model("Category", categorySchema);
+const Category = mongoose.model('Category', categorySchema);
 module.exports = Category;

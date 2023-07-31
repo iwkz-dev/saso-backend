@@ -1,36 +1,33 @@
-"use strict";
-const multer = require("multer");
+'use strict';
+
+const multer = require('multer');
 
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
 module.exports = {
-  uploadArray: (name, count) => {
-    return upload.array(name, count);
-  },
+  uploadArray: (name, count) => upload.array(name, count),
 
-  uploadSingle: (name) => {
-    return upload.single(name);
-  },
+  uploadSingle: (name) => upload.single(name),
 
   uploadFileXls: (name) => {
     const excelFilter = (req, file, cb) => {
       if (
-        file.mimetype.includes("excel") ||
-        file.mimetype.includes("spreadsheetml")
+        file.mimetype.includes('excel') ||
+        file.mimetype.includes('spreadsheetml')
       ) {
         cb(null, true);
       } else {
-        cb("Please upload only excel file.", false);
+        cb('Please upload only excel file.', false);
       }
     };
     const storageInDisk = multer.diskStorage({
-      destination: function (req, file, cb) {
-        cb(null, "./uploads/");
+      destination(req, file, cb) {
+        cb(null, './uploads/');
       },
-      filename: function (req, file, cb) {
+      filename(req, file, cb) {
         const dateTimeStamp = Date.now();
-        cb(null, dateTimeStamp + "-" + file.originalname);
+        cb(null, `${dateTimeStamp}-${file.originalname}`);
       },
     });
 

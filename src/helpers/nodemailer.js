@@ -1,16 +1,16 @@
-const nodemailer = require("nodemailer");
+const nodemailer = require('nodemailer');
 
 // ! LATER: BEST PRACTICE FOR FLOW CHANGE PASSWORD
 async function mailer(template) {
   let mailConfig;
   if (
-    process.env.NODE_ENV === "production" ||
-    process.env.NODE_ENV === "development"
+    process.env.NODE_ENV === 'production' ||
+    process.env.NODE_ENV === 'development'
   ) {
     // all emails are delivered to destination
     mailConfig = {
-      service: "gmail",
-      host: "smtp.gmail.com",
+      service: 'gmail',
+      host: 'smtp.gmail.com',
       secure: false,
       auth: {
         // user: process.env.EMAIL_NODEMAILER,
@@ -22,26 +22,26 @@ async function mailer(template) {
   } else {
     // all emails are catched by ethereal.email
     mailConfig = {
-      host: "smtp.ethereal.email",
+      host: 'smtp.ethereal.email',
       port: 587,
       auth: {
-        user: "daniella.hettinger@ethereal.email",
-        pass: "tquEkNk2EnQ9a72Tfw",
+        user: 'daniella.hettinger@ethereal.email',
+        pass: 'tquEkNk2EnQ9a72Tfw',
       },
     };
   }
-  let transporter = nodemailer.createTransport(mailConfig);
-  let mailOptions = template;
+  const transporter = nodemailer.createTransport(mailConfig);
+  const mailOptions = template;
 
   try {
-    let result = await transporter.sendMail(mailOptions);
+    const result = await transporter.sendMail(mailOptions);
 
     if (result) {
       return {
         result,
       };
     } else {
-      throw { name: "EmailError" };
+      throw { name: 'EmailError' };
     }
   } catch (error) {
     return {

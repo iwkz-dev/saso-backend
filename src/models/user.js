@@ -1,33 +1,33 @@
-"use strict";
+'use strict';
 
-const mongoose = require("mongoose");
-const { ObjectId } = require("bson");
-const validator = require("validator");
-const { hashPassword } = require("@helpers/bcrypt");
+const mongoose = require('mongoose');
+const validator = require('validator');
+const { hashPassword } = require('@helpers/bcrypt');
 
 const userSchema = new mongoose.Schema({
   fullname: {
     type: String,
-    required: [true, "Fullname is required"],
+    required: [true, 'Fullname is required'],
   },
   email: {
     type: String,
-    required: [true, "Email is required"],
+    required: [true, 'Email is required'],
+    unique: true,
     validate(value) {
       if (!validator.isEmail(value)) {
-        throw new Error("Email is invalid");
+        throw new Error('Email is invalid');
       }
     },
   },
   password: {
     type: String,
-    required: [true, "Password is required"],
-    minlength: [5, "Your password length should be greater than 5"],
+    required: [true, 'Password is required'],
+    minlength: [5, 'Your password length should be greater than 5'],
     select: false,
   },
   phone: {
     type: String,
-    required: [true, "Phone is required"],
+    required: [true, 'Phone is required'],
   },
   isActive: {
     type: Boolean,
@@ -54,11 +54,11 @@ const userSchema = new mongoose.Schema({
 });
 
 // ! HOOKS
-userSchema.pre("save", async function (next) {
+userSchema.pre('save', async function (next) {
   const user = this;
-  if (!user.isModified("password")) return next();
+  if (!user.isModified('password')) return next();
   user.password = hashPassword(user.password);
 });
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model('User', userSchema);
 module.exports = User;

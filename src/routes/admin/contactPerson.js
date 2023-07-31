@@ -1,21 +1,21 @@
 'use strict';
 
 const router = require('express').Router();
-const CategoryController = require('@controllers/admin/CategoryController');
-
+const ContactPersonController = require('@controllers/admin/ContactPersonController');
 /**
  * @swagger
  * tags:
- *   name: Admin-Category
- *   description: CRUD operation Category
+ *   name: Admin-Contact-Person
+ *   description: CRUD operation Contact Person.
  */
 
 /**
  * @swagger
- * /admin/category:
+ * /admin/contact-person:
  *    post:
- *      summary: Create Category
- *      tags: [Admin-Category]
+ *      summary: Create Contact-Person
+ *      tags: [Admin-Contact-Person]
+ *      description: Create contact person
  *      security:
  *         - ApiKeyAuth: []
  *      requestBody:
@@ -26,16 +26,24 @@ const CategoryController = require('@controllers/admin/CategoryController');
  *              type: object
  *              required:
  *                 - name
+ *                 - phoneNumber
  *              properties:
  *                name:
  *                  type: string
+ *                phoneNumber:
+ *                  type: string
+ *                type:
+ *                  type: number
+ *                event:
+ *                  type: string
+ *                  format: uuid
  *      responses:
  *        "201":
  *          description: CREATED
  *          content:
  *             application/json:
  *               schema:
- *                  $ref: '#/components/schemas/Category'
+ *                  $ref: '#/components/schemas/ContactPerson'
  *        "401":
  *           description: Invalid Access token
  *           content:
@@ -57,14 +65,14 @@ const CategoryController = require('@controllers/admin/CategoryController');
  *                message: Validation Error
  *                error: Validation Error
  */
-router.post('/', CategoryController.create);
+router.post('/', ContactPersonController.create);
 
 /**
  * @swagger
- * /admin/category:
+ * /admin/contact-person:
  *    get:
- *      summary: Return the list of all the categories
- *      tags: [Admin-Category]
+ *      summary: Return the list of all the contact person
+ *      tags: [Admin-Contact-Person]
  *      security:
  *         - ApiKeyAuth: []
  *      parameters:
@@ -74,13 +82,36 @@ router.post('/', CategoryController.create);
  *             type: string
  *           description: Sort criteria depend on key of object data, default updated_at:desc.
  *           example: updated_at:desc
+ *         - in: query
+ *           name: type
+ *           schema:
+ *             type: string
+ *           description: Filter for filtering contact person depends on type of the contact person. 0 for male, 1 for female.
+ *           example: 0
+ *         - in: query
+ *           name: event
+ *           schema:
+ *             type: string
+ *           description: Event id in bson object, if not defined it will show all contact persons
+ *         - in: query
+ *           name: page
+ *           schema:
+ *             type: number
+ *           description: Number of current page
+ *           example: 1
+ *         - in: query
+ *           name: limit
+ *           schema:
+ *             type: number
+ *           description: Number of items will shown in one page
+ *           example: 2
  *      responses:
  *        "200":
  *          description: OK
  *          content:
  *             application/json:
  *               schema:
- *                  $ref: '#/components/schemas/ResultCategories'
+ *                  $ref: '#/components/schemas/ContactPersons'
  *        "401":
  *           description: Invalid Access token
  *           content:
@@ -98,14 +129,14 @@ router.post('/', CategoryController.create);
  *               schema:
  *                 $ref: '#/components/schemas/Error'
  */
-router.get('/', CategoryController.getAllCategories);
+router.get('/', ContactPersonController.getAllContactPersons);
 
 /**
  * @swagger
- * /admin/category/{id}/detail:
- *    get:
- *      summary: Return the details of category
- *      tags: [Admin-Category]
+ * /admin/contact-person/{id}:
+ *    delete:
+ *      summary: Delete an Contact Person
+ *      tags: [Admin-Contact-Person]
  *      security:
  *         - ApiKeyAuth: []
  *      parameters:
@@ -114,14 +145,14 @@ router.get('/', CategoryController.getAllCategories);
  *         required: true
  *         schema:
  *           type: string
- *         description: Category id
+ *         description: Contact Person id
  *      responses:
  *        "200":
  *          description: OK
  *          content:
  *             application/json:
  *               schema:
- *                  $ref: '#/components/schemas/Category'
+ *                  $ref: '#/components/schemas/ContactPerson'
  *        "401":
  *           description: Invalid Access token
  *           content:
@@ -143,14 +174,14 @@ router.get('/', CategoryController.getAllCategories);
  *                message: Menu not found
  *                error: Not Found
  */
-router.get('/:id/detail', CategoryController.getCategoryById);
+router.delete('/:id', ContactPersonController.destroy);
 
 /**
  * @swagger
- * /admin/category/{id}:
+ * /admin/contact-person/{id}:
  *    put:
- *      summary: Edit an Category
- *      tags: [Admin-Category]
+ *      summary: Edit Contact-Person
+ *      tags: [Admin-Contact-Person]
  *      security:
  *         - ApiKeyAuth: []
  *      parameters:
@@ -159,7 +190,7 @@ router.get('/:id/detail', CategoryController.getCategoryById);
  *         required: true
  *         schema:
  *           type: string
- *         description: Category id
+ *         description: Contact Person id
  *      requestBody:
  *        required: true
  *        content:
@@ -168,16 +199,24 @@ router.get('/:id/detail', CategoryController.getCategoryById);
  *              type: object
  *              required:
  *                 - name
+ *                 - phoneNumber
  *              properties:
  *                name:
  *                  type: string
+ *                phoneNumber:
+ *                  type: string
+ *                type:
+ *                  type: number
+ *                event:
+ *                  type: string
+ *                  format: uuid
  *      responses:
- *        "200":
- *          description: OK
+ *        "201":
+ *          description: CREATED
  *          content:
  *             application/json:
  *               schema:
- *                  $ref: '#/components/schemas/Category'
+ *                  $ref: '#/components/schemas/ContactPerson'
  *        "401":
  *           description: Invalid Access token
  *           content:
@@ -188,16 +227,6 @@ router.get('/:id/detail', CategoryController.getCategoryById);
  *                status: failed
  *                message: Invalid Access Token
  *                error: Invalid Auth
- *        "404":
- *           description: Category not found
- *           content:
- *             application/json:
- *               schema:
- *                 $ref: '#/components/schemas/Error'
- *               example:
- *                status: failed
- *                message: Category not found
- *                error: Not Found
  *        "400":
  *           description: Validations Error
  *           content:
@@ -209,51 +238,6 @@ router.get('/:id/detail', CategoryController.getCategoryById);
  *                message: Validation Error
  *                error: Validation Error
  */
-router.put('/:id', CategoryController.update);
-
-/**
- * @swagger
- * /admin/category/{id}:
- *    delete:
- *      summary: Delete an Category
- *      tags: [Admin-Category]
- *      security:
- *         - ApiKeyAuth: []
- *      parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Category id
- *      responses:
- *        "200":
- *          description: OK
- *          content:
- *             application/json:
- *               schema:
- *                  $ref: '#/components/schemas/Category'
- *        "401":
- *           description: Invalid Access token
- *           content:
- *             application/json:
- *               schema:
- *                 $ref: '#/components/schemas/Error'
- *               example:
- *                status: failed
- *                message: Invalid Access Token
- *                error: Invalid Auth
- *        "404":
- *           description: Category not found
- *           content:
- *             application/json:
- *               schema:
- *                 $ref: '#/components/schemas/Error'
- *               example:
- *                status: failed
- *                message: Category not found
- *                error: Not Found
- */
-router.delete('/:id', CategoryController.delete);
+router.put('/:id', ContactPersonController.update);
 
 module.exports = router;

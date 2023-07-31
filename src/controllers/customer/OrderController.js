@@ -1,38 +1,45 @@
-"use strict";
+'use strict';
 
-const httpStatus = require("http-status-codes");
-const Order = require("@models/order");
-const Menu = require("@models/menu");
-const User = require("@models/user");
-const Event = require("@models/event");
-const resHelpers = require("@helpers/responseHelpers");
-const { invoiceTemplate } = require("@helpers/templates");
-const { pdfGenerator } = require("@helpers/pdfGenerator");
-const { dataPagination, detailById } = require("@helpers/dataHelper");
-const { mailer } = require("@helpers/nodemailer");
+const mongoose = require('mongoose');
+const httpStatus = require('http-status-codes');
+const Order = require('@models/order');
+const Menu = require('@models/menu');
+const User = require('@models/user');
+const Event = require('@models/event');
+const resHelpers = require('@helpers/responseHelpers');
+const { invoiceTemplate } = require('@helpers/templates');
+const { pdfGenerator } = require('@helpers/pdfGenerator');
+const { dataPagination, detailById } = require('@helpers/dataHelper');
+const { createOrderPaypal } = require('@helpers/paymentHelper');
+const PaymentType = require('@models/paymentType');
+// const { mailer } = require('@helpers/nodemailer');
 
-class UserController {
+class OrderController {
   static async order(req, res, next) {
-    const { menus, event, arrivedAt, note } = req.body;
-
+    const { menus, event, arrivedAt, note, paymentType } = req.body;
     const { id: userId } = req.user;
+
+    const session = await mongoose.startSession();
     try {
+      session.startTransaction();
       // ! LATER: WILL BE AUTOMATED SS21
       const findEvent = await Event.findOne({ _id: event });
       if (findEvent.status !== 1 || !findEvent) {
-        throw { name: "Bad Request", message: "Event not found" };
+        throw { name: 'Bad Request', message: 'Event not found' };
       }
 
       const countData = await Order.countDocuments({ event: findEvent.id });
 
-      let strStartYear = findEvent.startYear.toString();
-      let date = `${strStartYear.charAt(2)}` + `${strStartYear.charAt(3)}`;
+      const strStartYear = findEvent.startYear.toString();
+      const date = `${strStartYear.charAt(2)}${strStartYear.charAt(3)}`;
 
       let invoiceNumber = `SS${date}-`;
       if (countData < 10) {
         invoiceNumber += `00${countData + 1}`;
       } else if (countData < 100) {
         invoiceNumber += `0${countData + 1}`;
+      } else {
+        invoiceNumber += `${countData + 1}`;
       }
 
       const resetQuantity = [];
@@ -42,16 +49,16 @@ class UserController {
             _id: el._id,
             event: findEvent.id,
           })
-            .select(["-updated_at", "-created_at", "-description"])
+            .select(['-updated_at', '-created_at', '-description'])
             .lean();
 
           if (!foundMenu) {
-            throw { name: "Not Found", message: "Menu not found" };
+            throw { name: 'Not Found', message: 'Menu not found' };
           }
 
           if (el.totalPortion <= 0 || !el.totalPortion) {
             throw {
-              name: "Bad Request",
+              name: 'Bad Request',
               message: `Portion should be greater 0`,
             };
           }
@@ -66,7 +73,7 @@ class UserController {
           if (foundMenu.quantity < totalOrder) {
             return {
               error: true,
-              name: "Bad Request",
+              name: 'Bad Request',
               message: `Menu '${foundMenu.name}' is out of stock`,
             };
           } else {
@@ -74,7 +81,7 @@ class UserController {
               id: foundMenu._id,
               quantityOrder: foundMenu.quantityOrder,
             });
-            foundMenu["totalPortion"] = el.totalPortion;
+            foundMenu.totalPortion = el.totalPortion;
             delete foundMenu.quantity;
             delete foundMenu.quantityOrder;
             const payloadMenu = {
@@ -86,11 +93,15 @@ class UserController {
         })
       );
 
+      const findPaymentType = await PaymentType.findOne({
+        type: paymentType,
+      });
+
       //* CHECK IF THE MENU IS OUT OF STOCK *//
       findMenu.forEach((findError) => {
         if (findError.error) {
           resetQuantity.forEach(async (el) => {
-            const test = await Menu.findOneAndUpdate(
+            await Menu.findOneAndUpdate(
               { _id: el.id },
               { quantityOrder: el.quantityOrder },
               { new: true }
@@ -103,9 +114,7 @@ class UserController {
         }
       });
 
-      const totalEachMenu = findMenu.map((el) => {
-        return el.price * el.totalPortion;
-      });
+      const totalEachMenu = findMenu.map((el) => el.price * el.totalPortion);
 
       let totalPrice = 0;
       totalEachMenu.forEach((el) => {
@@ -122,25 +131,113 @@ class UserController {
         customerEmail: findUser.email,
         customerPhone: findUser.phone,
         event: findEvent.id,
-        note: note || "",
+        note: note || '',
         arrived_at: arrivedAt,
         updated_at: new Date(),
         created_at: new Date(),
+        paymentType: findPaymentType.id,
       };
 
       const createOrder = await Order.create(payload);
 
-      let template = invoiceTemplate(createOrder);
+      let paymentResponse;
+      if (findPaymentType.type === 'paypal') {
+        paymentResponse = await createOrderPaypal(invoiceNumber, totalPrice);
+      }
+      /*
+
+      Replace this while on approve or create new api to call this!!!!
+
+      const dataEmail = {
+        ...createOrder._doc,
+        eventData: { ...findEvent._doc },
+      };
+
+      const template = invoiceTemplate(dataEmail);
+
       await mailer({
-        from: "noreply@gmail.com",
+        from: 'noreply@gmail.com',
         to: createOrder.customerEmail,
-        subject: "Your Order " + createOrder.invoiceNumber,
+        subject: `Your Order ${createOrder.invoiceNumber}`,
         html: template,
       });
 
+      */
+
+      res.status(httpStatus.StatusCodes.CREATED).json(
+        resHelpers.success('success create an order', {
+          createOrder,
+          paymentResponse,
+        })
+      );
+      await session.commitTransaction();
+    } catch (error) {
+      await session.abortTransaction();
+      console.log(error);
+      next(error);
+    } finally {
+      await session.endSession();
+    }
+  }
+
+  static async onDeleteOrder(req, res, next) {
+    const { id: orderId } = req.params;
+    try {
+      const findOrder = await Order.findById(orderId);
+      if (!findOrder) {
+        throw { name: 'Not Found', message: 'Order not found' };
+      }
+
+      findOrder.menus.forEach(async (el) => {
+        const menuFound = await Menu.findById(el._id);
+        const payloadMenu = {
+          quantityOrder: menuFound.quantityOrder - el.totalPortion,
+        };
+        await Menu.update({ _id: el._id }, payloadMenu);
+      });
+
+      const deletedOrder = await Order.findOneAndDelete({ _id: orderId });
+
       res
-        .status(httpStatus.StatusCodes.CREATED)
-        .json(resHelpers.success("success create an order", createOrder));
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success('success remove order', deletedOrder));
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
+  static async approveOrder(req, res, next) {
+    const { id } = req.params;
+    try {
+      // 0 = no action
+      const newStatus = 1;
+      const findOrder = await Order.findById(id);
+      if (!findOrder) {
+        throw { name: 'Not Found', message: 'Order not found' };
+      }
+      if (findOrder.status === 2) {
+        throw {
+          name: 'Bad Request',
+          message: 'Order has been canceled or refund can not be changed',
+        };
+      }
+
+      if (findOrder.status !== 0) {
+        throw {
+          name: 'Bad Request',
+          message: 'Order can not be approved',
+        };
+      }
+
+      const updateOrder = await Order.update(
+        { _id: id },
+        { status: newStatus, updated_at: new Date() },
+        { new: true }
+      );
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success('success change status', updateOrder));
     } catch (error) {
       console.log(error);
       next(error);
@@ -155,11 +252,11 @@ class UserController {
         page: page || 1,
         limit: limit || 100000,
         sort: {
-          type: "updated_at",
+          type: 'updated_at',
           method: -1,
         },
       };
-      let filter = {
+      const filter = {
         customerId: userId,
       };
 
@@ -170,7 +267,7 @@ class UserController {
       const findOrdersById = await dataPagination(Order, filter, null, options);
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success fetch data", findOrdersById));
+        .json(resHelpers.success('success fetch data', findOrdersById));
     } catch (error) {
       console.log(error);
       next(error);
@@ -184,17 +281,17 @@ class UserController {
     try {
       const findOrder = await detailById(Order, orderId, null);
       if (!findOrder) {
-        throw { name: "Not Found", message: "Order not found" };
+        throw { name: 'Not Found', message: 'Order not found' };
       }
       if (userId !== findOrder.customerId.toString()) {
         throw {
-          name: "Forbidden",
-          message: "You have no authorization to look this order",
+          name: 'Forbidden',
+          message: 'You have no authorization to look this order',
         };
       }
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success("success fetch data", findOrder));
+        .json(resHelpers.success('success fetch data', findOrder));
     } catch (error) {
       console.log(error);
       next(error);
@@ -207,24 +304,35 @@ class UserController {
 
     try {
       const findOrder = await detailById(Order, orderId, null);
+      const findEvent = await detailById(Event, findOrder.event, null);
       if (!findOrder) {
-        throw { name: "Not Found", message: "Order not found" };
+        throw { name: 'Not Found', message: 'Order not found' };
+      }
+      if (!findEvent) {
+        throw { name: 'Not Found', message: 'Event not found' };
       }
       if (userId !== findOrder.customerId.toString()) {
         throw {
-          name: "Forbidden",
-          message: "You have no authorization to look this order",
+          name: 'Forbidden',
+          message: 'You have no authorization to look this order',
         };
       }
-      let template = invoiceTemplate(findOrder);
-      let pdfData = await pdfGenerator(template);
-      res.setHeader("Content-Type", "application/pdf");
-      res.end(pdfData);
+      findOrder.eventData = findEvent;
+      const template = invoiceTemplate(findOrder);
+      const pdfData = await pdfGenerator(template);
+      res.setHeader('Content-Type', 'application/pdf');
+      res.send(pdfData);
     } catch (error) {
-      console.log(error);
+      // if (error.name) {
+      //   res
+      //     .status(httpStatus.StatusCodes.OK)
+      //     .json(resHelpers.success("success download pdf"));
+      // } else {
+      console.log(error.name);
       next(error);
+      // }
     }
   }
 }
 
-module.exports = UserController;
+module.exports = OrderController;
