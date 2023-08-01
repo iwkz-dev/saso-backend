@@ -22,8 +22,8 @@ class MenuController {
 
     const payload = {
       name,
-      barcode: req.body.barcode ?? '',
-      description: req.body.description,
+      barcode: req.body.barcode || '',
+      description: req.body.description || '',
       quantity: +req.body.quantity,
       quantityOrder: +req.body.quantityOrder || 0,
       price: +req.body.price,

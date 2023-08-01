@@ -18,7 +18,7 @@ class EventController {
 
     const payload = {
       name,
-      description: req.body.description,
+      description: req.body.description || '',
       started_at: req.body.started_at,
       images: req.body.imagesData,
       status: 0,
@@ -54,6 +54,8 @@ class EventController {
     // let limit = 3;
     // let page = 1;
     const { page, limit, flagDate, status, sort } = req.query;
+    const { role } = req.user;
+    console.log(role);
     try {
       let statusQuery = '';
       if (status === 'draft') {
