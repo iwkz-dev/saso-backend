@@ -1,10 +1,8 @@
 'use strict';
 
 const Order = require('@models/order');
-const Menu = require('@models/menu');
 const Event = require('@models/event');
 const PaymentType = require('@models/paymentType');
-const { dataPagination, detailById } = require('@helpers/dataHelper');
 
 const paymentPaypalCleaner = async () => {
   try {

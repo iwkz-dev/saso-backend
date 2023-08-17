@@ -3,7 +3,7 @@
 const httpStatus = require('http-status-codes');
 const User = require('@models/user');
 const resHelpers = require('@helpers/responseHelpers');
-const { dataPagination, detailById } = require('@helpers/dataHelper');
+const { detailById } = require('@helpers/dataHelper');
 const { jwtSign } = require('@helpers/jwt');
 
 class UserController {
