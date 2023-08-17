@@ -289,9 +289,22 @@ class OrderController {
           message: 'You have no authorization to look this order',
         };
       }
+
+      const findPaymentType = await detailById(
+        PaymentType,
+        findOrder.paymentType,
+        null
+      );
+
+      const result = JSON.parse(JSON.stringify(findOrder));
+      result.paymentType = {
+        paymentType: findOrder.paymentType,
+        name: findPaymentType.type,
+      };
+
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success('success fetch data', findOrder));
+        .json(resHelpers.success('success fetch data', result));
     } catch (error) {
       console.log(error);
       next(error);
