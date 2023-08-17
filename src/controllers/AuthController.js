@@ -16,8 +16,15 @@ class AuthController {
    * @param {Object} next
    */
   static async login(req, res, next) {
-    const { email, password } = req.body;
+    const { email, password, type } = req.body;
+
     try {
+      if (!type) {
+        throw {
+          name: 'Bad Request',
+          message: 'Something wrong with your request',
+        };
+      }
       // ! FLOW LOGIN -> check email ada apa gk -> compare password dari user yg dicari-> check password sama apa gk dengan password.body -> done / kirim token
       const findUser = await User.findOne({ email }).select('+password');
       if (!findUser) {
@@ -35,6 +42,22 @@ class AuthController {
             email: findUser.email,
             role: findUser.role,
           });
+
+          const isUserAdmin = findUser.role === 1 || findUser.role === 2;
+
+          if (type === 'admin' && !isUserAdmin) {
+            throw {
+              name: 'Forbidden',
+              message: 'You are not allowed to access this page',
+            };
+          }
+
+          if (type === 'client' && isUserAdmin) {
+            throw {
+              name: 'Forbidden',
+              message: 'You are not allowed to access this page',
+            };
+          }
           /**
            * ROLE: 1 -> super_admin
            * ROLE: 2 -> admin
@@ -73,6 +96,13 @@ class AuthController {
       const findUser = await User.findOne({ email });
       if (!findUser) {
         throw { name: 'Not Found', message: 'User not found' };
+      }
+
+      if (findUser.role !== 3) {
+        throw {
+          name: 'Forbidden',
+          message: 'Can not change password for this user',
+        };
       }
       const updateUser = await User.findOneAndUpdate(
         { _id: findUser._id },
