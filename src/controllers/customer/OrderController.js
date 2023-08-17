@@ -144,6 +144,13 @@ class OrderController {
       if (findPaymentType.type === 'paypal') {
         paymentResponse = await createOrderPaypal(invoiceNumber, totalPrice);
       }
+      if (findPaymentType.type === 'transfer') {
+        paymentResponse = {
+          status: 'success',
+          type: 'transfer',
+          message: 'Booking success, please transfer to our bank account',
+        };
+      }
       /*
 
       Replace this while on approve or create new api to call this!!!!
