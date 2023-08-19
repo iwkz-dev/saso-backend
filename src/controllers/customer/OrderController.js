@@ -16,8 +16,8 @@ const PaymentType = require('@models/paymentType');
 
 class OrderController {
   static async order(req, res, next) {
-    const { menus, event, arrivedAt, note, paymentType } = req.body;
-    const { id: userId } = req.user;
+    const { menus, event, arrivedAt, note, paymentType, userData } = req.body;
+    const userId = req.user?.id || '';
 
     const session = await mongoose.startSession();
     try {
@@ -120,16 +120,21 @@ class OrderController {
       totalEachMenu.forEach((el) => {
         totalPrice += el;
       });
-      const findUser = await User.findById(userId);
+
+      let findUser = null;
+      if (userId) {
+        findUser = await User.findById(userId);
+      }
+
       const payload = {
         invoiceNumber,
         menus: findMenu,
         totalPrice,
         status: 0,
-        customerId: userId,
-        customerFullname: findUser.fullname,
-        customerEmail: findUser.email,
-        customerPhone: findUser.phone,
+        customerId: userId || null,
+        customerFullname: userId ? findUser.fullname : userData.fullname,
+        customerEmail: userId ? findUser.email : userData.email,
+        customerPhone: userId ? findUser.phone : userData.phone,
         event: findEvent.id,
         note: note || '',
         arrived_at: arrivedAt,
