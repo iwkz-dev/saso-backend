@@ -76,8 +76,6 @@ const capturePayment = async (orderId) => {
     },
   });
 
-  console.log(response.data);
-
   return response.data;
 };
 

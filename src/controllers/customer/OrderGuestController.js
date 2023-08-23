@@ -4,12 +4,11 @@ const mongoose = require('mongoose');
 const httpStatus = require('http-status-codes');
 const Order = require('@models/order');
 const Menu = require('@models/menu');
-const User = require('@models/user');
 const Event = require('@models/event');
 const resHelpers = require('@helpers/responseHelpers');
 const { invoiceTemplate } = require('@helpers/templates');
 const { pdfGenerator } = require('@helpers/pdfGenerator');
-const { dataPagination, detailById } = require('@helpers/dataHelper');
+const { detailById } = require('@helpers/dataHelper');
 const { createOrderPaypal } = require('@helpers/paymentHelper');
 const PaymentType = require('@models/paymentType');
 // const { mailer } = require('@helpers/nodemailer');
@@ -17,7 +16,6 @@ const PaymentType = require('@models/paymentType');
 class OrderController {
   static async order(req, res, next) {
     const { menus, event, arrivedAt, note, paymentType, userData } = req.body;
-    const userId = req.user.id;
 
     const session = await mongoose.startSession();
     try {
@@ -121,17 +119,15 @@ class OrderController {
         totalPrice += el;
       });
 
-      const findUser = await User.findById(userId);
-
       const payload = {
         invoiceNumber,
         menus: findMenu,
         totalPrice,
         status: 0,
-        customerId: userId,
-        customerFullname: findUser.fullname,
-        customerEmail: findUser.email,
-        customerPhone: findUser.phone,
+        customerId: null,
+        customerFullname: userData.fullname,
+        customerEmail: userData.email,
+        customerPhone: userData.phone,
         event: findEvent.id,
         note: note || '',
         arrived_at: arrivedAt,
@@ -189,33 +185,6 @@ class OrderController {
     }
   }
 
-  static async onDeleteOrder(req, res, next) {
-    const { id: orderId } = req.params;
-    try {
-      const findOrder = await Order.findById(orderId);
-      if (!findOrder) {
-        throw { name: 'Not Found', message: 'Order not found' };
-      }
-
-      findOrder.menus.forEach(async (el) => {
-        const menuFound = await Menu.findById(el._id);
-        const payloadMenu = {
-          quantityOrder: menuFound.quantityOrder - el.totalPortion,
-        };
-        await Menu.update({ _id: el._id }, payloadMenu);
-      });
-
-      const deletedOrder = await Order.findOneAndDelete({ _id: orderId });
-
-      res
-        .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success('success remove order', deletedOrder));
-    } catch (error) {
-      console.log(error);
-      next(error);
-    }
-  }
-
   static async approveOrder(req, res, next) {
     const { id } = req.params;
     try {
@@ -253,50 +222,19 @@ class OrderController {
     }
   }
 
-  static async getAllOrders(req, res, next) {
-    const { id: userId } = req.user;
-    const { page, limit, flagDate } = req.query;
+  static async getOrderByInvoiceNumber(req, res, next) {
+    const { invoiceNumber: orderInvoiceNumber, customerFullname } = req.query;
     try {
-      const options = {
-        page: page || 1,
-        limit: limit || 100000,
-        sort: {
-          type: 'updated_at',
-          method: -1,
-        },
-      };
-      const filter = {
-        customerId: userId,
-      };
+      const findOrder = await Order.findOne({
+        invoiceNumber: orderInvoiceNumber,
+      });
 
-      // ! LATER ONLY SHOW THE ACTUAL ORDER OF THE EVENT
-      // if (flagDate === "now") {
-      //   filter.updated_at = { $gte: new Date() };
-      // }
-      const findOrdersById = await dataPagination(Order, filter, null, options);
-      res
-        .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success('success fetch data', findOrdersById));
-    } catch (error) {
-      console.log(error);
-      next(error);
-    }
-  }
-
-  static async getOrderById(req, res, next) {
-    const { id: userId } = req.user;
-    const { id: orderId } = req.params;
-
-    try {
-      const findOrder = await detailById(Order, orderId, null);
       if (!findOrder) {
         throw { name: 'Not Found', message: 'Order not found' };
       }
-      if (userId !== findOrder.customerId.toString()) {
-        throw {
-          name: 'Forbidden',
-          message: 'You have no authorization to look this order',
-        };
+
+      if (findOrder.customerFullname !== customerFullname) {
+        throw { name: 'Not Found', message: 'Order not found' };
       }
 
       const findPaymentType = await detailById(
