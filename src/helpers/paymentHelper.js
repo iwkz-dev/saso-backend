@@ -58,8 +58,6 @@ const createOrderPaypal = async (orderId, value) => {
     data,
   });
 
-  console.log('paypal response:', response);
-
   return response.data;
 };
 

@@ -466,13 +466,27 @@ module.exports = {
                                             <tr>
                                                 <td
                                                     style="width: 55%; font-size: 16px; font-weight: bold; color: #1b1b1b; padding-bottom: 5px;">
-                                                    Customer Id
+                                                    Status
                                                 </td>
                                                 <td
                                                     style="width: 45%; font-size: 16px; font-weight: bold; color: #1b1b1b; padding-bottom: 5px;">
-                                                    ${data.customerId.toString()}
+                                                    ${statusString}
                                                 </td>
                                             </tr>
+                                            ${
+                                              data.customerId === null
+                                                ? ''
+                                                : `<tr>
+                                                    <td
+                                                        style="width: 55%; font-size: 16px; font-weight: bold; color: #1b1b1b; padding-bottom: 5px;">
+                                                        Customer Id
+                                                    </td>
+                                                    <td
+                                                      style="width: 45%; font-size: 16px; font-weight: bold; color: #1b1b1b; padding-bottom: 5px;">
+                                                        ${data.customerId.toString()}
+                                                    </td>
+                                                </tr>`
+                                            }
                                         </tbody>
                                     </table>
                                 </td>
@@ -517,37 +531,9 @@ module.exports = {
                                             <tr>
                                                 <td colspan="2"
                                                     style="font-size: 16px; font-weight: bold; color: #666666; padding-bottom: 5px;">
-                                                    Payment Method (Bank Transfer)
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td
-                                                    style="width: 55%; font-size: 14px; line-height: 18px; color: #666666; padding: 12px 0">
-                                                    Bank Name: <span style="font-weight: 600;">
-                                                    ${
-                                                      data.eventData.bankName ||
-                                                      '-'
+                                                    Payment Method: ${
+                                                      data.paymentType
                                                     }
-                                                    </span>
-                                                </td>
-                                                <td
-                                                    style="width: 45%; font-size: 14px; line-height: 18px; color: #666666; padding: 12px 0">
-                                                    Account Name: <span style="font-weight: 600;">Indonesischer Weisheits- und Kulturzentrum e.V.</span>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td
-                                                    style="width: 55%; font-size: 14px; line-height: 18px; color: #666666; padding: 12px 0">
-                                                    IBAN: <span style="font-weight: 600;">${
-                                                      data.eventData.iban || '-'
-                                                    }
-                                                    </span>
-                                                </td>
-                                                <td
-                                                    style="width: 45%; font-size: 14px; line-height: 18px; color: #666666; padding: 12px 0">
-                                                    BIC: <span style="font-weight: 600;">${
-                                                      data.eventData.bic || '-'
-                                                    }</span>
                                                 </td>
                                             </tr>
                                             <tr>
