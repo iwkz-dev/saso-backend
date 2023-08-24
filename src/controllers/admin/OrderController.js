@@ -3,8 +3,12 @@
 const httpStatus = require('http-status-codes');
 const Order = require('@models/order');
 const Menu = require('@models/menu');
+const PaymentType = require('@models/paymentType');
+const Event = require('@models/event');
 const resHelpers = require('@helpers/responseHelpers');
 const { dataPagination } = require('@helpers/dataHelper');
+const { invoiceTemplate } = require('@helpers/templates');
+const { mailer } = require('@helpers/nodemailer');
 
 class OrderController {
   static async getAllOrders(req, res, next) {
@@ -75,6 +79,36 @@ class OrderController {
         { status: statusPayload, updated_at: new Date() },
         { new: true }
       );
+
+      const findUpdatedOrder = await Order.findById(id);
+
+      const findEvent = await Event.findOne({ _id: findUpdatedOrder.event });
+      if (findEvent.status !== 1 || !findEvent) {
+        throw { name: 'Bad Request', message: 'Event not found' };
+      }
+
+      const findPaymentType = await PaymentType.findOne({
+        _id: findUpdatedOrder.paymentType,
+      });
+      if (!findPaymentType) {
+        throw { name: 'Bad Request', message: 'Payment type not found' };
+      }
+
+      const dataEmail = {
+        ...findUpdatedOrder._doc,
+        eventData: { ...findEvent._doc },
+        paymentType: findPaymentType.type,
+      };
+
+      const template = invoiceTemplate(dataEmail);
+
+      await mailer({
+        from: 'noreply@gmail.com',
+        to: findUpdatedOrder.customerEmail,
+        subject: `SASO - Your Order ${findUpdatedOrder.invoiceNumber} payment status has been changed`,
+        html: template,
+      });
+
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('success change status', updateOrder));
