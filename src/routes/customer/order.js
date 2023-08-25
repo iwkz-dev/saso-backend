@@ -176,7 +176,7 @@ router.get('/:id/detail', OrderController.getOrderById);
 
 router.delete('/:id', OrderController.onDeleteOrder);
 
-router.post('/:id/approve', OrderController.approveOrder);
+router.post('/approve', OrderController.approveOrder);
 
 /**
  * @swagger

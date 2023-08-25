@@ -61,6 +61,21 @@ const createOrderPaypal = async (orderId, value) => {
   return response.data;
 };
 
+const getOrderPaypal = async (paypalOrderId, paypalAccessToken) => {
+  const url = `${getPaypalEndpointUrl()}/v2/checkout/orders/${paypalOrderId}`;
+
+  const response = await axios({
+    url,
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${paypalAccessToken}`,
+    },
+  });
+
+  return response.data;
+};
+
 const capturePayment = async (orderId) => {
   const { access_token: accessToken } = await generateAccessToken();
   const url = `${getPaypalEndpointUrl()}/v2/checkout/orders/${orderId}/capture`;
@@ -80,4 +95,5 @@ const capturePayment = async (orderId) => {
 module.exports = {
   createOrderPaypal,
   capturePayment,
+  getOrderPaypal,
 };

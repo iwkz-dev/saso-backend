@@ -126,7 +126,7 @@ router.post('/', OrderGuestController.order);
  */
 router.get('/search-order', OrderGuestController.getOrderByInvoiceNumber);
 
-router.post('/:id/approve-guest', OrderGuestController.approveOrder);
+router.post('/approve-guest', OrderGuestController.approveOrder);
 
 /**
  * @swagger
