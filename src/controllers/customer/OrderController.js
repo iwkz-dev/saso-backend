@@ -16,7 +16,7 @@ const { mailer } = require('@helpers/nodemailer');
 
 class OrderController {
   static async order(req, res, next) {
-    const { menus, event, arrivedAt, note, paymentType, userData } = req.body;
+    const { menus, event, arrivedAt, note, paymentType } = req.body;
     const userId = req.user.id;
 
     const session = await mongoose.startSession();
@@ -390,8 +390,22 @@ class OrderController {
           message: 'You have no authorization to look this order',
         };
       }
+
+      const findPaymentType = await PaymentType.findOne({
+        _id: findOrder.paymentType,
+      });
+      if (!findPaymentType) {
+        throw { name: 'Bad Request', message: 'Payment type not found' };
+      }
+
       findOrder.eventData = findEvent;
-      const template = invoiceTemplate(findOrder);
+      const dataEmail = {
+        ...findOrder._doc,
+        eventData: { ...findEvent._doc },
+        paymentType: findPaymentType.type,
+      };
+
+      const template = invoiceTemplate(dataEmail);
       const pdfData = await pdfGenerator(template);
       res.setHeader('Content-Type', 'application/pdf');
       res.send(pdfData);
