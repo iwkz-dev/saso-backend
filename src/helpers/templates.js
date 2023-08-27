@@ -315,20 +315,25 @@ module.exports = {
       options
     );
     let statusString = '';
+    let statusColor = '#1b1b1b';
     if (data.status === 0) {
       statusString = 'Not Paid';
+      statusColor = '#1b1b1b';
     }
 
     if (data.status === 1) {
       statusString = 'Paid';
+      statusColor = '#1F51FF';
     }
 
     if (data.status === 2) {
       statusString = 'Cancelled';
+      statusColor = '#C70039';
     }
 
     if (data.status === 3) {
       statusString = 'Done';
+      statusColor = '#228b22';
     }
     return `
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -469,7 +474,7 @@ module.exports = {
                                                     Status
                                                 </td>
                                                 <td
-                                                    style="width: 45%; font-size: 16px; font-weight: bold; color: #1b1b1b; padding-bottom: 5px;">
+                                                    style="width: 45%; font-size: 16px; font-weight: bold; color: ${statusColor}; padding-bottom: 5px;">
                                                     ${statusString}
                                                 </td>
                                             </tr>
