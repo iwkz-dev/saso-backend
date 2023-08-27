@@ -94,6 +94,9 @@ class OrderController {
       const findPaymentType = await PaymentType.findOne({
         type: paymentType,
       });
+      if (!findPaymentType) {
+        throw { name: 'Bad Request', message: 'Payment type not found' };
+      }
 
       //* CHECK IF THE MENU IS OUT OF STOCK *//
       findMenu.forEach((findError) => {
@@ -119,25 +122,6 @@ class OrderController {
         totalPrice += el;
       });
 
-      const payload = {
-        invoiceNumber,
-        menus: findMenu,
-        totalPrice,
-        status: 0,
-        customerId: null,
-        customerFullname: userData.fullname,
-        customerEmail: userData.email,
-        customerPhone: userData.phone,
-        event: findEvent.id,
-        note: note || '',
-        arrived_at: arrivedAt,
-        updated_at: new Date(),
-        created_at: new Date(),
-        paymentType: findPaymentType.id,
-      };
-
-      const createOrder = await Order.create(payload);
-
       let paymentResponse;
       if (findPaymentType.type === 'paypal') {
         paymentResponse = await createOrderPaypal(invoiceNumber, totalPrice);
@@ -149,6 +133,26 @@ class OrderController {
           message: 'Booking success, please transfer to our bank account',
         };
       }
+
+      const payload = {
+        invoiceNumber,
+        menus: findMenu,
+        totalPrice,
+        status: 0,
+        customerId: '',
+        customerFullname: userData.fullname,
+        customerEmail: userData.email,
+        customerPhone: userData.phone,
+        event: findEvent.id,
+        note: note || '',
+        arrived_at: arrivedAt,
+        updated_at: new Date(),
+        created_at: new Date(),
+        paymentType: findPaymentType.id,
+        paypalOrderId: paymentResponse.id || '',
+      };
+
+      const createOrder = await Order.create(payload);
 
       const dataEmail = {
         ...createOrder._doc,
@@ -209,7 +213,10 @@ class OrderController {
 
       // 0 = no action
       const newStatus = 1;
-      const findOrder = await Order.findOne({ invoiceNumber });
+      const findOrder = await Order.findOne({
+        invoiceNumber,
+        paypalOrderId: orderID,
+      });
       if (!findOrder) {
         throw { name: 'Not Found', message: 'Order not found' };
       }
@@ -231,6 +238,9 @@ class OrderController {
       });
       if (!findPaymentType) {
         throw { name: 'Bad Request', message: 'Payment type not found' };
+      }
+      if (findPaymentType.type !== 'paypal') {
+        throw { name: 'Bad Request', message: 'Order can not be approved' };
       }
 
       await Order.update(
