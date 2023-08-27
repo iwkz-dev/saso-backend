@@ -139,7 +139,7 @@ class OrderController {
         menus: findMenu,
         totalPrice,
         status: 0,
-        customerId: '',
+        customerId: null,
         customerFullname: userData.fullname,
         customerEmail: userData.email,
         customerPhone: userData.phone,
