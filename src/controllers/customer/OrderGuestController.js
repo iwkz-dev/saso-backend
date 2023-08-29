@@ -315,42 +315,6 @@ class OrderController {
       next(error);
     }
   }
-
-  static async generatePdf(req, res, next) {
-    const { id: orderId } = req.params;
-    const { id: userId } = req.user;
-
-    try {
-      const findOrder = await detailById(Order, orderId, null);
-      const findEvent = await detailById(Event, findOrder.event, null);
-      if (!findOrder) {
-        throw { name: 'Not Found', message: 'Order not found' };
-      }
-      if (!findEvent) {
-        throw { name: 'Not Found', message: 'Event not found' };
-      }
-      if (userId !== findOrder.customerId.toString()) {
-        throw {
-          name: 'Forbidden',
-          message: 'You have no authorization to look this order',
-        };
-      }
-      findOrder.eventData = findEvent;
-      const template = invoiceTemplate(findOrder);
-      const pdfData = await pdfGenerator(template);
-      res.setHeader('Content-Type', 'application/pdf');
-      res.send(pdfData);
-    } catch (error) {
-      // if (error.name) {
-      //   res
-      //     .status(httpStatus.StatusCodes.OK)
-      //     .json(resHelpers.success("success download pdf"));
-      // } else {
-      console.log(error.name);
-      next(error);
-      // }
-    }
-  }
 }
 
 module.exports = OrderController;

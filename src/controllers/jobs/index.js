@@ -3,11 +3,11 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 const cron = require('node-cron');
 
-const { paymentPaypalCleaner } = require('./paymentPaypalCleaner');
+const { orderCleaner } = require('./orderCleaner');
 
 const startJobs = () => {
   cron.schedule('0 23 * * *', () => {
-    paymentPaypalCleaner();
+    orderCleaner();
   });
 };
 

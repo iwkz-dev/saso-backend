@@ -193,33 +193,6 @@ class OrderController {
     }
   }
 
-  static async onDeleteOrder(req, res, next) {
-    const { id: orderId } = req.params;
-    try {
-      const findOrder = await Order.findById(orderId);
-      if (!findOrder) {
-        throw { name: 'Not Found', message: 'Order not found' };
-      }
-
-      findOrder.menus.forEach(async (el) => {
-        const menuFound = await Menu.findById(el._id);
-        const payloadMenu = {
-          quantityOrder: menuFound.quantityOrder - el.totalPortion,
-        };
-        await Menu.update({ _id: el._id }, payloadMenu);
-      });
-
-      const deletedOrder = await Order.findOneAndDelete({ _id: orderId });
-
-      res
-        .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success('success remove order', deletedOrder));
-    } catch (error) {
-      console.log(error);
-      next(error);
-    }
-  }
-
   static async approveOrder(req, res, next) {
     const { orderID, facilitatorAccessToken } = req.body;
     try {
