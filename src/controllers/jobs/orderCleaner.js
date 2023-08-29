@@ -2,21 +2,18 @@
 
 const Order = require('@models/order');
 const Event = require('@models/event');
-const PaymentType = require('@models/paymentType');
 
-const paymentPaypalCleaner = async () => {
+const orderCleaner = async () => {
   try {
     // 0 = no action
     const statusPayload = 0;
-    const findPaymentType = await PaymentType.findOne({ type: 'paypal' });
     const findEvent = await Event.findOne({ status: 1 });
     const oneDayAgo = new Date();
     oneDayAgo.setDate(oneDayAgo.getDate() - 1);
 
     Order.updateMany(
       {
-        created_at: { $lt: oneDayAgo },
-        paymentType: findPaymentType.id,
+        updated_at: { $lt: oneDayAgo },
         event: findEvent.id,
         status: statusPayload,
       },
@@ -33,4 +30,4 @@ const paymentPaypalCleaner = async () => {
   }
 };
 
-module.exports = { paymentPaypalCleaner };
+module.exports = { orderCleaner };

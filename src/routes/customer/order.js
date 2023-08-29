@@ -174,8 +174,6 @@ router.get('/', OrderController.getAllOrders);
  */
 router.get('/:id/detail', OrderController.getOrderById);
 
-router.delete('/:id', OrderController.onDeleteOrder);
-
 router.post('/approve', OrderController.approveOrder);
 
 /**
