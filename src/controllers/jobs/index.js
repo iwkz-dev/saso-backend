@@ -6,7 +6,7 @@ const cron = require('node-cron');
 const { orderCleaner } = require('./orderCleaner');
 
 const startJobs = () => {
-  cron.schedule('0 23 * * *', () => {
+  cron.schedule('0 23 */2 * *', () => {
     orderCleaner();
   });
 };
