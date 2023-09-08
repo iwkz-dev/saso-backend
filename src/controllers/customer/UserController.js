@@ -10,7 +10,7 @@ class UserController {
   static async register(req, res, next) {
     const payload = {
       fullname: req.body.fullname,
-      email: req.body.email,
+      email: req.body.email.toLowerCase(),
       password: req.body.password,
       isActive: true,
       phone: req.body.phone,
@@ -19,7 +19,9 @@ class UserController {
       created_at: new Date(),
     };
     try {
-      const findEmail = await User.findOne({ email: req.body.email });
+      const findEmail = await User.findOne({
+        email: payload.email,
+      });
 
       if (findEmail) {
         throw { name: 'Bad Request', message: 'Email is already registered' };

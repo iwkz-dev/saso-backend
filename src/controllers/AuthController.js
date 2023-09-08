@@ -16,7 +16,8 @@ class AuthController {
    * @param {Object} next
    */
   static async login(req, res, next) {
-    const { email, password, type } = req.body;
+    const { password, type } = req.body;
+    const email = req.body.email.toLowerCase();
 
     try {
       if (!type) {
@@ -83,7 +84,7 @@ class AuthController {
   }
 
   static async forgetPassword(req, res, next) {
-    const { email } = req.body;
+    const email = req.body.email.toLowerCase();
 
     try {
       const forgetPasswordToken = jwtSign(
