@@ -23,6 +23,7 @@ const generateAccessToken = async () => {
     method: 'POST',
     auth: {
       username: PAYPAL_CLIENT_ID,
+      password: PAYPAL_SECRET || '',
     },
     data: 'grant_type=client_credentials',
   });
