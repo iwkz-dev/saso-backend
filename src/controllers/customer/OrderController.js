@@ -215,9 +215,14 @@ class OrderController {
         };
       }
 
-      const invoiceNumber = paymentResponse.purchase_units[0].description
-        .split(':')[1]
-        .trim();
+      // Use a regular expression to find the "SS23-178" pattern
+      const regex = /Invoice number: ([A-Z0-9-]+)/;
+
+      // Use the match method to find the first match of the regular expression in the input string
+      const match = paymentResponse.purchase_units[0].description.match(regex);
+
+      // Check if a match was found and extract the desired value
+      const invoiceNumber = match[1].trim();
 
       // 0 = no action
       const newStatus = 1;
