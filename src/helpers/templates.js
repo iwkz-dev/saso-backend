@@ -536,38 +536,48 @@ module.exports = {
                                                   ${
                                                     data.paymentType ===
                                                     'transfer'
-                                                      ? ` 
+                                                      ? `
                                                       <tr>
                                                       <td colspan="2"
-                                                          style="font-size: 16px; font-weight: bold; color: #666666; padding-bottom: 5px;">
+                                                          style="font-size: 16px; font-weight: bold; color: #666666; padding-bottom: 12px;">
                                                           Payment Method: ${
                                                             data.paymentType
                                                           }
                                                       </td>
                                                   </tr>
+                                                  <tr>
+                                                  <td
+                                                      style="width: 55%; font-size: 14px; line-height: 18px; color: #666666; vertical-align: top;">
+                                                      Paypal: ${
+                                                        data.eventData.paypal
+                                                          ? `${data.eventData.paypal}`
+                                                          : '-'
+                                                      }
+                                                  </td>
+                                              </tr>
                                                       <tr>
                                                   <td
-                                                      style="width: 55%; font-size: 14px; line-height: 18px; color: #666666;">
+                                                      style="width: 55%; font-size: 14px; line-height: 18px; color: #666666; vertical-align: top;">
                                                       Bank Name: ${
                                                         data.eventData
                                                           .bankName || '-'
                                                       }
                                                   </td>
                                                   <td
-                                                      style="width: 45%; font-size: 14px; line-height: 18px; color: #666666;">
+                                                      style="width: 45%; font-size: 14px; line-height: 18px; color: #666666; vertical-align: top;">
                                                       Account Name: Indonesischer Weisheits- und Kulturzentrum e.V.
                                                   </td>
                                               </tr>
                                               <tr>
                                                   <td
-                                                      style="width: 55%; font-size: 14px; line-height: 18px; color: #666666;">
+                                                      style="width: 55%; font-size: 14px; line-height: 18px; color: #666666; vertical-align: top;">
                                                       IBAN: ${
                                                         data.eventData.iban ||
                                                         '-'
                                                       }
                                                   </td>
                                                   <td
-                                                      style="width: 45%; font-size: 14px; line-height: 18px; color: #666666;">
+                                                      style="width: 45%; font-size: 14px; line-height: 18px; color: #666666; vertical-align: top;">
                                                       BIC: ${
                                                         data.eventData.bic ||
                                                         '-'
@@ -581,10 +591,10 @@ module.exports = {
                                                     'paypal'
                                                       ? `<tr>
                                                       <td colspan="2"
-                                                        style="width: 55%; font-size: 16px; font-weight: bold; line-height: 18px; color: #666666; padding: 10px 0px;">
+                                                        style="width: 55%; font-size: 16px; font-weight: bold; line-height: 18px; color: #666666; padding: 10px 0px; vertical-align: top;">
                                                         Payment Method (Paypal) : ${
                                                           data.eventData.paypal
-                                                            ? `@${data.eventData.paypal}`
+                                                            ? `${data.eventData.paypal}`
                                                             : '-'
                                                         }
                                                       </td>

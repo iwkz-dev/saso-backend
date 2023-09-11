@@ -34,16 +34,21 @@ const generateAccessToken = async () => {
 const createOrderPaypal = async (orderId, value) => {
   const { access_token: accessToken } = await generateAccessToken();
   const url = `${getPaypalEndpointUrl()}/v2/checkout/orders`;
+  // Calculate the value with fee
+  const fixedFee = 0.39;
+  const percentageFee = 2.99;
+  const valueWithFee = (value + fixedFee) / (1 - percentageFee / 100);
 
-  // TODO: change me
   const data = {
     intent: 'CAPTURE',
     purchase_units: [
       {
-        description: `Invoice number: ${orderId}`,
+        description: `Invoice number: ${orderId}, (Price includes PayPal fee €${(
+          valueWithFee - value
+        ).toFixed(2)}) `,
         amount: {
           currency_code: getCurrencyCode(),
-          value,
+          value: valueWithFee.toFixed(2),
         },
       },
     ],
