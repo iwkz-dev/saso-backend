@@ -565,7 +565,7 @@ module.exports = {
                                                   </td>
                                                   <td
                                                       style="width: 45%; font-size: 14px; line-height: 18px; color: #666666; vertical-align: top;">
-                                                      Account Name: Indonesischer Weisheits- und Kulturzentrum e.V.
+                                                      Account Name: IWKZ e.V.
                                                   </td>
                                               </tr>
                                               <tr>
