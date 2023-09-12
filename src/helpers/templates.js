@@ -545,16 +545,6 @@ module.exports = {
                                                           }
                                                       </td>
                                                   </tr>
-                                                  <tr>
-                                                  <td
-                                                      style="width: 55%; font-size: 14px; line-height: 18px; color: #666666; vertical-align: top;">
-                                                      Paypal: ${
-                                                        data.eventData.paypal
-                                                          ? `${data.eventData.paypal}`
-                                                          : '-'
-                                                      }
-                                                  </td>
-                                              </tr>
                                                       <tr>
                                                   <td
                                                       style="width: 55%; font-size: 14px; line-height: 18px; color: #666666; vertical-align: top;">
