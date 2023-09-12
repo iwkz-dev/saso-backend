@@ -602,8 +602,10 @@ module.exports = {
                                                 <tr>
                                                 <td colspan="2"
                                                   style="width: 100%; text-align: center; font-size: 12px; color: #f1807e; padding-top: 12px 0">
-                                                    <span style="font-weight: 600;">
-                                                      Unpaid orders will be canceled automatically within 2x24 hours. Please send the proof to the contact person.
+                                                    <span>
+                                                      Unpaid orders will be canceled automatically within 2x24 hours. 
+                                                      <br/>
+                                                      Please send the proof to the contact person.
                                                     </span>
                                                 </td>
                                             </tr>
