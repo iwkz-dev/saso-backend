@@ -38,6 +38,6 @@ app.use((req, res, next) => {
   next(createError(404));
 });
 
-startJobs();
+// startJobs();
 
 module.exports = app;
