@@ -248,7 +248,7 @@ class OrderController {
         throw { name: 'Bad Request', message: 'Order can not be approved' };
       }
 
-      await Order.update(
+      await Order.updateOne(
         { _id: findOrder._id },
         { status: newStatus, updated_at: new Date() },
         { new: true }
