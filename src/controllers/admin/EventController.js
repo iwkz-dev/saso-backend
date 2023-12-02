@@ -18,7 +18,7 @@ class EventController {
 
     const payload = {
       name,
-      description: req.body.description,
+      description: req.body.description || '',
       started_at: req.body.started_at,
       images: req.body.imagesData,
       status: 0,
@@ -189,7 +189,7 @@ class EventController {
 
       const payload = {
         name: req.body.name,
-        description: req.body.description,
+        description: req.body.description || '',
         started_at: req.body.started_at,
         startYear: getYear[0],
         images: payloadImages.imagesSaved,
@@ -243,7 +243,7 @@ class EventController {
         updated_at: new Date(),
       };
 
-      const updateEventImages = await Event.update({ _id: id }, payload, {
+      const updateEventImages = await Event.updateOne({ _id: id }, payload, {
         new: true,
       });
 

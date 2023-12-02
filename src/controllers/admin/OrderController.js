@@ -52,10 +52,13 @@ class OrderController {
         throw { name: 'Not Found', message: 'Order not found' };
       }
       if (findOrder.status === 2) {
-        throw {
-          name: 'Bad Request',
-          message: 'Order has been canceled or refund can not be changed',
-        };
+        findOrder.menus.forEach(async (el) => {
+          const menuFound = await Menu.findById(el._id);
+          const payloadMenu = {
+            quantityOrder: menuFound.quantityOrder + el.totalPortion,
+          };
+          await Menu.updateOne({ _id: el._id }, payloadMenu);
+        });
       }
       if (status === 'paid') {
         statusPayload = 1;
@@ -67,14 +70,14 @@ class OrderController {
           const payloadMenu = {
             quantityOrder: menuFound.quantityOrder - el.totalPortion,
           };
-          await Menu.update({ _id: el._id }, payloadMenu);
+          await Menu.updateOne({ _id: el._id }, payloadMenu);
         });
       }
       if (status === 'done') {
         statusPayload = 3;
       }
 
-      const updateOrder = await Order.update(
+      const updateOrder = await Order.updateOne(
         { _id: id },
         { status: statusPayload, updated_at: new Date() },
         { new: true }

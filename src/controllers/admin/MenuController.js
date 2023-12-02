@@ -282,7 +282,7 @@ class MenuController {
         updated_at: new Date(),
       };
 
-      const updateMenuImages = await Menu.update({ _id: id }, payload, {
+      const updateMenuImages = await Menu.updateOne({ _id: id }, payload, {
         new: true,
       });
 
