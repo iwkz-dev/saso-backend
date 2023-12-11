@@ -17,6 +17,9 @@ const menuSchema = new mongoose.Schema({
   description: {
     type: String,
   },
+  note: {
+    type: String,
+  },
   quantity: {
     type: Number,
     min: [0, 'Cannot be lower than 0'],
