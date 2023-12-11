@@ -545,18 +545,32 @@ module.exports = {
                                                           }
                                                       </td>
                                                   </tr>
-                                                      <tr>
-                                                  <td
+                                                  <tr>
+                                                    <td colspan="2"
                                                       style="width: 55%; font-size: 14px; line-height: 18px; color: #666666; vertical-align: top;">
-                                                      Bank Name: ${
-                                                        data.eventData
-                                                          .bankName || '-'
+                                                      Paypal: ${
+                                                        data.eventData.paypal
+                                                          ? `${data.eventData.paypal}`
+                                                          : '-'
                                                       }
-                                                  </td>
-                                                  <td
-                                                      style="width: 45%; font-size: 14px; line-height: 18px; color: #666666; vertical-align: top;">
-                                                      Account Name: IWKZ e.V.
-                                                  </td>
+                                                    </td>
+                                                  </tr>
+                                                  <tr>
+                                                    <td style="font-size:14px;line-height:18px;color:#757575;padding-bottom:10px">
+                                                    </td>
+                                                  </tr>
+                                                  <tr>
+                                                    <td
+                                                        style="width: 55%; font-size: 14px; line-height: 18px; color: #666666; vertical-align: top;">
+                                                        Bank Name: ${
+                                                          data.eventData
+                                                            .bankName || '-'
+                                                        }
+                                                    </td>
+                                                    <td
+                                                        style="width: 45%; font-size: 14px; line-height: 18px; color: #666666; vertical-align: top;">
+                                                        Account Name: IWKZ e.V.
+                                                    </td>
                                               </tr>
                                               <tr>
                                                   <td

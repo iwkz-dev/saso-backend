@@ -3,7 +3,11 @@
 const httpStatus = require('http-status-codes');
 const ContactPerson = require('@models/contactPerson');
 const resHelpers = require('@helpers/responseHelpers');
-const { dataPagination, firstWordUppercase } = require('@helpers/dataHelper');
+const {
+  dataPagination,
+  detailById,
+  firstWordUppercase,
+} = require('@helpers/dataHelper');
 
 class ContactPersonController {
   static async create(req, res, next) {
@@ -12,7 +16,6 @@ class ContactPersonController {
     const payload = {
       name,
       phoneNumber: req.body.phoneNumber,
-      type: req.body.type || 0,
       event: req.body.event || null,
       updated_at: new Date(),
       created_at: new Date(),
@@ -81,6 +84,22 @@ class ContactPersonController {
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('success fetch data', findContactPersons));
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
+  static async getContactPersonById(req, res, next) {
+    const { id } = req.params;
+    try {
+      const findContactPerson = await detailById(ContactPerson, id, null);
+      if (!findContactPerson) {
+        throw { name: 'Not Found', message: 'Contact Person not found' };
+      }
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success('success fetch data', findContactPerson));
     } catch (error) {
       console.log(error);
       next(error);

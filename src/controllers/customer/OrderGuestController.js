@@ -30,8 +30,12 @@ class OrderController {
 
       const strStartYear = findEvent.startYear.toString();
       const date = `${strStartYear.charAt(2)}${strStartYear.charAt(3)}`;
+      const code = findEvent.name
+        .split(' ')
+        .map((letter) => letter.charAt(0))
+        .join('');
 
-      let invoiceNumber = `SS${date}-`;
+      let invoiceNumber = `${code}${date}-`;
       if (countData < 10) {
         invoiceNumber += `00${countData + 1}`;
       } else if (countData < 100) {
@@ -86,6 +90,7 @@ class OrderController {
               quantityOrder: totalOrder,
             };
             await Menu.findOneAndUpdate({ _id: el._id }, payloadMenu);
+            foundMenu.note = el.note;
             return foundMenu;
           }
         })

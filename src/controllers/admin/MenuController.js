@@ -24,6 +24,7 @@ class MenuController {
       name,
       barcode: req.body.barcode ?? '',
       description: req.body.description,
+      note: req.body.note || '',
       quantity: +req.body.quantity,
       quantityOrder: +req.body.quantityOrder || 0,
       price: +req.body.price,
@@ -179,6 +180,7 @@ class MenuController {
         name: req.body.name,
         barcode: req.body.barcode ?? '',
         description: req.body.description,
+        note: req.body.note || '',
         price: +req.body.price,
         category: req.body.category,
         quantity: +req.body.quantity,
@@ -374,8 +376,9 @@ class MenuController {
           }
           item.name = item[0];
           item.description = item[1];
-          item.quantity = item[2];
-          item.price = item[3];
+          item.note = item[2];
+          item.quantity = item[3];
+          item.price = item[4];
           item.quantityOrder = 0;
           item.updated_at = new Date();
           item.created_at = new Date();
