@@ -15,7 +15,7 @@ async function imgKitUploadMulti(req, res, next) {
           const typeFile =
             el.originalname.split('.')[el.originalname.split('.').length - 1];
           if (typeFile === 'jpg' || typeFile === 'png' || typeFile === 'jpeg') {
-            if (el.size < 2000000) {
+            if (el.size < 12000000) {
               const encodePrivateKey = Buffer.from(
                 `${process.env.IMGKIT_PRIVATE_KEY}:`,
                 'utf-8'
