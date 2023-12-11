@@ -11,9 +11,6 @@ const contactPersonSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Phone Number is required'],
   },
-  type: {
-    type: Number,
-  },
   event: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Events',

@@ -133,6 +133,51 @@ router.get('/', ContactPersonController.getAllContactPersons);
 
 /**
  * @swagger
+ * /admin/contactPerson/{id}/detail:
+ *    get:
+ *      summary: Return the details of contact person
+ *      tags: [Admin-Contact-Person]
+ *      security:
+ *         - ApiKeyAuth: []
+ *      parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ContactPerson id
+ *      responses:
+ *        "200":
+ *          description: OK
+ *          content:
+ *             application/json:
+ *               schema:
+ *                  $ref: '#/components/schemas/ContactPerson'
+ *        "401":
+ *           description: Invalid Access token
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Invalid Access Token
+ *                error: Invalid Auth
+ *        "404":
+ *           description: Menu not found
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Menu not found
+ *                error: Not Found
+ */
+router.get('/:id/detail', ContactPersonController.getContactPersonById);
+
+/**
+ * @swagger
  * /admin/contact-person/{id}:
  *    delete:
  *      summary: Delete an Contact Person

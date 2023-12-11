@@ -2,8 +2,9 @@
 
 const httpStatus = require('http-status-codes');
 const Event = require('@models/event');
+const ContactPerson = require('@models/contactPerson');
 const resHelpers = require('@helpers/responseHelpers');
-const { dataPagination, getOneData } = require('@helpers/dataHelper');
+const { dataPagination } = require('@helpers/dataHelper');
 
 class EventController {
   // -1 for descending & 1 for ascending
@@ -40,6 +41,17 @@ class EventController {
       }
       const findEvents = await dataPagination(Event, filter, null, options);
 
+      const eventWithContactPerson = await Promise.all(
+        findEvents.data.map(async (event) => {
+          const filterContactPersons = { event: event._id };
+          const contactPersons = await ContactPerson.find(filterContactPersons);
+          return {
+            ...event._doc,
+            contactPersons,
+          };
+        })
+      );
+      findEvents.data = eventWithContactPerson;
       // const findEvents = await Event.find(null, null, {
       //   sort: { updated_at: -1 },
       //   limit: limit * 1,
