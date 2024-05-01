@@ -12,13 +12,13 @@ const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
 const routers = require('@routes');
 const { openAPIDocs } = require('@configs/swagger');
-const { startJobs } = require('./controllers/jobs');
+// const { startJobs } = require('./controllers/jobs');
 
 // ! BEST PRACTICE REQUIRE YANG DARI MODULE DIATAS ABIS ITU REQUIRE YANG ADA DI FILE LOCAL
 const app = express();
 
 // paypal payment test
-app.get('/', (req, res) => res.sendFile(`${__dirname}/paypal.html`));
+// app.get('/', (req, res) => res.sendFile(`${__dirname}/paypal.html`));
 
 app.use(logger('dev'));
 
@@ -31,7 +31,6 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openAPIDocs));
 // app.get("/api-docs", );
 
 const uriPrefix = process.env.API_PREFIX || '/api/v1';
-console.log(uriPrefix);
 app.use(uriPrefix, routers);
 
 app.use((req, res, next) => {

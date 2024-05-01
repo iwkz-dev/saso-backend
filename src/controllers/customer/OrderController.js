@@ -92,14 +92,11 @@ class OrderController {
               quantityOrder: totalOrder,
             };
             await Menu.findOneAndUpdate({ _id: el._id }, payloadMenu);
-            console.log(el);
             foundMenu.note = el.note;
             return foundMenu;
           }
         })
       );
-
-      console.log(findMenu);
 
       const findPaymentType = await PaymentType.findOne({
         type: paymentType,

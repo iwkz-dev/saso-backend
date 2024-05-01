@@ -8,7 +8,6 @@ const Event = require('@models/event');
 const PaymentType = require('@models/paymentType');
 const resHelpers = require('@helpers/responseHelpers');
 const { invoiceTemplate } = require('@helpers/templates');
-const { pdfGenerator } = require('@helpers/pdfGenerator');
 const { detailById } = require('@helpers/dataHelper');
 const { createOrderPaypal, getOrderPaypal } = require('@helpers/paymentHelper');
 const { mailer } = require('@helpers/nodemailer');
