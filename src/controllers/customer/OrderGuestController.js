@@ -19,29 +19,26 @@ class OrderController {
     const session = await mongoose.startSession();
     try {
       session.startTransaction();
-      // ! LATER: WILL BE AUTOMATED SS21
-      const findEvent = await Event.findOne({ _id: event });
-      if (findEvent.status !== 1 || !findEvent) {
+
+      const findEvent = await Event.findOne({ _id: event }).session(session);
+      if (!findEvent || findEvent.status !== 1) {
         throw { name: 'Bad Request', message: 'Event not found' };
       }
 
-      const countData = await Order.countDocuments({ event: findEvent.id });
+      const countData = await Order.countDocuments({
+        event: findEvent.id,
+      }).session(session);
 
       const strStartYear = findEvent.startYear.toString();
-      const date = `${strStartYear.charAt(2)}${strStartYear.charAt(3)}`;
+      const date = strStartYear.slice(-2);
       const code = findEvent.name
         .split(' ')
-        .map((letter) => letter.charAt(0))
+        .map((word) => word[0])
         .join('');
 
-      let invoiceNumber = `${code}${date}-`;
-      if (countData < 10) {
-        invoiceNumber += `00${countData + 1}`;
-      } else if (countData < 100) {
-        invoiceNumber += `0${countData + 1}`;
-      } else {
-        invoiceNumber += `${countData + 1}`;
-      }
+      const invoiceNumber = `${code}${date}-${(countData + 1)
+        .toString()
+        .padStart(3, '0')}`;
 
       const resetQuantity = [];
       const findMenu = await Promise.all(
@@ -50,26 +47,21 @@ class OrderController {
             _id: el._id,
             event: findEvent.id,
           })
-            .select(['-updated_at', '-created_at', '-description'])
-            .lean();
+            .select('-updated_at -created_at -description')
+            .lean()
+            .session(session);
 
-          if (!foundMenu) {
+          if (!foundMenu)
             throw { name: 'Not Found', message: 'Menu not found' };
-          }
 
-          if (el.totalPortion <= 0 || !el.totalPortion) {
+          if (el.totalPortion <= 0) {
             throw {
               name: 'Bad Request',
-              message: `Portion should be greater 0`,
+              message: 'Portion should be greater than 0',
             };
           }
-          let quantityFound = foundMenu.quantityOrder;
 
-          if (!quantityFound) {
-            quantityFound = 0;
-          }
-
-          const totalOrder = quantityFound + el.totalPortion;
+          const totalOrder = (foundMenu.quantityOrder || 0) + el.totalPortion;
 
           if (foundMenu.quantity < totalOrder) {
             return {
@@ -83,12 +75,11 @@ class OrderController {
               quantityOrder: foundMenu.quantityOrder,
             });
             foundMenu.totalPortion = el.totalPortion;
-            delete foundMenu.quantity;
-            delete foundMenu.quantityOrder;
-            const payloadMenu = {
-              quantityOrder: totalOrder,
-            };
-            await Menu.findOneAndUpdate({ _id: el._id }, payloadMenu);
+            await Menu.findOneAndUpdate(
+              { _id: el._id },
+              { quantityOrder: totalOrder },
+              { session }
+            );
             foundMenu.note = el.note;
             return foundMenu;
           }
@@ -97,40 +88,34 @@ class OrderController {
 
       const findPaymentType = await PaymentType.findOne({
         type: paymentType,
-      });
-      if (!findPaymentType) {
+      }).session(session);
+      if (!findPaymentType)
         throw { name: 'Bad Request', message: 'Payment type not found' };
-      }
 
-      //* CHECK IF THE MENU IS OUT OF STOCK *//
-      findMenu.forEach((findError) => {
+      findMenu.forEach(async (findError) => {
         if (findError.error) {
-          resetQuantity.forEach(async (el) => {
-            await Menu.findOneAndUpdate(
-              { _id: el.id },
-              { quantityOrder: el.quantityOrder },
-              { new: true }
-            );
-          });
-          throw {
-            name: findError.name,
-            message: findError.message,
-          };
+          await Promise.all(
+            resetQuantity.map(async (el) => {
+              await Menu.findOneAndUpdate(
+                { _id: el.id },
+                { quantityOrder: el.quantityOrder },
+                { session }
+              );
+            })
+          );
+          throw { name: findError.name, message: findError.message };
         }
       });
 
-      const totalEachMenu = findMenu.map((el) => el.price * el.totalPortion);
-
-      let totalPrice = 0;
-      totalEachMenu.forEach((el) => {
-        totalPrice += el;
-      });
+      const totalPrice = findMenu.reduce(
+        (total, el) => total + el.price * el.totalPortion,
+        0
+      );
 
       let paymentResponse;
       if (findPaymentType.type === 'paypal') {
         paymentResponse = await createOrderPaypal(invoiceNumber, totalPrice);
-      }
-      if (findPaymentType.type === 'transfer') {
+      } else if (findPaymentType.type === 'transfer') {
         paymentResponse = {
           status: 'success',
           type: 'transfer',
@@ -156,11 +141,11 @@ class OrderController {
         paypalOrderId: paymentResponse.id || '',
       };
 
-      const createOrder = await Order.create(payload);
+      const createOrder = await Order.create([payload], { session });
 
       const dataEmail = {
-        ...createOrder._doc,
-        eventData: { ...findEvent._doc },
+        ...createOrder[0]._doc,
+        eventData: findEvent.toObject(),
         paymentType: findPaymentType.type,
       };
 
@@ -168,30 +153,34 @@ class OrderController {
 
       await mailer({
         from: 'noreply@gmail.com',
-        to: createOrder.customerEmail,
-        subject: `SASO - Your Order ${createOrder.invoiceNumber}`,
+        to: createOrder[0].customerEmail,
+        subject: `SASO - Your Order ${createOrder[0].invoiceNumber}`,
         html: template,
       });
 
+      await session.commitTransaction();
       res.status(httpStatus.StatusCodes.CREATED).json(
-        resHelpers.success('success create an order', {
-          createOrder,
+        resHelpers.success('Success create an order', {
+          createOrder: createOrder[0],
           paymentResponse,
         })
       );
-      await session.commitTransaction();
     } catch (error) {
       await session.abortTransaction();
       console.log(error);
       next(error);
     } finally {
-      await session.endSession();
+      session.endSession();
     }
   }
 
   static async approveOrder(req, res, next) {
     const { orderID, facilitatorAccessToken } = req.body;
+
+    const session = await mongoose.startSession();
     try {
+      session.startTransaction();
+
       const paymentResponse = await getOrderPaypal(
         orderID,
         facilitatorAccessToken
@@ -204,65 +193,74 @@ class OrderController {
         };
       }
 
-      if (paymentResponse.purchase_units.length <= 0) {
+      if (
+        !paymentResponse.purchase_units ||
+        paymentResponse.purchase_units.length === 0
+      ) {
+        throw { name: 'Bad Request', message: 'There is no purchase unit' };
+      }
+
+      const description = paymentResponse.purchase_units[0].description;
+      const regex = /Invoice number: ([A-Z0-9-]+)/;
+      const match = description.match(regex);
+
+      if (!match || !match[1]) {
         throw {
           name: 'Bad Request',
-          message: 'There is no purchase unit',
+          message: 'Invoice number not found in description',
         };
       }
 
-      // Use a regular expression to find the "SS23-178" pattern
-      const regex = /Invoice number: ([A-Z0-9-]+)/;
-
-      // Use the match method to find the first match of the regular expression in the input string
-      const match = paymentResponse.purchase_units[0].description.match(regex);
-
-      // Check if a match was found and extract the desired value
       const invoiceNumber = match[1].trim();
 
-      // 0 = no action
-      const newStatus = 1;
       const findOrder = await Order.findOne({
         invoiceNumber,
         paypalOrderId: orderID,
-      });
+      }).session(session);
+
       if (!findOrder) {
         throw { name: 'Not Found', message: 'Order not found' };
       }
+
       if (findOrder.status === 2) {
         throw {
           name: 'Bad Request',
-          message: 'Order has been canceled or refund can not be changed',
-        };
-      }
-      if (findOrder.status !== 0) {
-        throw {
-          name: 'Bad Request',
-          message: 'Order can not be approved',
+          message: 'Order has been canceled or refunded, and cannot be changed',
         };
       }
 
-      const findPaymentType = await PaymentType.findOne({
-        _id: findOrder.paymentType,
-      });
-      if (!findPaymentType) {
-        throw { name: 'Bad Request', message: 'Payment type not found' };
+      if (findOrder.status !== 0) {
+        throw { name: 'Bad Request', message: 'Order cannot be approved' };
       }
-      if (findPaymentType.type !== 'paypal') {
-        throw { name: 'Bad Request', message: 'Order can not be approved' };
+
+      const findPaymentType = await PaymentType.findById(
+        findOrder.paymentType
+      ).session(session);
+      if (!findPaymentType || findPaymentType.type !== 'paypal') {
+        throw {
+          name: 'Bad Request',
+          message: 'Payment type not found or is not PayPal',
+        };
       }
 
       await Order.updateOne(
         { _id: findOrder._id },
-        { status: newStatus, updated_at: new Date() },
-        { new: true }
+        { status: 1, updated_at: new Date() },
+        { session }
       );
 
-      const findUpdatedOrder = await Order.findById(findOrder._id);
+      const findUpdatedOrder = await Order.findById(findOrder._id).session(
+        session
+      );
 
-      const findEvent = await Event.findOne({ _id: findUpdatedOrder.event });
-      if (findEvent.status !== 1 || !findEvent) {
-        throw { name: 'Bad Request', message: 'Event not found' };
+      const findEvent = await Event.findById(findUpdatedOrder.event).session(
+        session
+      );
+      if (!findEvent || findEvent.status !== 1) {
+        throw {
+          name: 'Bad Request',
+          message: 'Event not found or is not active',
+        };
       }
 
       const dataEmail = {
@@ -280,21 +278,35 @@ class OrderController {
         html: template,
       });
 
+      await session.commitTransaction();
+
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success('success change status', findUpdatedOrder));
+        .json(
+          resHelpers.success(
+            'Successfully changed order status',
+            findUpdatedOrder
+          )
+        );
     } catch (error) {
+      await session.abortTransaction();
       console.log(error);
       next(error);
+    } finally {
+      session.endSession();
     }
   }
 
   static async getOrderByInvoiceNumber(req, res, next) {
     const { invoiceNumber: orderInvoiceNumber, customerFullname } = req.query;
+
+    const session = await mongoose.startSession();
     try {
+      session.startTransaction();
+
       const findOrder = await Order.findOne({
         invoiceNumber: orderInvoiceNumber,
-      });
+      }).session(session);
 
       if (!findOrder) {
         throw { name: 'Not Found', message: 'Order not found' };
@@ -316,12 +328,17 @@ class OrderController {
         name: findPaymentType.type,
       };
 
+      await session.commitTransaction();
+
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success('success fetch data', result));
+        .json(resHelpers.success('Successfully fetched data', result));
     } catch (error) {
+      await session.abortTransaction();
       console.log(error);
       next(error);
+    } finally {
+      session.endSession();
     }
   }
 }
