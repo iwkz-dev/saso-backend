@@ -9,43 +9,55 @@ const {
   detailById,
   detailByBarcode,
 } = require('@helpers/dataHelper');
+const mongoose = require('mongoose');
 
 class MenuController {
+  static LIMIT = 100000;
+
   static async getAllMenus(req, res, next) {
     const { page, limit, event, category, flagDate, status } = req.query;
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
     try {
       const options = {
         page: page || 1,
-        limit: limit || 100000,
+        limit: limit || this.LIMIT,
         sort: {
-          type: 'updated_at',
-          method: -1,
+          updated_at: -1,
         },
       };
 
       const filter = {};
       if (flagDate === 'now' || status) {
-        let statusQuery = '';
-        if (status === 'draft') {
-          statusQuery = 0;
-        }
-        if (status === 'approved') {
-          statusQuery = 1;
-        }
-        if (status === 'done') {
-          statusQuery = 2;
+        let statusQuery;
+        switch (status) {
+          case 'draft':
+            statusQuery = 0;
+            break;
+          case 'approved':
+            statusQuery = 1;
+            break;
+          case 'done':
+            statusQuery = 2;
+            break;
+          default:
+            statusQuery = undefined;
         }
 
         const filterEvent = {};
         if (flagDate) {
           filterEvent.startYear = { $gte: new Date().getFullYear() };
         }
-        if (status) {
+        if (statusQuery !== undefined) {
           filterEvent.status = statusQuery;
         }
-        const findEvent = await Event.findOne(filterEvent);
-        filter.event = findEvent._id;
+
+        const findEvent = await Event.findOne(filterEvent).session(session);
+        if (findEvent) {
+          filter.event = findEvent._id;
+        }
       }
       if (event) {
         filter.event = event;
@@ -54,11 +66,22 @@ class MenuController {
         filter.category = category;
       }
 
-      const findMenu = await dataPagination(Menu, filter, null, options);
+      const findMenu = await dataPagination(
+        Menu,
+        filter,
+        null,
+        options,
+        session
+      );
+      await session.commitTransaction();
+      session.endSession();
+
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('success fetch data', findMenu));
     } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
       console.log(error);
       next(error);
     }

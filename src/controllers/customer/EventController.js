@@ -5,65 +5,77 @@ const Event = require('@models/event');
 const ContactPerson = require('@models/contactPerson');
 const resHelpers = require('@helpers/responseHelpers');
 const { dataPagination } = require('@helpers/dataHelper');
+const mongoose = require('mongoose');
 
 class EventController {
   // -1 for descending & 1 for ascending
   static async getAllEvents(req, res, next) {
-    // let limit = 3;
-    // let page = 1;
     const { page, limit, flagDate, status } = req.query;
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
-      let statusQuery = '';
-      if (status === 'draft') {
-        statusQuery = 0;
+      let statusQuery;
+      switch (status) {
+        case 'draft':
+          statusQuery = 0;
+          break;
+        case 'approved':
+          statusQuery = 1;
+          break;
+        case 'done':
+          statusQuery = 2;
+          break;
+        default:
+          statusQuery = undefined;
       }
-      if (status === 'approved') {
-        statusQuery = 1;
-      }
-      if (status === 'done') {
-        statusQuery = 2;
-      }
+
       const options = {
         page: page || 1,
         limit: limit || 100000,
-        sort: {
-          type: 'updated_at',
-          method: -1,
-        },
+        sort: { updated_at: -1 },
       };
+
       const filter = {};
       if (flagDate === 'now') {
         filter.startYear = { $gte: new Date().getFullYear() };
       }
-
-      if (status) {
+      if (statusQuery !== undefined) {
         filter.status = statusQuery;
       }
-      const findEvents = await dataPagination(Event, filter, null, options);
+
+      const findEvents = await dataPagination(
+        Event,
+        filter,
+        null,
+        options,
+        session
+      );
 
       const eventWithContactPerson = await Promise.all(
         findEvents.data.map(async (event) => {
-          const filterContactPersons = { event: event._id };
-          const contactPersons = await ContactPerson.find(filterContactPersons);
+          const contactPersons = await ContactPerson.find({
+            event: event._id,
+          }).session(session);
           return {
             ...event._doc,
             contactPersons,
           };
         })
       );
+
       findEvents.data = eventWithContactPerson;
-      // const findEvents = await Event.find(null, null, {
-      //   sort: { updated_at: -1 },
-      //   limit: limit * 1,
-      //   skip: (page - 1) * limit,
-      // });
-      // .limit(limit * 1)
-      // .skip((page - 1) * limit)
-      // .sort({ updated_at: -1 });
+
+      await session.commitTransaction();
+      session.endSession();
+
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('success fetch data', findEvents));
     } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
       console.log(error);
       next(error);
     }
