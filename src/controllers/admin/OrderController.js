@@ -1,6 +1,7 @@
 'use strict';
 
 const httpStatus = require('http-status-codes');
+const mongoose = require('mongoose');
 const Order = require('@models/order');
 const Menu = require('@models/menu');
 const PaymentType = require('@models/paymentType');
@@ -12,8 +13,11 @@ const { mailer } = require('@helpers/nodemailer');
 
 class OrderController {
   static async getAllOrders(req, res, next) {
-    const { page, limit, invoiceNumber, event } = req.query;
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
+      const { page, limit, invoiceNumber, event } = req.query;
       const options = {
         page: page || 1,
         limit: limit || 100000,
@@ -32,45 +36,61 @@ class OrderController {
         filter.event = event;
       }
 
-      const findAllOrders = await dataPagination(Order, filter, null, options);
+      const findAllOrders = await dataPagination(
+        Order,
+        filter,
+        null,
+        options,
+        session
+      ); // Ensure dataPagination supports sessions
+      await session.commitTransaction();
+      session.endSession();
+
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('success fetch data', findAllOrders));
     } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
       console.log(error);
       next(error);
     }
   }
 
   static async changeStatus(req, res, next) {
-    const { status, id } = req.params;
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
-      // 0 = no action
+      const { status, id } = req.params;
+
       let statusPayload = 0;
-      const findOrder = await Order.findById(id);
+      const findOrder = await Order.findById(id).session(session);
       if (!findOrder) {
         throw { name: 'Not Found', message: 'Order not found' };
       }
+
       if (findOrder.status === 2) {
         findOrder.menus.forEach(async (el) => {
-          const menuFound = await Menu.findById(el._id);
+          const menuFound = await Menu.findById(el._id).session(session);
           const payloadMenu = {
             quantityOrder: menuFound.quantityOrder + el.totalPortion,
           };
-          await Menu.updateOne({ _id: el._id }, payloadMenu);
+          await Menu.updateOne({ _id: el._id }, payloadMenu, { session });
         });
       }
+
       if (status === 'paid') {
         statusPayload = 1;
       }
       if (status === 'refund' || status === 'cancel') {
         statusPayload = 2;
         findOrder.menus.forEach(async (el) => {
-          const menuFound = await Menu.findById(el._id);
+          const menuFound = await Menu.findById(el._id).session(session);
           const payloadMenu = {
             quantityOrder: menuFound.quantityOrder - el.totalPortion,
           };
-          await Menu.updateOne({ _id: el._id }, payloadMenu);
+          await Menu.updateOne({ _id: el._id }, payloadMenu, { session });
         });
       }
       if (status === 'done') {
@@ -80,19 +100,20 @@ class OrderController {
       const updateOrder = await Order.updateOne(
         { _id: id },
         { status: statusPayload, updated_at: new Date() },
-        { new: true }
+        { new: true, session }
       );
 
-      const findUpdatedOrder = await Order.findById(id);
-
-      const findEvent = await Event.findOne({ _id: findUpdatedOrder.event });
+      const findUpdatedOrder = await Order.findById(id).session(session);
+      const findEvent = await Event.findOne({
+        _id: findUpdatedOrder.event,
+      }).session(session);
       if (findEvent.status !== 1 || !findEvent) {
         throw { name: 'Bad Request', message: 'Event not found' };
       }
 
       const findPaymentType = await PaymentType.findOne({
         _id: findUpdatedOrder.paymentType,
-      });
+      }).session(session);
       if (!findPaymentType) {
         throw { name: 'Bad Request', message: 'Payment type not found' };
       }
@@ -112,10 +133,15 @@ class OrderController {
         html: template,
       });
 
+      await session.commitTransaction();
+      session.endSession();
+
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('success change status', updateOrder));
     } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
       console.log(error);
       next(error);
     }

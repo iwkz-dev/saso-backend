@@ -1,6 +1,7 @@
 'use strict';
 
 const httpStatus = require('http-status-codes');
+const mongoose = require('mongoose');
 const Menu = require('@models/menu');
 const readXlsxFile = require('read-excel-file/node');
 const Event = require('@models/event');
@@ -18,40 +19,55 @@ class MenuController {
   // TO DO: update menu, get specific menu based on name, delete specific menu, delete all menu
   // belum ada image
   static async create(req, res, next) {
-    const name = await firstWordUppercase(req.body.name);
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    const payload = {
-      name,
-      barcode: req.body.barcode ?? '',
-      description: req.body.description,
-      note: req.body.note || '',
-      quantity: +req.body.quantity,
-      quantityOrder: +req.body.quantityOrder || 0,
-      price: +req.body.price,
-      category: req.body.category,
-      images: req.body.imagesData,
-      event: req.body.event || null,
-      updated_at: new Date(),
-      created_at: new Date(),
-    };
     try {
-      const createMenu = await Menu.create(payload);
+      const name = await firstWordUppercase(req.body.name);
+
+      const payload = {
+        name,
+        barcode: req.body.barcode ?? '',
+        description: req.body.description,
+        note: req.body.note || '',
+        quantity: +req.body.quantity,
+        quantityOrder: +req.body.quantityOrder || 0,
+        price: +req.body.price,
+        category: req.body.category,
+        images: req.body.imagesData,
+        event: req.body.event || null,
+        updated_at: new Date(),
+        created_at: new Date(),
+      };
+
+      const createMenu = await Menu.create([payload], { session }); // Pass session here
+
       if (req.body.imagesData) {
-        await bulkUpload(req.body.imagesData, createMenu._id, 'menu');
+        await bulkUpload(req.body.imagesData, createMenu[0]._id, 'menu'); // Pass session here
       }
+
+      await session.commitTransaction();
+      session.endSession();
+
       res
         .status(httpStatus.StatusCodes.CREATED)
-        .json(resHelpers.success('success create a menu', createMenu));
+        .json(resHelpers.success('success create a menu', createMenu[0]));
     } catch (error) {
-      console.log(error);
+      await session.abortTransaction();
+      session.endSession();
+      console.error(error);
       next(error);
     }
   }
 
   static async getAllMenus(req, res, next) {
-    const { page, limit, event, category, flagDate, status, sort } = req.query;
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
     try {
+      const { page, limit, event, category, flagDate, status, sort } =
+        req.query;
+
       const options = {
         page: page || 1,
         limit: limit || 100000,
@@ -95,9 +111,9 @@ class MenuController {
         if (status) {
           filterEvent.status = statusQuery;
         }
-        const findEvent = await Event.findOne(filterEvent);
+        const findEvent = await Event.findOne(filterEvent).session(session);
 
-        filter.event = findEvent._id;
+        filter.event = findEvent ? findEvent._id : null;
       }
 
       if (event) {
@@ -108,36 +124,56 @@ class MenuController {
       }
 
       const findMenu = await dataPagination(Menu, filter, null, options);
+      await session.commitTransaction();
+      session.endSession();
+
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('success fetch data', findMenu));
     } catch (error) {
-      console.log(error);
+      await session.abortTransaction();
+      session.endSession();
+      console.error(error);
       next(error);
     }
   }
 
   static async getMenuById(req, res, next) {
-    const { id } = req.params;
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
+      const { id } = req.params;
       const findMenu = await detailById(Menu, id, null);
+
       if (!findMenu) {
         throw { name: 'Not Found', message: 'Menu not found' };
       }
+
+      await session.commitTransaction();
+      session.endSession();
+
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('success fetch data', findMenu));
     } catch (error) {
-      console.log(error);
+      await session.abortTransaction();
+      session.endSession();
+      console.error(error);
       next(error);
     }
   }
 
   static async destroy(req, res, next) {
-    const { id } = req.params;
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
     try {
-      const deletedMenu = await Menu.findOneAndDelete({ _id: id });
+      const { id } = req.params;
+
+      const deletedMenu = await Menu.findOneAndDelete({ _id: id }).session(
+        session
+      );
       if (!deletedMenu) {
         throw { name: 'Not Found', message: 'Menu not found' };
       }
@@ -146,19 +182,27 @@ class MenuController {
         await deleteImages(deletedMenu.images);
       }
 
+      await session.commitTransaction();
+      session.endSession();
+
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('success delete data', deletedMenu));
     } catch (error) {
-      console.log(error);
+      await session.abortTransaction();
+      session.endSession();
+      console.error(error);
       next(error);
     }
   }
 
   static async update(req, res, next) {
-    const { id } = req.params;
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
     try {
+      const { id } = req.params;
+
       const findMenu = await detailById(Menu, id, null);
       if (!findMenu) {
         throw { name: 'Not Found', message: `Menu not found` };
@@ -191,6 +235,7 @@ class MenuController {
 
       const updatedMenu = await Menu.findOneAndUpdate({ _id: id }, payload, {
         new: true,
+        session,
       });
 
       if (!updatedMenu) {
@@ -201,19 +246,27 @@ class MenuController {
         await bulkUpload(req.body.imagesData, findMenu._id, 'menu');
       }
 
+      await session.commitTransaction();
+      session.endSession();
+
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('success update data', updatedMenu));
     } catch (error) {
-      console.log(error);
+      await session.abortTransaction();
+      session.endSession();
+      console.error(error);
       next(error);
     }
   }
 
   static async addQuantity(req, res, next) {
-    const { id } = req.params;
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
-      const findMenu = await Menu.findById(id);
+      const { id } = req.params;
+      const findMenu = await Menu.findById(id).session(session);
 
       if (!findMenu) {
         throw { name: 'Not Found', message: 'Menu not found' };
@@ -225,20 +278,30 @@ class MenuController {
       };
       const updatedMenu = await Menu.findOneAndUpdate({ _id: id }, payload, {
         new: true,
+        session,
       });
+
+      await session.commitTransaction();
+      session.endSession();
+
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('success add quantity menu', updatedMenu));
     } catch (error) {
-      console.log(error);
+      await session.abortTransaction();
+      session.endSession();
+      console.error(error);
       next(error);
     }
   }
 
   static async subsQuantity(req, res, next) {
-    const { id } = req.params;
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
-      const findMenu = await Menu.findById(id);
+      const { id } = req.params;
+      const findMenu = await Menu.findById(id).session(session);
 
       if (!findMenu) {
         throw { name: 'Not Found', message: 'Menu not found' };
@@ -250,22 +313,32 @@ class MenuController {
       };
       const updatedMenu = await Menu.findOneAndUpdate({ _id: id }, payload, {
         new: true,
+        session,
       });
+
+      await session.commitTransaction();
+      session.endSession();
+
       res
         .status(httpStatus.StatusCodes.OK)
         .json(
-          resHelpers.success('success substract quantity menu', updatedMenu)
+          resHelpers.success('success subtract quantity menu', updatedMenu)
         );
     } catch (error) {
-      console.log(error);
+      await session.abortTransaction();
+      session.endSession();
+      console.error(error);
       next(error);
     }
   }
 
   static async uploadImages(req, res, next) {
-    const { id } = req.params;
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
-      const findMenu = await Menu.findById(id);
+      const { id } = req.params;
+      const findMenu = await Menu.findById(id).session(session);
 
       if (!findMenu) {
         throw { name: 'Not Found', message: 'Menu not found' };
@@ -285,12 +358,15 @@ class MenuController {
       };
 
       const updateMenuImages = await Menu.updateOne({ _id: id }, payload, {
-        new: true,
+        session,
       });
 
       if (req.body.imagesData) {
         await bulkUpload(req.body.imagesData, findMenu._id, 'menu');
       }
+
+      await session.commitTransaction();
+      session.endSession();
 
       res
         .status(httpStatus.StatusCodes.OK)
@@ -298,16 +374,20 @@ class MenuController {
           resHelpers.success('success add images to the menu', updateMenuImages)
         );
     } catch (error) {
-      console.log(error);
+      await session.abortTransaction();
+      session.endSession();
+      console.error(error);
       next(error);
     }
   }
 
   static async destroyImages(req, res, next) {
-    const { id, eTag } = req.params;
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
     try {
-      const findMenu = await Menu.findById(id);
+      const { id, eTag } = req.params;
+      const findMenu = await Menu.findById(id).session(session);
 
       if (!findMenu) {
         throw { name: 'Not Found', message: 'Menu not found' };
@@ -329,7 +409,12 @@ class MenuController {
 
         const updatedMenu = await Menu.findOneAndUpdate({ _id: id }, payload, {
           new: true,
+          session,
         });
+
+        await session.commitTransaction();
+        session.endSession();
+
         res
           .status(httpStatus.StatusCodes.CREATED)
           .json(resHelpers.success('success destroy an image', updatedMenu));
@@ -337,12 +422,17 @@ class MenuController {
         throw { name: 'Bad Request', message: 'Image is empty' };
       }
     } catch (error) {
-      console.log(error);
+      await session.abortTransaction();
+      session.endSession();
+      console.error(error);
       next(error);
     }
   }
 
   static async bulkCreate(req, res, next) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
       const xlsxRead = await readXlsxFile(`./uploads/${req.file.filename}`);
       const sliceXlsx = xlsxRead.slice(1);
@@ -351,7 +441,7 @@ class MenuController {
         sliceXlsx.map(async (item) => {
           const findEvent = await Event.findOne({
             startYear: { $gte: new Date().getFullYear() },
-          });
+          }).session(session);
           if (findEvent) {
             item.event = findEvent._id;
           } else {
@@ -362,15 +452,19 @@ class MenuController {
             };
           }
           const slug = item[4].toLowerCase().replace(' ', '_');
-          const findCategories = await Category.findOne({ slug });
+          const findCategories = await Category.findOne({ slug }).session(
+            session
+          );
           if (!findCategories) {
             const categoryPayload = {
               name: item[4],
               updated_at: new Date(),
               created_at: new Date(),
             };
-            const createCategory = await Category.create(categoryPayload);
-            item.category = createCategory._id;
+            const createCategory = await Category.create([categoryPayload], {
+              session,
+            });
+            item.category = createCategory[0]._id;
           } else {
             item.category = findCategories._id;
           }
@@ -386,12 +480,18 @@ class MenuController {
         })
       );
 
-      const createBulkMenus = await Menu.insertMany(bulkPayload);
+      const createBulkMenus = await Menu.insertMany(bulkPayload, { session });
+
+      await session.commitTransaction();
+      session.endSession();
+
       res
         .status(httpStatus.StatusCodes.CREATED)
         .json(resHelpers.success('success create a menu', createBulkMenus));
     } catch (error) {
-      console.log(error);
+      await session.abortTransaction();
+      session.endSession();
+      console.error(error);
       next(error);
     }
   }
