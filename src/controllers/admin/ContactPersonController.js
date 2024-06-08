@@ -1,5 +1,6 @@
 'use strict';
 
+const mongoose = require('mongoose');
 const httpStatus = require('http-status-codes');
 const ContactPerson = require('@models/contactPerson');
 const resHelpers = require('@helpers/responseHelpers');
@@ -11,58 +12,57 @@ const {
 
 class ContactPersonController {
   static async create(req, res, next) {
-    const name = await firstWordUppercase(req.body.name);
-
-    const payload = {
-      name,
-      phoneNumber: req.body.phoneNumber,
-      event: req.body.event || null,
-      updated_at: new Date(),
-      created_at: new Date(),
-    };
-
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
-      const createContactPerson = await ContactPerson.create(payload);
+      const name = await firstWordUppercase(req.body.name);
+      const payload = {
+        name,
+        phoneNumber: req.body.phoneNumber,
+        event: req.body.event || null,
+        updated_at: new Date(),
+        created_at: new Date(),
+      };
 
-      res
-        .status(httpStatus.StatusCodes.CREATED)
-        .json(
-          resHelpers.success(
-            'success create an contact person',
-            createContactPerson
-          )
-        );
+      const createContactPerson = await ContactPerson.create([payload], {
+        session,
+      });
+
+      await session.commitTransaction();
+      session.endSession();
+
+      res.status(httpStatus.StatusCodes.CREATED).json(
+        resHelpers.success(
+          'Successfully created a contact person',
+          createContactPerson[0] // Since create returns an array when using session
+        )
+      );
     } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
       console.log(error);
       next(error);
     }
   }
 
   static async getAllContactPersons(req, res, next) {
-    const { page, limit, event, type, sort } = req.query;
-
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
+      const { page, limit, event, type, sort } = req.query;
+
       const options = {
         page: page || 1,
         limit: limit || 100000,
         sort: {
-          type: 'updated_at',
-          method: -1,
+          updated_at: -1,
         },
       };
 
-      let method;
       if (sort) {
-        const splittedSort = sort.split(':');
-        if (splittedSort[1] === 'desc') {
-          method = -1;
-        }
-        if (splittedSort[1] === 'asc') {
-          method = 1;
-        }
+        const [sortField, sortOrder] = sort.split(':');
         options.sort = {
-          type: splittedSort[0],
-          method,
+          [sortField]: sortOrder === 'asc' ? 1 : -1,
         };
       }
 
@@ -81,10 +81,17 @@ class ContactPersonController {
         options
       );
 
+      await session.commitTransaction();
+      session.endSession();
+
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success('success fetch data', findContactPersons));
+        .json(
+          resHelpers.success('Successfully fetched data', findContactPersons)
+        );
     } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
       console.log(error);
       next(error);
     }
@@ -92,15 +99,25 @@ class ContactPersonController {
 
   static async getContactPersonById(req, res, next) {
     const { id } = req.params;
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
       const findContactPerson = await detailById(ContactPerson, id, null);
       if (!findContactPerson) {
         throw { name: 'Not Found', message: 'Contact Person not found' };
       }
+
+      await session.commitTransaction();
+      session.endSession();
+
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success('success fetch data', findContactPerson));
+        .json(
+          resHelpers.success('Successfully fetched data', findContactPerson)
+        );
     } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
       console.log(error);
       next(error);
     }
@@ -108,17 +125,28 @@ class ContactPersonController {
 
   static async destroy(req, res, next) {
     const { id } = req.params;
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
-      const deletedContactPerson = await ContactPerson.findOneAndDelete({
-        _id: id,
-      });
+      const deletedContactPerson = await ContactPerson.findOneAndDelete(
+        { _id: id },
+        { session }
+      );
       if (!deletedContactPerson) {
         throw { name: 'Not Found', message: 'Contact Person not found' };
       }
+
+      await session.commitTransaction();
+      session.endSession();
+
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success('success delete data', deletedContactPerson));
+        .json(
+          resHelpers.success('Successfully deleted data', deletedContactPerson)
+        );
     } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
       console.log(error);
       next(error);
     }
@@ -126,32 +154,39 @@ class ContactPersonController {
 
   static async update(req, res, next) {
     const { id } = req.params;
-    const name = await firstWordUppercase(req.body.name);
-
-    const payload = {
-      name,
-      phoneNumber: req.body.phoneNumber,
-      type: req.body.type || 0,
-      event: req.body.event || null,
-      updated_at: new Date(),
-    };
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
+      const name = await firstWordUppercase(req.body.name);
+      const payload = {
+        name,
+        phoneNumber: req.body.phoneNumber,
+        type: req.body.type || 0,
+        event: req.body.event || null,
+        updated_at: new Date(),
+      };
+
       const updatedContactPerson = await ContactPerson.findOneAndUpdate(
         { _id: id },
         payload,
-        {
-          new: true,
-        }
+        { new: true, session }
       );
 
       if (!updatedContactPerson) {
         throw { name: 'Not Found', message: 'Contact Person not found' };
       }
 
+      await session.commitTransaction();
+      session.endSession();
+
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success('success update data', updatedContactPerson));
+        .json(
+          resHelpers.success('Successfully updated data', updatedContactPerson)
+        );
     } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
       console.log(error);
       next(error);
     }

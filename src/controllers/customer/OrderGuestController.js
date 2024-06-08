@@ -64,8 +64,7 @@ class OrderController {
           const totalOrder = (foundMenu.quantityOrder || 0) + el.totalPortion;
 
           if (foundMenu.quantity < totalOrder) {
-            return {
-              error: true,
+            throw {
               name: 'Bad Request',
               message: `Menu '${foundMenu.name}' is out of stock`,
             };
