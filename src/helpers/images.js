@@ -19,13 +19,47 @@ module.exports = {
     }
   },
   deleteImages: async (data) => {
-    const fileIdImages = [];
-    if (data.length > 0) {
-      data.forEach(async (el) => {
-        fileIdImages.push(el.eTag);
-        await Image.findOneAndDelete({
-          eTag: el.eTag,
+    try {
+      const fileIdImages = [];
+      if (data.length > 0) {
+        data.forEach(async (el) => {
+          fileIdImages.push(el.eTag);
+          await Image.findOneAndDelete({
+            eTag: el.eTag,
+          });
         });
+        const encodePrivateKey = Buffer.from(
+          `${process.env.IMGKIT_PRIVATE_KEY}:`,
+          'utf-8'
+        ).toString('base64');
+
+        await axios.post(
+          'https://api.imagekit.io/v1/files/batch/deleteByFileIds',
+          { fileIds: fileIdImages },
+          {
+            headers: {
+              Authorization: `Basic ${encodePrivateKey}`,
+            },
+          }
+        );
+      }
+    } catch (error) {
+      console.log('delete images:', error);
+    }
+  },
+  deleteImage: async (model, eTag) => {
+    try {
+      const fileIdImages = [eTag];
+      // if (data.images.length > 0) {
+
+      const imageFound = await Image.findOne({
+        eTag,
+      });
+      if (!imageFound || imageFound.type !== model) {
+        throw { name: 'Not Found', message: 'Image not found' };
+      }
+      await Image.deleteOne({
+        eTag,
       });
       const encodePrivateKey = Buffer.from(
         `${process.env.IMGKIT_PRIVATE_KEY}:`,
@@ -41,34 +75,8 @@ module.exports = {
           },
         }
       );
+    } catch (error) {
+      console.log('delete iamge', error);
     }
-  },
-  deleteImage: async (model, eTag) => {
-    const fileIdImages = [eTag];
-    // if (data.images.length > 0) {
-
-    const imageFound = await Image.findOne({
-      eTag,
-    });
-    if (!imageFound || imageFound.type !== model) {
-      throw { name: 'Not Found', message: 'Image not found' };
-    }
-    await Image.deleteOne({
-      eTag,
-    });
-    const encodePrivateKey = Buffer.from(
-      `${process.env.IMGKIT_PRIVATE_KEY}:`,
-      'utf-8'
-    ).toString('base64');
-
-    await axios.post(
-      'https://api.imagekit.io/v1/files/batch/deleteByFileIds',
-      { fileIds: fileIdImages },
-      {
-        headers: {
-          Authorization: `Basic ${encodePrivateKey}`,
-        },
-      }
-    );
   },
 };
