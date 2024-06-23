@@ -24,7 +24,7 @@ const orderSchema = new mongoose.Schema({
     type: String,
   },
   paymentType: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     ref: 'PaymentTypes',
   },
   paypalOrderId: {
