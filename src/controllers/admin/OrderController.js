@@ -112,7 +112,10 @@ class OrderController {
       }
 
       const findPaymentType = await PaymentType.findOne({
-        type: findUpdatedOrder.paymentType,
+        $or: [
+          { _id: findUpdatedOrder.paymentType },
+          { type: findUpdatedOrder.paymentType },
+        ],
       }).session(session);
       if (!findPaymentType) {
         throw { name: 'Bad Request', message: 'Payment type not found' };
