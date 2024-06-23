@@ -146,7 +146,7 @@ class OrderController {
         arrived_at: arrivedAt,
         updated_at: new Date(),
         created_at: new Date(),
-        paymentType: findPaymentType.id,
+        paymentType: findPaymentType.type,
         paypalOrderId: paymentResponse.id || '',
       };
 
