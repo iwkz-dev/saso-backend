@@ -108,7 +108,11 @@ class OrderController {
         _id: findUpdatedOrder.event,
       }).session(session);
       if (findEvent.status !== 1 || !findEvent) {
-        throw { name: 'Bad Request', message: 'Event not found' };
+        throw {
+          name: 'Bad Request',
+          message:
+            'Event is not found or its status is still in draft or already done',
+        };
       }
 
       const findPaymentType = await PaymentType.findOne({
