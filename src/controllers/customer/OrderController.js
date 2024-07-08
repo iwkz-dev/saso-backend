@@ -8,6 +8,7 @@ const User = require('@models/user');
 const Event = require('@models/event');
 const PaymentType = require('@models/paymentType');
 const resHelpers = require('@helpers/responseHelpers');
+const QRCode = require('qrcode');
 const { invoiceTemplate } = require('@helpers/templates');
 const { pdfGenerator } = require('@helpers/pdfGenerator');
 const { dataPagination, detailById } = require('@helpers/dataHelper');
@@ -151,11 +152,19 @@ class OrderController {
       };
 
       const createOrder = await Order.create([payload], { session });
+      const qrcodeImg = await QRCode.toDataURL(
+        createOrder[0].invoiceNumber.toString(),
+        {
+          version: 2,
+        }
+      );
+      console.log(qrcodeImg);
 
       const dataEmail = {
         ...createOrder[0]._doc,
         eventData: { ...findEvent._doc },
         paymentType: findPaymentType.type,
+        qrcodeImg,
       };
 
       const template = invoiceTemplate(dataEmail);
@@ -164,6 +173,7 @@ class OrderController {
         from: 'noreply@gmail.com',
         to: createOrder[0].customerEmail,
         subject: `SASO - Your Order ${createOrder[0].invoiceNumber}`,
+        attachDataUrls: true,
         html: template,
       });
 

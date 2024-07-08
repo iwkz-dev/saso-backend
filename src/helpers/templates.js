@@ -477,6 +477,17 @@ module.exports = {
                                                           ${statusString}
                                                       </td>
                                                   </tr>
+                                                  <tr>
+                                                      <td
+                                                          style="width: 55%; font-size: 16px; font-weight: bold; color: #1b1b1b; padding-bottom: 5px;">
+                                                          QRCode
+                                                      </td>
+                                                      <td rowspan="4" style="padding-right: 10px; padding-bottom: 10px;">
+                                                        <img style="height: 80px; width: 85px" src="${
+                                                          data.qrcodeImg
+                                                        }"/>
+                                                      </td>
+                                                  </tr>
                                                   ${
                                                     data.customerId === null
                                                       ? ''

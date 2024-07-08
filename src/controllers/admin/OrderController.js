@@ -153,6 +153,34 @@ class OrderController {
       next(error);
     }
   }
+
+  static async getOrderByInvoiceNumber(req, res, next) {
+    const { invoiceNumber } = req.params;
+
+    const session = await mongoose.startSession();
+    try {
+      session.startTransaction();
+
+      const findOrder = await Order.findOne({ invoiceNumber });
+      if (!findOrder) {
+        throw { name: 'Not Found', message: 'Order not found' };
+      }
+
+      const result = JSON.parse(JSON.stringify(findOrder));
+
+      await session.commitTransaction();
+
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success('Successfully fetched data', result));
+    } catch (error) {
+      await session.abortTransaction();
+      console.log(error);
+      next(error);
+    } finally {
+      session.endSession();
+    }
+  }
 }
 
 module.exports = OrderController;
