@@ -127,7 +127,7 @@ class OrderController {
       }
 
       const qrcodeImg = await QRCode.toDataURL(
-        findUpdatedOrder[0].invoiceNumber.toString(),
+        findUpdatedOrder.invoiceNumber.toString(),
         {
           version: 2,
         }
