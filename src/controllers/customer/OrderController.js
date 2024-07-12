@@ -158,7 +158,6 @@ class OrderController {
           version: 2,
         }
       );
-      console.log(qrcodeImg);
 
       const dataEmail = {
         ...createOrder[0]._doc,

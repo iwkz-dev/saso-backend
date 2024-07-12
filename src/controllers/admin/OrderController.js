@@ -6,6 +6,7 @@ const Order = require('@models/order');
 const Menu = require('@models/menu');
 const PaymentType = require('@models/paymentType');
 const Event = require('@models/event');
+const QRCode = require('qrcode');
 const resHelpers = require('@helpers/responseHelpers');
 const { dataPagination } = require('@helpers/dataHelper');
 const { invoiceTemplate } = require('@helpers/templates');
@@ -125,10 +126,18 @@ class OrderController {
         throw { name: 'Bad Request', message: 'Payment type not found' };
       }
 
+      const qrcodeImg = await QRCode.toDataURL(
+        findUpdatedOrder[0].invoiceNumber.toString(),
+        {
+          version: 2,
+        }
+      );
+
       const dataEmail = {
         ...findUpdatedOrder._doc,
         eventData: { ...findEvent._doc },
         paymentType: findPaymentType.type,
+        qrcodeImg,
       };
 
       const template = invoiceTemplate(dataEmail);
@@ -137,6 +146,7 @@ class OrderController {
         from: 'noreply@gmail.com',
         to: findUpdatedOrder.customerEmail,
         subject: `SASO - Your Order ${findUpdatedOrder.invoiceNumber} payment status has been changed`,
+        attachDataUrls: true,
         html: template,
       });
 
