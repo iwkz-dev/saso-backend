@@ -126,12 +126,9 @@ class OrderController {
         throw { name: 'Bad Request', message: 'Payment type not found' };
       }
 
-      const qrcodeImg = await QRCode.toDataURL(
-        findUpdatedOrder.invoiceNumber.toString(),
-        {
-          version: 2,
-        }
-      );
+      const qrcodeImg = await QRCode.toDataURL(findUpdatedOrder.invoiceNumber, {
+        version: 2,
+      });
 
       const dataEmail = {
         ...findUpdatedOrder._doc,

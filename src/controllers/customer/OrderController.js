@@ -152,12 +152,9 @@ class OrderController {
       };
 
       const createOrder = await Order.create([payload], { session });
-      const qrcodeImg = await QRCode.toDataURL(
-        createOrder[0].invoiceNumber.toString(),
-        {
-          version: 2,
-        }
-      );
+      const qrcodeImg = await QRCode.toDataURL(createOrder[0].invoiceNumber, {
+        version: 2,
+      });
 
       const dataEmail = {
         ...createOrder[0]._doc,
