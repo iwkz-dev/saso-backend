@@ -127,4 +127,8 @@ router.get('/', OrderController.getAllOrders);
  */
 router.patch('/:id/:status', OrderController.changeStatus);
 
+router.get(
+  '/invoiceNumber/:invoiceNumber',
+  OrderController.getOrderByInvoiceNumber
+);
 module.exports = router;

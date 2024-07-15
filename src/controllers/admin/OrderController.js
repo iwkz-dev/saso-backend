@@ -6,6 +6,7 @@ const Order = require('@models/order');
 const Menu = require('@models/menu');
 const PaymentType = require('@models/paymentType');
 const Event = require('@models/event');
+const QRCode = require('qrcode');
 const resHelpers = require('@helpers/responseHelpers');
 const { dataPagination } = require('@helpers/dataHelper');
 const { invoiceTemplate } = require('@helpers/templates');
@@ -125,10 +126,15 @@ class OrderController {
         throw { name: 'Bad Request', message: 'Payment type not found' };
       }
 
+      const qrcodeImg = await QRCode.toDataURL(findUpdatedOrder.invoiceNumber, {
+        version: 2,
+      });
+
       const dataEmail = {
         ...findUpdatedOrder._doc,
         eventData: { ...findEvent._doc },
         paymentType: findPaymentType.type,
+        qrcodeImg,
       };
 
       const template = invoiceTemplate(dataEmail);
@@ -137,6 +143,7 @@ class OrderController {
         from: 'noreply@gmail.com',
         to: findUpdatedOrder.customerEmail,
         subject: `SASO - Your Order ${findUpdatedOrder.invoiceNumber} payment status has been changed`,
+        attachDataUrls: true,
         html: template,
       });
 
@@ -151,6 +158,34 @@ class OrderController {
       session.endSession();
       console.log(error);
       next(error);
+    }
+  }
+
+  static async getOrderByInvoiceNumber(req, res, next) {
+    const { invoiceNumber } = req.params;
+
+    const session = await mongoose.startSession();
+    try {
+      session.startTransaction();
+
+      const findOrder = await Order.findOne({ invoiceNumber });
+      if (!findOrder) {
+        throw { name: 'Not Found', message: 'Order not found' };
+      }
+
+      const result = JSON.parse(JSON.stringify(findOrder));
+
+      await session.commitTransaction();
+
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success('Successfully fetched data', result));
+    } catch (error) {
+      await session.abortTransaction();
+      console.log(error);
+      next(error);
+    } finally {
+      session.endSession();
     }
   }
 }
