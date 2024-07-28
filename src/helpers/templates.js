@@ -478,12 +478,8 @@ module.exports = {
                                                       </td>
                                                   </tr>
                                                   <tr>
-                                                      <td
-                                                          style="width: 55%; font-size: 16px; font-weight: bold; color: #1b1b1b; padding-bottom: 5px;">
-                                                          QRCode
-                                                      </td>
-                                                      <td rowspan="4" style="padding-right: 10px; padding-bottom: 10px;">
-                                                        <img style="height: 80px; width: 85px" src="${
+                                                      <td colspan="2" style="padding-right: 10px; padding-bottom: 10px; text-align: center">
+                                                        <img style="height: 10rem; width: 10rem" src="${
                                                           data.qrcodeImg
                                                         }"/>
                                                       </td>
