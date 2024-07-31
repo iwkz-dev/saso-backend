@@ -249,9 +249,9 @@ class OrderController {
         throw { name: 'Bad Request', message: 'Order cannot be approved' };
       }
 
-      const findPaymentType = await PaymentType.findById(
-        findOrder.paymentType
-      ).session(session);
+      const findPaymentType = await PaymentType.findOne({
+        $or: [{ type: findOrder.paymentType }, { id: findOrder.paymentType }],
+      }).session(session);
       if (!findPaymentType || findPaymentType.type !== 'paypal') {
         throw {
           name: 'Bad Request',
@@ -364,11 +364,9 @@ class OrderController {
         };
       }
 
-      const findPaymentType = await detailById(
-        PaymentType,
-        findOrder.paymentType,
-        null
-      );
+      const findPaymentType = await PaymentType.findOne({
+        $or: [{ type: findOrder.paymentType }, { id: findOrder.paymentType }],
+      }).session(session);
 
       const result = JSON.parse(JSON.stringify(findOrder));
       result.paymentType = {
@@ -415,9 +413,9 @@ class OrderController {
         };
       }
 
-      const findPaymentType = await PaymentType.findById(
-        findOrder.paymentType
-      ).session(session);
+      const findPaymentType = await PaymentType.findOne({
+        $or: [{ type: findOrder.paymentType }, { id: findOrder.paymentType }],
+      }).session(session);
       if (!findPaymentType) {
         throw { name: 'Bad Request', message: 'Payment type not found' };
       }
