@@ -80,7 +80,7 @@ class EventController {
         page: page || 1,
         limit: limit || 100000,
         sort: {
-          type: 'updated_at',
+          type: 'created_at',
           method: -1,
         },
         session,
@@ -110,7 +110,7 @@ class EventController {
 
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success('success fetch data', findEvents));
+        .json(resHelpers.success('Success load events', findEvents));
     } catch (error) {
       await session.abortTransaction();
       session.endSession();
@@ -134,7 +134,7 @@ class EventController {
 
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success('success fetch data', findEvent));
+        .json(resHelpers.success('Success load an event', findEvent));
     } catch (error) {
       await session.abortTransaction();
       session.endSession();
@@ -181,7 +181,7 @@ class EventController {
 
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success('success delete data', deletedEvent));
+        .json(resHelpers.success('Event successfully deleted', deletedEvent));
     } catch (error) {
       await session.abortTransaction();
       session.endSession();

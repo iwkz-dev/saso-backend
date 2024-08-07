@@ -304,21 +304,31 @@ class OrderController {
   }
 
   static async getOrderByInvoiceNumber(req, res, next) {
-    const { invoiceNumber: orderInvoiceNumber, customerFullname } = req.query;
+    const {
+      invoiceNumber: orderInvoiceNumber,
+      customerFullname,
+      eventId,
+    } = req.query;
 
     const session = await mongoose.startSession();
     try {
       session.startTransaction();
 
+      const findEvent = await detailById(Event, eventId, null);
+
+      if (findEvent.status !== 1) {
+        throw { name: 'Not Found', message: 'Order not found' };
+      }
+
       const findOrder = await Order.findOne({
-        invoiceNumber: orderInvoiceNumber,
+        $and: [{ invoiceNumber: orderInvoiceNumber }, { customerFullname }],
       }).session(session);
 
       if (!findOrder) {
         throw { name: 'Not Found', message: 'Order not found' };
       }
 
-      if (findOrder.customerFullname !== customerFullname) {
+      if (findEvent._id.toString() !== findOrder.event.toString()) {
         throw { name: 'Not Found', message: 'Order not found' };
       }
 
