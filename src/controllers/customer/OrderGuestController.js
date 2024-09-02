@@ -22,7 +22,7 @@ class OrderController {
       session.startTransaction();
 
       const findEvent = await Event.findOne({ _id: event }).session(session);
-      if (!findEvent || findEvent.status !== 1) {
+      if (!findEvent || findEvent.po_closed) {
         throw { name: 'Bad Request', message: 'Event not found' };
       }
 
@@ -262,7 +262,7 @@ class OrderController {
       const findEvent = await Event.findById(findUpdatedOrder.event).session(
         session
       );
-      if (!findEvent || findEvent.status !== 1) {
+      if (!findEvent || findEvent.po_closed) {
         throw {
           name: 'Bad Request',
           message: 'Event not found or is not active',

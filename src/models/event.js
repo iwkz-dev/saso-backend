@@ -21,6 +21,9 @@ const eventSchema = new mongoose.Schema({
   startYear: {
     type: Number,
   },
+  po_closed: {
+    type: Boolean,
+  },
   /**
    * STATUS: 0 -> draft
    * STATUS: 1 -> approved
