@@ -24,6 +24,7 @@ class EventController {
         name,
         description: req.body.description || '',
         started_at: req.body.started_at,
+        po_closed: !!req.body.po_closed,
         images: req.body.imagesData,
         status: 0,
         iban: req.body.iban || '',
@@ -219,6 +220,7 @@ class EventController {
         name: req.body.name,
         description: req.body.description || '',
         started_at: req.body.started_at,
+        po_closed: !!req.body.po_closed,
         startYear: getYear[0],
         images: payloadImages.imagesSaved,
         iban: req.body.iban || '',
@@ -388,6 +390,43 @@ class EventController {
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('success change status', updateEvent));
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      console.log(error);
+      next(error);
+    }
+  }
+
+  static async changePOClosed(req, res, next) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      const { id, poClosedStatus } = req.params;
+
+      let statusPOClosed;
+      if (poClosedStatus === 'no') {
+        statusPOClosed = false;
+      } else if (poClosedStatus === 'yes') {
+        statusPOClosed = true;
+      } else {
+        throw { name: 'Bad Request', message: 'Invalid status' };
+      }
+
+      const updateEvent = await Event.findOneAndUpdate(
+        { _id: id },
+        { po_closed: statusPOClosed, updated_at: new Date() },
+        { new: true, session }
+      );
+
+      await session.commitTransaction();
+      session.endSession();
+
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(
+          resHelpers.success('success change PO Closed status', updateEvent)
+        );
     } catch (error) {
       await session.abortTransaction();
       session.endSession();

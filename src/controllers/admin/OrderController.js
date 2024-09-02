@@ -108,11 +108,10 @@ class OrderController {
       const findEvent = await Event.findOne({
         _id: findUpdatedOrder.event,
       }).session(session);
-      if (findEvent.status !== 1 || !findEvent) {
+      if (findEvent.po_closed || !findEvent) {
         throw {
           name: 'Bad Request',
-          message:
-            'Event is not found or its status is still in draft or already done',
+          message: 'Event is not found or the pre-order is closed',
         };
       }
 

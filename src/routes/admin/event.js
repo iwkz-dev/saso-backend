@@ -534,6 +534,11 @@ router.delete('/:id/delete-images/:eTag', EventController.destroyImages);
  */
 router.patch('/:id/:status/change-status', EventController.changeStatus);
 
+router.patch(
+  '/:id/:poClosedStatus/change-po-closed',
+  EventController.changePOClosed
+);
+
 router.post(
   '/upload-image',
   uploadArray('imageUrls', 5),
