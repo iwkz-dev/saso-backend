@@ -188,6 +188,80 @@ class OrderController {
       session.endSession();
     }
   }
+
+  static async confirmOrderedMenuStatusByVendors(req, res, next) {
+    const { orderId, vendorId } = req.params;
+
+    const session = await mongoose.startSession();
+    try {
+      session.startTransaction();
+
+      const result = await Order.updateOne(
+        { _id: orderId },
+        {
+          $set: {
+            'menus.$[menu].status': 1,
+          },
+        },
+        {
+          arrayFilters: [
+            {
+              'menu.vendor': new mongoose.Types.ObjectId(vendorId),
+              $or: [{ 'menu.status': null }, { 'menu.status': 0 }],
+            },
+          ],
+          session,
+        }
+      );
+
+      if (result.matchedCount === 0) {
+        throw { name: 'Not Found', message: 'Order not found' };
+      }
+
+      if (result.modifiedCount === 0) {
+        // To tell if the vendor exists but all menus are already confirmed,
+        // do a quick check: Are there any menus with this vendorId?
+        const order = await Order.findOne({ _id: orderId }).session(session);
+
+        const vendorMenus = order.menus.filter(
+          (menu) => menu.vendor.toString() === vendorId
+        );
+
+        if (vendorMenus.length === 0) {
+          throw {
+            name: 'Bad Request',
+            message: 'No menus found for this vendor',
+          };
+        }
+
+        const allConfirmed = vendorMenus.every((menu) => menu.status === 1);
+        if (allConfirmed) {
+          throw {
+            name: 'Bad Request',
+            message: 'All menus for this vendor are already confirmed',
+          };
+        }
+
+        // If we reach here → it must be an unexpected case
+        throw {
+          name: 'Bad Request',
+          message: 'No menus matched vendorId or invalid status filter',
+        };
+      }
+
+      await session.commitTransaction();
+
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success('Ordered menu status confirmed', result));
+    } catch (error) {
+      await session.abortTransaction();
+      console.error(error);
+      next(error);
+    } finally {
+      session.endSession();
+    }
+  }
 }
 
 module.exports = OrderController;

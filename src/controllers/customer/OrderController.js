@@ -89,6 +89,7 @@ class OrderController {
             ...foundMenu,
             totalPortion: el.totalPortion,
             note: el.note,
+            status: null,
           };
         })
       );
