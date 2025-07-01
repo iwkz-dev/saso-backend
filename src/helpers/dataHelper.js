@@ -39,7 +39,7 @@ module.exports = {
   },
 
   detailById: async (model, id, selected) => {
-    const findDetail = await model.findById(id).select(selected);
+    const findDetail = await model.findOne({ id }).select(selected);
     return findDetail;
   },
 

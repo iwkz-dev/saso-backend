@@ -16,7 +16,7 @@ async function authAdmin(req, res, next) {
       const verifiedAccessToken = jwtVerify(accessToken);
 
       const findUser = await User.findOne({
-        _id: verifiedAccessToken.id,
+        id: verifiedAccessToken.id,
       });
 
       if (!findUser || findUser.role === 3) {

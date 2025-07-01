@@ -16,6 +16,7 @@ const routerListAdmin = {
   '/user': 'admin/user',
   '/menu': 'admin/menu',
   '/category': 'admin/category',
+  '/vendor': 'admin/vendor',
   '/order': 'admin/order',
   '/payment-type': 'admin/paymentType',
   '/contact-person': 'admin/contactPerson',

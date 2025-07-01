@@ -34,6 +34,7 @@ class MenuController {
         quantityOrder: +req.body.quantityOrder || 0,
         price: +req.body.price,
         category: req.body.category,
+        vendor: req.body.vendor,
         images: req.body.imagesData,
         event: req.body.event || null,
         updated_at: new Date(),
@@ -65,7 +66,7 @@ class MenuController {
     session.startTransaction();
 
     try {
-      const { page, limit, event, category, flagDate, status, sort } =
+      const { page, limit, event, category, vendor, flagDate, status, sort } =
         req.query;
 
       const options = {
@@ -121,6 +122,10 @@ class MenuController {
       }
       if (category) {
         filter.category = category;
+      }
+
+      if (vendor) {
+        filter.vendor = vendor;
       }
 
       const findMenu = await dataPagination(Menu, filter, null, options);
@@ -227,6 +232,7 @@ class MenuController {
         note: req.body.note || '',
         price: +req.body.price,
         category: req.body.category,
+        vendor: req.body.vendor,
         quantity: +req.body.quantity,
         event: req.body.event || null,
         images: payloadImages.imagesSaved,
