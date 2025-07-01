@@ -131,4 +131,10 @@ router.get(
   '/invoiceNumber/:invoiceNumber',
   OrderController.getOrderByInvoiceNumber
 );
+
+router.patch(
+  '/:orderId/vendor/:vendorId/confirm',
+  OrderController.confirmOrderedMenuStatusByVendors
+);
+
 module.exports = router;

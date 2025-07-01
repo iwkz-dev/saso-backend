@@ -34,6 +34,10 @@ const menuSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Events',
   },
+  vendor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Vendors',
+  },
   price: {
     type: Number,
     min: [0, 'Cannot be lower than 0'],

@@ -81,6 +81,7 @@ class OrderController {
               { session }
             );
             foundMenu.note = el.note;
+            foundMenu.status = null;
             return foundMenu;
           }
         })
