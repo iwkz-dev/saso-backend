@@ -1,5 +1,7 @@
 'use strict';
 
+const mongoose = require('mongoose');
+
 async function onPagination(count, limit, page) {
   const totalPage = Math.ceil(count / limit);
   const pagination = {
@@ -39,7 +41,14 @@ module.exports = {
   },
 
   detailById: async (model, id, selected) => {
-    const findDetail = await model.findOne({ id }).select(selected);
+    if (!mongoose.isValidObjectId(id)) {
+      throw { name: 'Bad Request', message: 'Invalid ID format' };
+    }
+
+    const findDetail = await model
+      .findOne({ _id: new mongoose.Types.ObjectId(id) })
+      .select(selected);
+
     return findDetail;
   },
 

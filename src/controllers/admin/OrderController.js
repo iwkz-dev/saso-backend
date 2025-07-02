@@ -196,64 +196,130 @@ class OrderController {
     try {
       session.startTransaction();
 
-      const result = await Order.updateOne(
-        { _id: orderId },
-        {
-          $set: {
-            'menus.$[menu].status': 1,
-          },
-        },
-        {
-          arrayFilters: [
-            {
-              'menu.vendor': new mongoose.Types.ObjectId(vendorId),
-              $or: [{ 'menu.status': null }, { 'menu.status': 0 }],
-            },
-          ],
-          session,
-        }
-      );
-
-      if (result.matchedCount === 0) {
+      const order = await Order.findOne({ _id: orderId }).session(session);
+      if (!order) {
         throw { name: 'Not Found', message: 'Order not found' };
       }
 
-      if (result.modifiedCount === 0) {
-        // To tell if the vendor exists but all menus are already confirmed,
-        // do a quick check: Are there any menus with this vendorId?
-        const order = await Order.findOne({ _id: orderId }).session(session);
-
-        const vendorMenus = order.menus.filter(
-          (menu) => menu.vendor.toString() === vendorId
-        );
-
-        if (vendorMenus.length === 0) {
-          throw {
-            name: 'Bad Request',
-            message: 'No menus found for this vendor',
-          };
-        }
-
-        const allConfirmed = vendorMenus.every((menu) => menu.status === 1);
-        if (allConfirmed) {
-          throw {
-            name: 'Bad Request',
-            message: 'All menus for this vendor are already confirmed',
-          };
-        }
-
-        // If we reach here → it must be an unexpected case
+      if (order.status !== 1) {
         throw {
           name: 'Bad Request',
-          message: 'No menus matched vendorId or invalid status filter',
+          message: 'Order must be paid before confirming menu status.',
         };
+      }
+
+      const menuPromises = order.menus.map((orderedMenu) =>
+        Menu.findOne({ _id: orderedMenu._id }).session(session)
+      );
+      const menuDocs = await Promise.all(menuPromises);
+
+      let anyUpdated = false;
+      const updatedMenus = [];
+
+      const orderedMenus = order.menus;
+
+      for (let i = 0; i < orderedMenus.length; i++) {
+        const orderedMenu = orderedMenus[i];
+        const menuDoc = menuDocs.find(
+          (menu) => menu._id.toString() === orderedMenu._id.toString()
+        );
+
+        if (
+          menuDoc &&
+          menuDoc.vendor.toString() === vendorId &&
+          orderedMenu.status !== 1
+        ) {
+          orderedMenu.status = 1;
+          updatedMenus.push({
+            _id: menuDoc._id,
+            name: menuDoc.name,
+          });
+          anyUpdated = true;
+        }
+      }
+
+      if (!anyUpdated) {
+        throw {
+          name: 'Bad Request',
+          message:
+            'No ordered menus matched this vendor, or all items are already confirmed.',
+        };
+      }
+
+      await Order.updateOne(
+        { _id: orderId },
+        { $set: { menus: orderedMenus } },
+        { session }
+      );
+
+      const allConfirmed = orderedMenus.every((m) => m.status === 1);
+
+      if (allConfirmed) {
+        await Order.updateOne(
+          { _id: orderId },
+          { status: 3, updated_at: new Date() },
+          { session }
+        );
+
+        const findUpdatedOrder = await Order.findById(orderId).session(session);
+        const findEvent = await Event.findOne({
+          _id: findUpdatedOrder.event,
+        }).session(session);
+        if (!findEvent || findEvent.status !== 1) {
+          throw {
+            name: 'Bad Request',
+            message: 'Event not found or its status is invalid.',
+          };
+        }
+
+        const findPaymentType = await PaymentType.findOne({
+          $or: [
+            { type: findUpdatedOrder.paymentType },
+            { id: findUpdatedOrder.paymentType },
+          ],
+        }).session(session);
+        if (!findPaymentType) {
+          throw { name: 'Bad Request', message: 'Payment type not found.' };
+        }
+
+        const qrcodeImg = await QRCode.toDataURL(
+          findUpdatedOrder.invoiceNumber,
+          {
+            version: 2,
+          }
+        );
+
+        const dataEmail = {
+          ...findUpdatedOrder._doc,
+          eventData: { ...findEvent._doc },
+          paymentType: findPaymentType.type,
+          qrcodeImg,
+        };
+
+        const template = invoiceTemplate(dataEmail);
+
+        await mailer({
+          from: 'noreply@gmail.com',
+          to: findUpdatedOrder.customerEmail,
+          subject: `SASO - Your Order ${findUpdatedOrder.invoiceNumber} is now done`,
+          attachDataUrls: true,
+          html: template,
+        });
       }
 
       await session.commitTransaction();
 
-      res
-        .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success('Ordered menu status confirmed', result));
+      res.status(httpStatus.StatusCodes.OK).json(
+        resHelpers.success(
+          allConfirmed
+            ? 'All ordered menus confirmed. Order status updated to done and email sent.'
+            : 'Ordered menus confirmed for this vendor.',
+          {
+            confirmedMenus: updatedMenus,
+            orderDone: allConfirmed,
+          }
+        )
+      );
     } catch (error) {
       await session.abortTransaction();
       console.error(error);
