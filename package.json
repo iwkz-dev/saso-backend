@@ -3,6 +3,9 @@
   "version": "v1",
   "description": "Saso API v1",
   "main": "app.js",
+  "engines": {
+    "node": "18.4.0"
+  },
   "scripts": {
     "setup": "npm i && cp .env.example .env",
     "start": "NODE_ENV=development npx nodemon bin/www",
