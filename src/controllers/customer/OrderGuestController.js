@@ -41,8 +41,10 @@ class OrderController {
         .toString()
         .padStart(3, '0')}`;
 
+      const orderedMenu = [];
       const resetQuantity = [];
-      const findMenu = await Promise.all(
+
+      await Promise.all(
         menus.map(async (el) => {
           const foundMenu = await Menu.findOne({
             _id: el._id,
@@ -52,10 +54,11 @@ class OrderController {
             .lean()
             .session(session);
 
-          if (!foundMenu)
+          if (!foundMenu) {
             throw { name: 'Not Found', message: 'Menu not found' };
+          }
 
-          if (el.totalPortion <= 0) {
+          if (!el.totalPortion || el.totalPortion <= 0) {
             throw {
               name: 'Bad Request',
               message: 'Portion should be greater than 0',
@@ -65,51 +68,54 @@ class OrderController {
           const totalOrder = (foundMenu.quantityOrder || 0) + el.totalPortion;
 
           if (foundMenu.quantity < totalOrder) {
+            await Promise.all(
+              resetQuantity.map(async (r) => {
+                await Menu.findOneAndUpdate(
+                  { _id: r.id },
+                  { quantityOrder: r.quantityOrder }
+                ).session(session);
+              })
+            );
             throw {
               name: 'Bad Request',
               message: `Menu '${foundMenu.name}' is out of stock`,
             };
-          } else {
-            resetQuantity.push({
-              id: foundMenu._id,
-              quantityOrder: foundMenu.quantityOrder,
-            });
-            foundMenu.totalPortion = el.totalPortion;
-            await Menu.findOneAndUpdate(
-              { _id: el._id },
-              { quantityOrder: totalOrder },
-              { session }
-            );
-            foundMenu.note = el.note;
-            foundMenu.status = null;
-            return foundMenu;
           }
+
+          resetQuantity.push({
+            id: foundMenu._id,
+            quantityOrder: foundMenu.quantityOrder,
+          });
+
+          await Menu.findOneAndUpdate(
+            { _id: el._id },
+            { quantityOrder: totalOrder }
+          ).session(session);
+
+          orderedMenu.push({
+            name: foundMenu.name,
+            category: foundMenu.category,
+            event: foundMenu.event,
+            id: foundMenu._id,
+            totalPortion: el.totalPortion,
+            note: el.note,
+            price: foundMenu.price,
+            status: 0,
+            images: foundMenu.images,
+          });
         })
       );
 
       const findPaymentType = await PaymentType.findOne({
         type: paymentType,
       }).session(session);
-      if (!findPaymentType)
+
+      if (!findPaymentType) {
         throw { name: 'Bad Request', message: 'Payment type not found' };
+      }
 
-      findMenu.forEach(async (findError) => {
-        if (findError.error) {
-          await Promise.all(
-            resetQuantity.map(async (el) => {
-              await Menu.findOneAndUpdate(
-                { _id: el.id },
-                { quantityOrder: el.quantityOrder },
-                { session }
-              );
-            })
-          );
-          throw { name: findError.name, message: findError.message };
-        }
-      });
-
-      const totalPrice = findMenu.reduce(
-        (total, el) => total + el.price * el.totalPortion,
+      const totalPrice = orderedMenu.reduce(
+        (acc, menu) => acc + menu.price * menu.totalPortion,
         0
       );
 
@@ -126,7 +132,7 @@ class OrderController {
 
       const payload = {
         invoiceNumber,
-        menus: findMenu,
+        menus: orderedMenu,
         totalPrice,
         status: 0,
         customerId: null,

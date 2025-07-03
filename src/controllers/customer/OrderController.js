@@ -43,8 +43,10 @@ class OrderController {
         '0'
       )}`;
 
+      const orderedMenu = [];
       const resetQuantity = [];
-      const findMenu = await Promise.all(
+
+      await Promise.all(
         menus.map(async (el) => {
           const foundMenu = await Menu.findOne({
             _id: el._id,
@@ -68,8 +70,15 @@ class OrderController {
           const totalOrder = (foundMenu.quantityOrder || 0) + el.totalPortion;
 
           if (foundMenu.quantity < totalOrder) {
+            await Promise.all(
+              resetQuantity.map(async (r) => {
+                await Menu.findOneAndUpdate(
+                  { _id: r.id },
+                  { quantityOrder: r.quantityOrder }
+                ).session(session);
+              })
+            );
             throw {
-              error: true,
               name: 'Bad Request',
               message: `Menu '${foundMenu.name}' is out of stock`,
             };
@@ -85,35 +94,29 @@ class OrderController {
             { quantityOrder: totalOrder }
           ).session(session);
 
-          return {
-            ...foundMenu,
+          orderedMenu.push({
+            name: foundMenu.name,
+            category: foundMenu.category,
+            event: foundMenu.event,
+            id: foundMenu._id,
             totalPortion: el.totalPortion,
             note: el.note,
-            status: null,
-          };
+            price: foundMenu.price,
+            status: 0,
+            images: foundMenu.images,
+          });
         })
       );
 
       const findPaymentType = await PaymentType.findOne({
         type: paymentType,
       }).session(session);
+
       if (!findPaymentType) {
         throw { name: 'Bad Request', message: 'Payment type not found' };
       }
 
-      findMenu.forEach((menu) => {
-        if (menu.error) {
-          resetQuantity.forEach(async (el) => {
-            await Menu.findOneAndUpdate(
-              { _id: el.id },
-              { quantityOrder: el.quantityOrder }
-            ).session(session);
-          });
-          throw { name: menu.name, message: menu.message };
-        }
-      });
-
-      const totalPrice = findMenu.reduce(
+      const totalPrice = orderedMenu.reduce(
         (acc, menu) => acc + menu.price * menu.totalPortion,
         0
       );
@@ -136,7 +139,7 @@ class OrderController {
 
       const payload = {
         invoiceNumber,
-        menus: findMenu,
+        menus: orderedMenu,
         totalPrice,
         status: 0,
         customerId: userId,
@@ -355,6 +358,8 @@ class OrderController {
       session.startTransaction();
 
       const findOrder = await detailById(Order, orderId, null);
+
+      console.log(findOrder, orderId);
       if (!findOrder) {
         throw { name: 'Not Found', message: 'Order not found' };
       }
