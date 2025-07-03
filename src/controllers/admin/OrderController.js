@@ -11,6 +11,7 @@ const resHelpers = require('@helpers/responseHelpers');
 const { dataPagination } = require('@helpers/dataHelper');
 const { invoiceTemplate } = require('@helpers/templates');
 const { mailer } = require('@helpers/nodemailer');
+const { detailById } = require('../../helpers/dataHelper');
 
 class OrderController {
   static async getAllOrders(req, res, next) {
@@ -209,7 +210,7 @@ class OrderController {
       }
 
       const menuPromises = order.menus.map((orderedMenu) =>
-        Menu.findOne({ _id: orderedMenu._id }).session(session)
+        detailById(Menu, orderedMenu.id, 'name vendor')
       );
       const menuDocs = await Promise.all(menuPromises);
 
@@ -221,7 +222,7 @@ class OrderController {
       for (let i = 0; i < orderedMenus.length; i++) {
         const orderedMenu = orderedMenus[i];
         const menuDoc = menuDocs.find(
-          (menu) => menu._id.toString() === orderedMenu._id.toString()
+          (menu) => menu._id.toString() === orderedMenu.id.toString()
         );
 
         if (
