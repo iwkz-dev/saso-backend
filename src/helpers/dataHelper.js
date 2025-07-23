@@ -61,42 +61,32 @@ module.exports = {
     return findDetail;
   },
 
-  updateWithImages: async (options) => {
-    const { imagesData, bodyETags, dataFound } = options;
-
+  updateWithImages: async ({ imagesData, bodyETags, dataFound }) => {
     const imagesSaved = [...imagesData];
-    let eTags;
     const imagesNotSaved = [];
 
+    let eTags = [];
     if (bodyETags) {
-      if (typeof bodyETags === 'string') {
-        eTags = [bodyETags];
+      if (Array.isArray(bodyETags)) {
+        eTags = bodyETags;
       } else {
-        eTags = [...bodyETags];
+        eTags = [bodyETags];
       }
-      let saved = [];
-      let notSaved = [];
+    }
 
-      saved = dataFound.images.filter((image) => eTags.includes(image.eTag));
-      notSaved = dataFound.images.filter(
+    if (eTags.length > 0) {
+      const saved = dataFound.images.filter((image) =>
+        eTags.includes(image.eTag)
+      );
+      const notSaved = dataFound.images.filter(
         (image) => !eTags.includes(image.eTag)
       );
 
-      if (saved.length > 0) {
-        saved.forEach((el) => {
-          imagesSaved.push(el);
-        });
-      }
-      if (notSaved.length > 0) {
-        notSaved.forEach((el) => {
-          imagesNotSaved.push(el);
-        });
-      }
-    }
-    if (!bodyETags) {
-      dataFound.images.forEach((image) => {
-        imagesNotSaved.push(image);
-      });
+      // Add saved to the beginning of the array
+      imagesSaved.unshift(...saved);
+      imagesNotSaved.push(...notSaved);
+    } else {
+      imagesNotSaved.push(...dataFound.images);
     }
 
     return { imagesSaved, imagesNotSaved };

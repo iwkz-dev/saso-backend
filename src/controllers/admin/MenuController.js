@@ -208,12 +208,26 @@ class MenuController {
     try {
       const { id } = req.params;
 
+      if (req.body.imageUrls) {
+        const imageUrls = Array.isArray(req.body.imageUrls)
+          ? req.body.imageUrls
+          : [req.body.imageUrls];
+
+        if (!Array.isArray(req.body.eTags)) {
+          req.body.eTags = [];
+        }
+
+        imageUrls.forEach((imageId) => {
+          req.body.eTags.push(imageId);
+        });
+      }
+
       const findMenu = await detailById(Menu, id, null);
       if (!findMenu) {
         throw { name: 'Not Found', message: `Menu not found` };
       }
       const options = {
-        imagesData: req.body.imagesData,
+        imagesData: req.body.imagesData || [],
         bodyETags: req.body.eTags,
         dataFound: findMenu,
       };
