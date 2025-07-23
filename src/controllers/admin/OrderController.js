@@ -202,7 +202,7 @@ class OrderController {
         throw { name: 'Not Found', message: 'Order not found' };
       }
 
-      if (order.status !== 1) {
+      if (order.status === 1 || order.status !== 3) {
         throw {
           name: 'Bad Request',
           message: 'Order must be paid before confirming menu status.',
