@@ -202,8 +202,6 @@ class OrderController {
         throw { name: 'Not Found', message: 'Order not found' };
       }
 
-      console.log(order.status);
-
       if (order.status !== 1 && order.status !== 3) {
         throw {
           name: 'Bad Request',
