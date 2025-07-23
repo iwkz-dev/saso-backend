@@ -1,5 +1,6 @@
 'use strict';
 
+const mongoose = require('mongoose');
 const { jwtVerify } = require('@helpers/jwt');
 const User = require('@models/user');
 
@@ -96,7 +97,7 @@ async function authChangePassword(req, res, next) {
       } else if (token !== findUser.forgetPasswordToken) {
         throw { name: 'Invalid Auth', message: 'Invalid Token' };
       } else {
-        req.body.id = findUser._id;
+        req.body.id = new mongoose.Types.ObjectId(findUser._id);
         next();
       }
     }
