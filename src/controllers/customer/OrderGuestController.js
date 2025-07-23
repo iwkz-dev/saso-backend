@@ -3,17 +3,19 @@
 const mongoose = require('mongoose');
 const httpStatus = require('http-status-codes');
 const Order = require('@models/order');
-const Menu = require('@models/menu');
 const Event = require('@models/event');
 const PaymentType = require('@models/paymentType');
 const resHelpers = require('@helpers/responseHelpers');
-const QRCode = require('qrcode');
-const { invoiceTemplate } = require('@helpers/templates');
 const { detailById } = require('@helpers/dataHelper');
-const { createOrderPaypal, getOrderPaypal } = require('@helpers/paymentHelper');
-const { mailer } = require('@helpers/nodemailer');
+const { getOrderPaypal } = require('@helpers/paymentHelper');
+const {
+  generateInvoiceNumber,
+  validateAndPrepareMenus,
+  getPaymentDetails,
+  sendInvoiceEmail,
+} = require('@helpers/orderHelper');
 
-class OrderController {
+class OrderGuestController {
   static async order(req, res, next) {
     const { menus, event, arrivedAt, note, paymentType, userData } = req.body;
 
@@ -26,109 +28,23 @@ class OrderController {
         throw { name: 'Bad Request', message: 'Event not found' };
       }
 
-      const countData = await Order.countDocuments({
-        event: findEvent.id,
-      }).session(session);
-
-      const strStartYear = findEvent.startYear.toString();
-      const date = strStartYear.slice(-2);
-      const code = findEvent.name
-        .split(' ')
-        .map((word) => word[0])
-        .join('');
-
-      const invoiceNumber = `${code}${date}-${(countData + 1)
-        .toString()
-        .padStart(3, '0')}`;
-
-      const orderedMenu = [];
-      const resetQuantity = [];
-
-      await Promise.all(
-        menus.map(async (el) => {
-          const foundMenu = await Menu.findOne({
-            _id: el._id,
-            event: findEvent.id,
-          })
-            .select('-updated_at -created_at -description')
-            .lean()
-            .session(session);
-
-          if (!foundMenu) {
-            throw { name: 'Not Found', message: 'Menu not found' };
-          }
-
-          if (!el.totalPortion || el.totalPortion <= 0) {
-            throw {
-              name: 'Bad Request',
-              message: 'Portion should be greater than 0',
-            };
-          }
-
-          const totalOrder = (foundMenu.quantityOrder || 0) + el.totalPortion;
-
-          if (foundMenu.quantity < totalOrder) {
-            await Promise.all(
-              resetQuantity.map(async (r) => {
-                await Menu.findOneAndUpdate(
-                  { _id: r.id },
-                  { quantityOrder: r.quantityOrder }
-                ).session(session);
-              })
-            );
-            throw {
-              name: 'Bad Request',
-              message: `Menu '${foundMenu.name}' is out of stock`,
-            };
-          }
-
-          resetQuantity.push({
-            id: foundMenu._id,
-            quantityOrder: foundMenu.quantityOrder,
-          });
-
-          await Menu.findOneAndUpdate(
-            { _id: el._id },
-            { quantityOrder: totalOrder }
-          ).session(session);
-
-          orderedMenu.push({
-            name: foundMenu.name,
-            category: foundMenu.category,
-            event: foundMenu.event,
-            id: foundMenu._id,
-            totalPortion: el.totalPortion,
-            note: el.note,
-            price: foundMenu.price,
-            status: 0,
-            images: foundMenu.images,
-          });
-        })
+      const invoiceNumber = await generateInvoiceNumber(findEvent, session);
+      const orderedMenu = await validateAndPrepareMenus(
+        menus,
+        findEvent.id,
+        session
       );
-
-      const findPaymentType = await PaymentType.findOne({
-        type: paymentType,
-      }).session(session);
-
-      if (!findPaymentType) {
-        throw { name: 'Bad Request', message: 'Payment type not found' };
-      }
-
       const totalPrice = orderedMenu.reduce(
         (acc, menu) => acc + menu.price * menu.totalPortion,
         0
       );
 
-      let paymentResponse;
-      if (findPaymentType.type === 'paypal') {
-        paymentResponse = await createOrderPaypal(invoiceNumber, totalPrice);
-      } else if (findPaymentType.type === 'transfer') {
-        paymentResponse = {
-          status: 'success',
-          type: 'transfer',
-          message: 'Booking success, please transfer to our bank account',
-        };
-      }
+      const { findPaymentType, paymentResponse } = await getPaymentDetails(
+        paymentType,
+        invoiceNumber,
+        totalPrice,
+        session
+      );
 
       const payload = {
         invoiceNumber,
@@ -150,26 +66,12 @@ class OrderController {
 
       const createOrder = await Order.create([payload], { session });
 
-      const qrcodeImg = await QRCode.toDataURL(createOrder[0].invoiceNumber, {
-        version: 2,
-      });
-
-      const dataEmail = {
-        ...createOrder[0]._doc,
-        eventData: findEvent.toObject(),
-        paymentType: findPaymentType.type,
-        qrcodeImg,
-      };
-
-      const template = invoiceTemplate(dataEmail);
-
-      await mailer({
-        from: 'noreply@gmail.com',
-        to: createOrder[0].customerEmail,
-        subject: `SASO - Your Order ${createOrder[0].invoiceNumber}`,
-        attachDataUrls: true,
-        html: template,
-      });
+      await sendInvoiceEmail(
+        createOrder[0],
+        findEvent.toObject(),
+        findPaymentType.type,
+        createOrder[0].customerEmail
+      );
 
       await session.commitTransaction();
       res.status(httpStatus.StatusCodes.CREATED).json(
@@ -198,7 +100,6 @@ class OrderController {
         orderID,
         facilitatorAccessToken
       );
-
       if (paymentResponse.status !== 'COMPLETED') {
         throw {
           name: 'Bad Request',
@@ -206,17 +107,9 @@ class OrderController {
         };
       }
 
-      if (
-        !paymentResponse.purchase_units ||
-        paymentResponse.purchase_units.length === 0
-      ) {
-        throw { name: 'Bad Request', message: 'There is no purchase unit' };
-      }
-
-      const description = paymentResponse.purchase_units[0].description;
-      const regex = /Invoice number: ([A-Z0-9-]+)/;
-      const match = description.match(regex);
-
+      const description =
+        paymentResponse?.purchase_units?.[0]?.description || '';
+      const match = description.match(/Invoice number: ([A-Z0-9-]+)/);
       if (!match || !match[1]) {
         throw {
           name: 'Bad Request',
@@ -230,10 +123,7 @@ class OrderController {
         invoiceNumber,
         paypalOrderId: orderID,
       }).session(session);
-
-      if (!findOrder) {
-        throw { name: 'Not Found', message: 'Order not found' };
-      }
+      if (!findOrder) throw { name: 'Not Found', message: 'Order not found' };
 
       if (findOrder.status === 2) {
         throw {
@@ -265,7 +155,6 @@ class OrderController {
       const findUpdatedOrder = await Order.findById(findOrder._id).session(
         session
       );
-
       const findEvent = await Event.findById(findUpdatedOrder.event).session(
         session
       );
@@ -276,23 +165,14 @@ class OrderController {
         };
       }
 
-      const dataEmail = {
-        ...findUpdatedOrder._doc,
-        eventData: { ...findEvent._doc },
-        paymentType: findPaymentType.type,
-      };
-
-      const template = invoiceTemplate(dataEmail);
-
-      await mailer({
-        from: 'noreply@gmail.com',
-        to: findUpdatedOrder.customerEmail,
-        subject: `SASO - Your Order ${findUpdatedOrder.invoiceNumber} payment status has been changed`,
-        html: template,
-      });
+      await sendInvoiceEmail(
+        findUpdatedOrder,
+        findEvent.toObject(),
+        findPaymentType.type,
+        findUpdatedOrder.customerEmail
+      );
 
       await session.commitTransaction();
-
       res
         .status(httpStatus.StatusCodes.OK)
         .json(
@@ -311,31 +191,25 @@ class OrderController {
   }
 
   static async getOrderByInvoiceNumber(req, res, next) {
-    const {
-      invoiceNumber: orderInvoiceNumber,
-      customerFullname,
-      eventId,
-    } = req.query;
+    const { invoiceNumber, customerFullname, eventId } = req.query;
 
     const session = await mongoose.startSession();
     try {
       session.startTransaction();
 
       const findEvent = await detailById(Event, eventId, null);
-
       if (findEvent.status !== 1) {
         throw { name: 'Not Found', message: 'Order not found' };
       }
 
       const findOrder = await Order.findOne({
-        $and: [{ invoiceNumber: orderInvoiceNumber }, { customerFullname }],
+        $and: [{ invoiceNumber }, { customerFullname }],
       }).session(session);
 
-      if (!findOrder) {
-        throw { name: 'Not Found', message: 'Order not found' };
-      }
-
-      if (findEvent._id.toString() !== findOrder.event.toString()) {
+      if (
+        !findOrder ||
+        findEvent._id.toString() !== findOrder.event.toString()
+      ) {
         throw { name: 'Not Found', message: 'Order not found' };
       }
 
@@ -350,7 +224,6 @@ class OrderController {
       };
 
       await session.commitTransaction();
-
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('Successfully fetched data', result));
@@ -364,4 +237,4 @@ class OrderController {
   }
 }
 
-module.exports = OrderController;
+module.exports = OrderGuestController;
