@@ -224,8 +224,17 @@ class MenuController {
 
       const findMenu = await detailById(Menu, id, null);
       if (!findMenu) {
-        throw { name: 'Not Found', message: `Menu not found` };
+        throw { name: 'Not Found', message: 'Menu not found' };
       }
+
+      const requestedQuantity = Number(req.body.quantity);
+      if (requestedQuantity < (findMenu.quantityOrder || 0)) {
+        throw {
+          name: 'Bad Request',
+          message: `Quantity cannot be less than already ordered quantity (${findMenu.quantityOrder})`,
+        };
+      }
+
       const options = {
         imagesData: req.body.imagesData || [],
         bodyETags: req.body.eTags,
@@ -247,7 +256,7 @@ class MenuController {
         price: +req.body.price,
         category: req.body.category,
         vendor: req.body.vendor,
-        quantity: +req.body.quantity,
+        quantity: requestedQuantity,
         event: req.body.event || null,
         images: payloadImages.imagesSaved,
         updated_at: new Date(),
