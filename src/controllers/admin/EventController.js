@@ -25,7 +25,7 @@ class EventController {
         description: req.body.description || '',
         started_at: req.body.started_at,
         po_closed: !!req.body.po_closed,
-        images: req.body.imagesData,
+        images: req.body.imagesData || [],
         status: 0,
         iban: req.body.iban || '',
         bic: req.body.bic || '',
@@ -196,17 +196,32 @@ class EventController {
     session.startTransaction();
     try {
       const { id } = req.params;
-      const findEvent = await detailById(Event, id, null);
 
+      if (req.body.imageUrls) {
+        const imageUrls = Array.isArray(req.body.imageUrls)
+          ? req.body.imageUrls
+          : [req.body.imageUrls];
+
+        if (!Array.isArray(req.body.eTags)) {
+          req.body.eTags = [];
+        }
+
+        imageUrls.forEach((imageId) => {
+          req.body.eTags.push(imageId);
+        });
+      }
+
+      const findEvent = await detailById(Event, id, null);
       if (!findEvent) {
         throw { name: 'Not Found', message: `Event not found` };
       }
 
       const options = {
-        imagesData: req.body.imagesData,
+        imagesData: req.body.imagesData || [],
         bodyETags: req.body.eTags,
         dataFound: findEvent,
       };
+
       const payloadImages = await updateWithImages(options);
       if (payloadImages.imagesSaved.length > 5) {
         await deleteImages(req.body.imagesData);
