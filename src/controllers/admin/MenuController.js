@@ -35,7 +35,7 @@ class MenuController {
         price: +req.body.price,
         category: req.body.category,
         vendor: req.body.vendor,
-        images: req.body.imagesData,
+        images: req.body.imagesData || [],
         event: req.body.event || null,
         updated_at: new Date(),
         created_at: new Date(),
