@@ -1,62 +1,3 @@
-function generateBodyMenu(data) {
-  let body = ``;
-
-  data.forEach((el) => {
-    body += `
-    <tr>
-      <td style="padding-top: 0;">
-        <table width="560" align="center" cellpadding="0" cellspacing="0" border="0"
-          class="devicewidthinner" style="border-bottom: 1px solid #eeeeee;">
-          <tbody>
-            <tr>
-              <td rowspan="4" style="padding-right: 10px; padding-bottom: 10px;">
-                <img style="height: 80px; width: 85px" src="${
-                  el.images.length > 0
-                    ? el.images[0].imageUrl
-                    : `https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-15.png`
-                }"
-                  alt="Product Image" />
-              </td>
-              <td colspan="2"
-                style="font-size: 14px; font-weight: bold; color: #666666; padding-bottom: 5px;">
-                ${el.name}
-              </td>
-            </tr>
-            <tr>
-              <td
-                style="font-size: 14px; line-height: 18px; color: #757575; width: 440px;">
-                Quantity: ${el.totalPortion}
-              </td>
-              <td style="width: 130px;"></td>
-            </tr>
-            <tr>
-              <td style="font-size: 14px; line-height: 18px; color: #757575;">
-              </td>
-              <td
-                style="font-size: 14px; line-height: 18px; color: #757575; text-align: right;">
-                € ${el.price.toLocaleString('de-DE')} Per Item
-              </td>
-            </tr>
-            <tr>
-              <td
-                style="font-size: 14px; line-height: 18px; color: #757575; padding-bottom: 10px;">
-              </td>
-              <td
-                style="font-size: 14px; line-height: 18px; color: #757575; text-align: right; padding-bottom: 10px;">
-                <b style="color: #666666;">€ ${(
-                  el.price * el.totalPortion
-                ).toLocaleString('de-DE')}</b> Total
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </td>
-    </tr>
-    `;
-  });
-  return body;
-}
-
 module.exports = {
   changePasswordTemplate(email, token) {
     return {
@@ -303,347 +244,382 @@ module.exports = {
   },
 
   invoiceTemplate(data) {
-    const options = {
+    const toDate = (v) => (v ? new Date(v) : null);
+    const dateOpts = {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric',
     };
-    const dateLocalCreatedAt = data.created_at.toLocaleDateString(
-      undefined,
-      options
-    );
-    let statusString = '';
-    let statusColor = '#1b1b1b';
-    if (data.status === 0) {
-      statusString = 'Not Paid';
-      statusColor = '#1b1b1b';
-    }
+    const fmtDate = (d) =>
+      d ? d.toLocaleDateString(undefined, dateOpts) : '—';
+    const fmtCurrency = (n) =>
+      new Intl.NumberFormat('de-DE', {
+        style: 'currency',
+        currency: 'EUR',
+      }).format(n || 0);
 
-    if (data.status === 1) {
-      statusString = 'Paid';
-      statusColor = '#1F51FF';
-    }
+    // Dates
+    const createdAtStr = fmtDate(toDate(data?.created_at));
+    const eventDateStr = fmtDate(toDate(data?.eventData?.started_at));
 
-    if (data.status === 2) {
-      statusString = 'Cancelled';
-      statusColor = '#C70039';
-    }
+    // Status map
+    const statusMap = {
+      0: { text: 'Not Paid', color: '#1b1b1b' },
+      1: { text: 'Paid', color: '#1F51FF' },
+      2: { text: 'Cancelled', color: '#C70039' },
+      3: { text: 'Done', color: '#228b22' },
+    };
+    const st = statusMap[data?.status ?? 0];
 
-    if (data.status === 3) {
-      statusString = 'Done';
-      statusColor = '#228b22';
-    }
-    return `
-      <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-      <html xmlns="http://www.w3.org/1999/xhtml">
-      <head>
-          <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-          <title>Your Order</title>
-      
-          <!-- Start Common CSS -->
-          <style type="text/css">
-              #outlook a {
-                  padding: 0;
+    // Items rows
+    const rows = (data?.menus || [])
+      .map((m) => {
+        const qty = m?.totalPortion || 0;
+        const price = m?.price || 0;
+        const subtotal = qty * price;
+        const img = m?.images?.[0]?.imageUrl
+          ? m.images[0].imageUrl
+          : 'https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-15.png';
+
+        return `
+    <tr>
+      <td style="padding:8px 0;border-top:1px solid #eee;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+          <tr>
+            <!-- Thumb -->
+            <td width="56" valign="top" style="padding-right:12px;">
+              ${
+                img
+                  ? `<img src="${img}" width="56" height="56"
+                          style="display:block;border:1px solid #eee;border-radius:10px;background:#f5f5f5;object-fit:cover;"
+                          alt="Item"/>`
+                  : ''
               }
-      
-              body {
-                  width: 100% !important;
-                  -webkit-text-size-adjust: 100%;
-                  -ms-text-size-adjust: 100%;
-                  margin: 0;
-                  padding: 0;
-                  font-family: Helvetica, arial, sans-serif;
-              }
-      
-              .ExternalClass {
-                  width: 100%;
-              }
-      
-              .ExternalClass,
-              .ExternalClass p,
-              .ExternalClass span,
-              .ExternalClass font,
-              .ExternalClass td,
-              .ExternalClass div {
-                  line-height: 100%;
-              }
-      
-              .backgroundTable {
-                  margin: 0;
-                  padding: 0;
-                  width: 100% !important;
-                  line-height: 100% !important;
-              }
-      
-              .main-temp table {
-                  border-collapse: collapse;
-                  mso-table-lspace: 0pt;
-                  mso-table-rspace: 0pt;
-                  font-family: Helvetica, arial, sans-serif;
-              }
-      
-              .main-temp table td {
-                  border-collapse: collapse;
-              }
-          </style>
-          <!-- End Common CSS -->
-      </head>
-      
-      <body>
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" class="backgroundTable main-temp"
-              style="">
-              <tbody>
-                  <tr>
-                      <td>
-                          <table width="600" align="center" cellpadding="15" cellspacing="0" border="0"
-                              class="devicewidth"
-                              style="background-color: #ffffff;">
-                              <tbody>
-                                  <!-- Start header Section -->
-                                  <tr>
-                                      <td style="padding-top: 30px;">
-                                          <table width="560" align="center" cellpadding="0" cellspacing="0" border="0"
-                                              class="devicewidthinner"
-                                              style="border-bottom: 1px solid #eeeeee; text-align: center;">
-                                              <tbody>
-                                                  <tr>
-                                                      <td style="font-weight: 700;">
-                                                          Indonesischer Weisheits- & Kulturzentrum e.V. <span>Berlin</span>
-                                                      </td>
-                                                  </tr>
-                                                  <tr>
-                                                      <td style="font-size: 14px; line-height: 18px; color: #666666;">
-                                                          Feldzeugmeisterstr. 1
-                                                      </td>
-                                                  </tr>
-                                                  <tr>
-                                                      <td
-                                                          style="font-size: 14px; line-height: 18px; color: #666666; padding-bottom: 10px;">
-                                                          10557 Berlin
-                                                      </td>
-                                                  </tr>
-                                              </tbody>
-                                          </table>
-                                      </td>
-                                  </tr>
-                                  <!-- End header Section -->
-      
-                                  <!-- Start address Section -->
-                                  <tr>
-                                      <td style="padding-top: 0;">
-                                          <table width="560" align="center" cellpadding="0" cellspacing="0" border="0"
-                                              class="devicewidthinner" style="border-bottom: 1px solid #bbbbbb;">
-                                              <tbody>
-                                                  <tr>
-                                                      <td
-                                                          style="width: 55%; font-size: 16px; font-weight: bold; color: #1b1b1b; padding-bottom: 5px;">
-                                                          Invoice Number
-                                                      </td>
-                                                      <td
-                                                          style="width: 45%; font-size: 16px; font-weight: bold; color: #1b1b1b; padding-bottom: 5px;">
-                                                          ${data.invoiceNumber}
-                                                      </td>
-                                                  </tr>
-                                                  <tr>
-                                                      <td
-                                                          style="width: 55%; font-size: 14px; line-height: 18px; color: #666666;">
-                                                          Invoice Date
-                                                      </td>
-                                                      <td
-                                                          style="width: 45%; font-size: 14px; line-height: 18px; color: #666666;">
-                                                          ${dateLocalCreatedAt}
-                                                      </td>
-                                                  </tr>
-                                                  <tr>
-                                                      <td
-                                                          style="width: 55%; font-size: 16px; font-weight: bold; color: #1b1b1b; padding-bottom: 5px;">
-                                                          Fullname
-                                                      </td>
-                                                      <td
-                                                          style="width: 45%; font-size: 16px; font-weight: bold; color: #1b1b1b; padding-bottom: 5px;">
-                                                          ${
-                                                            data.customerFullname
-                                                          }
-                                                      </td>
-                                                  </tr>
-                                                  <tr>
-                                                      <td
-                                                          style="width: 55%; font-size: 16px; font-weight: bold; color: #1b1b1b; padding-bottom: 5px;">
-                                                          Status
-                                                      </td>
-                                                      <td
-                                                          style="width: 45%; font-size: 16px; font-weight: bold; color: ${statusColor}; padding-bottom: 5px;">
-                                                          ${statusString}
-                                                      </td>
-                                                  </tr>
-                                                  <tr>
-                                                      <td colspan="2" style="padding-right: 10px; padding-bottom: 10px; text-align: center">
-                                                        <img style="height: 10rem; width: 10rem" src="${
-                                                          data.qrcodeImg
-                                                        }"/>
-                                                      </td>
-                                                  </tr>
-                                                  ${
-                                                    data.customerId === null
-                                                      ? ''
-                                                      : `<tr>
-                                                          <td
-                                                              style="width: 55%; font-size: 16px; font-weight: bold; color: #1b1b1b; padding-bottom: 5px;">
-                                                              Customer Id
-                                                          </td>
-                                                          <td
-                                                            style="width: 45%; font-size: 16px; font-weight: bold; color: #1b1b1b; padding-bottom: 5px;">
-                                                              ${data.customerId.toString()}
-                                                          </td>
-                                                      </tr>`
-                                                  }
-                                              </tbody>
-                                          </table>
-                                      </td>
-                                  </tr>
-                                  <!-- End address Section -->
-      
-                                  <!-- Start product Section -->
-                                  ${generateBodyMenu(data.menus)}
-                                  <!-- End product Section -->
-      
-                                  <!-- Start calculation Section -->
-                                  <tr>
-                                      <td style="padding-top: 0;">
-                                          <table width="560" align="center" cellpadding="0" cellspacing="0" border="0"
-                                              class="devicewidthinner"
-                                              style="border-bottom: 1px solid #bbbbbb; margin-top: -5px;">
-                                              <tbody>
-                                                  <tr>
-                                                      <td rowspan="5" style="width: 55%;"></td>
-      
-                                                      <td
-                                                        style="font-size: 14px; font-weight: bold; line-height: 18px; color: #666666; padding-top: 10px; padding-bottom: 10px;">
-                                                          Total Price
-                                                      </td>
-                                                      <td
-                                                        style="font-size: 14px; font-weight: bold; line-height: 18px; color: #666666; padding-top: 10px; padding-bottom: 10px; text-align: right;">
-                                                          € ${data.totalPrice}
-                                                      </td>
-                                                  </tr>
-                                              </tbody>
-                                          </table>
-                                      </td>
-                                  </tr>
-                                  <!-- End calculation Section -->
-      
-                                  <!-- Start payment method Section -->
-                                  <tr>
-                                      <td style="padding: 0 10px;">
-                                          <table width="560" align="center" cellpadding="0" cellspacing="0" border="0"
-                                              class="devicewidthinner">
-                                              <tbody>
-                                                  
-                                                  ${
-                                                    data.paymentType ===
-                                                    'transfer'
-                                                      ? `
-                                                      <tr>
-                                                      <td colspan="2"
-                                                          style="font-size: 16px; font-weight: bold; color: #666666; padding-bottom: 12px;">
-                                                          Payment Method: ${
-                                                            data.paymentType
-                                                          }
-                                                      </td>
-                                                  </tr>
-                                                  <tr>
-                                                    <td colspan="2"
-                                                      style="width: 55%; font-size: 14px; line-height: 18px; color: #666666; vertical-align: top;">
-                                                      Paypal: ${
-                                                        data.eventData.paypal
-                                                          ? `${data.eventData.paypal}`
-                                                          : '-'
-                                                      }
-                                                    </td>
-                                                  </tr>
-                                                  <tr>
-                                                    <td style="font-size:14px;line-height:18px;color:#757575;padding-bottom:10px">
-                                                    </td>
-                                                  </tr>
-                                                  <tr>
-                                                    <td
-                                                        style="width: 55%; font-size: 14px; line-height: 18px; color: #666666; vertical-align: top;">
-                                                        Bank Name: ${
-                                                          data.eventData
-                                                            .bankName || '-'
-                                                        }
-                                                    </td>
-                                                    <td
-                                                        style="width: 45%; font-size: 14px; line-height: 18px; color: #666666; vertical-align: top;">
-                                                        Account Name: IWKZ e.V.
-                                                    </td>
-                                              </tr>
-                                              <tr>
-                                                  <td
-                                                      style="width: 55%; font-size: 14px; line-height: 18px; color: #666666; vertical-align: top;">
-                                                      IBAN: ${
-                                                        data.eventData.iban ||
-                                                        '-'
-                                                      }
-                                                  </td>
-                                                  <td
-                                                      style="width: 45%; font-size: 14px; line-height: 18px; color: #666666; vertical-align: top;">
-                                                      BIC: ${
-                                                        data.eventData.bic ||
-                                                        '-'
-                                                      }
-                                                  </td>
-                                              </tr>`
-                                                      : ''
-                                                  }
-                                                  ${
-                                                    data.paymentType ===
-                                                    'paypal'
-                                                      ? `<tr>
-                                                      <td colspan="2"
-                                                        style="width: 55%; font-size: 16px; font-weight: bold; line-height: 18px; color: #666666; padding: 10px 0px; vertical-align: top;">
-                                                        Payment Method (Paypal) : ${
-                                                          data.eventData.paypal
-                                                            ? `${data.eventData.paypal}`
-                                                            : '-'
-                                                        }
-                                                      </td>
-                                                  </tr>`
-                                                      : ''
-                                                  }
-                                                  <tr>
-                                                    <td colspan="2"
-                                                    style="width: 100%; text-align: center; font-size: 14px; color: #666666; padding: 12px 0">
-                                                     Verwendungszweck : <span style="font-weight: 600;">${
-                                                       data.invoiceNumber || '-'
-                                                     }</span>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                <td colspan="2"
-                                                  style="width: 100%; text-align: center; font-size: 12px; color: #f1807e; padding-top: 12px 0">
-                                                    <span>
-                                                      Unpaid orders will be canceled within 2x24 hours. 
-                                                      <br/>
-                                                      Please send the proof to the contact person.
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                              </tbody>
-                                          </table>
-                                      </td>
-                                  </tr>
-                                  <!-- End payment method Section -->
-                              </tbody>
-                          </table>
-                      </td>
-                  </tr>
-              </tbody>
+            </td>
+
+            <!-- Name (flex) -->
+            <td width="292" valign="middle" style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;">
+              <strong style="line-height:1.3;display:block;">${
+                m?.name || '-'
+              }</strong>
+            </td>
+
+            <!-- Qty -->
+            <td width="40" align="right" valign="middle"
+                style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;white-space:nowrap;">
+              ${qty}
+            </td>
+
+            <!-- Unit -->
+            <td width="90" align="right" valign="middle"
+                style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;white-space:nowrap;">
+              ${fmtCurrency(price)}
+            </td>
+
+            <!-- Subtotal -->
+            <td width="100" align="right" valign="middle"
+                style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;white-space:nowrap;">
+              <strong>${fmtCurrency(subtotal)}</strong>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  `;
+      })
+      .join('');
+
+    // Bank block (for transfer)
+    const isTransfer = (data?.paymentType || '').toLowerCase() === 'transfer';
+    const bankBlock = isTransfer
+      ? `
+      <tr>
+        <td style="padding:16px;border:1px solid #eee;border-radius:8px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+            <tr>
+              <td colspan="2" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#333;padding-bottom:8px;"><strong>Bank Transfer Details</strong></td>
+            </tr>
+            <tr>
+              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;width:140px;">IBAN</td>
+              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;"><strong>${
+                data?.eventData?.iban || '—'
+              }</strong></td>
+            </tr>
+            <tr>
+              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;">BIC</td>
+              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;"><strong>${
+                data?.eventData?.bic || '—'
+              }</strong></td>
+            </tr>
+            <tr>
+              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;">Bank Name</td>
+              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;"><strong>${
+                data?.eventData?.bankName || '—'
+              }</strong></td>
+            </tr>
+            <tr>
+              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;">Usage Note</td>
+              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;">${
+                data?.eventData?.usageNote || ''
+              }</td>
+            </tr>
           </table>
-      </body>
-      
-      </html>
-      `;
+        </td>
+      </tr>
+    `
+      : '';
+
+    // Pre-order note by status
+    let preorderNote;
+    if (data?.status === 2) {
+      preorderNote = 'Order cancelled.';
+    } else if (data?.status === 1 || data?.status === 3) {
+      preorderNote = 'Payment received — your pre-order is confirmed.';
+    } else {
+      preorderNote =
+        'This is a pre-order. Please complete payment to confirm your order.';
+    }
+
+    // QR
+    const qrImg = data?.qrcodeImg
+      ? `<img src="${data.qrcodeImg}" width="120" height="120" style="display:block;border:1px solid #eee;border-radius:6px;" alt="QR code"/>`
+      : '';
+
+    // --- HTML (email-safe)
+    return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Invoice ${data?.invoiceNumber || ''}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="margin:0;padding:0;background-color:#f6f7f9;">
+  <!-- Preheader (hidden in most clients) -->
+  <div style="display:none;font-size:1px;color:#f6f7f9;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
+    Invoice ${data?.invoiceNumber || ''} • ${preorderNote}
+  </div>
+
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f6f7f9;">
+    <tr>
+      <td align="center" style="padding:24px;">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:100%;background:#ffffff;border-radius:12px;overflow:hidden;">
+          <!-- Header -->
+          <tr>
+            <td style="padding:20px 24px;border-bottom:1px solid #eee;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                  <td valign="top" style="font-family:Arial,Helvetica,sans-serif;font-size:16px;color:#1b1b1b;font-weight:bold;">
+                    Indonesischer Weisheits- &amp; Kulturzentrum e.V. <span style="display:block;color:#666;font-weight:normal;font-size:14px;">Berlin</span>
+                    <div style="color:#666;font-size:13px;margin-top:6px;">Feldzeugmeisterstr. 1<br/>10557 Berlin</div>
+                  </td>
+                  <td valign="top" align="right" style="font-family:Arial,Helvetica,sans-serif;">
+                    <div style="font-size:22px;font-weight:800;color:#1b1b1b;line-height:1.2;">Invoice</div>
+                    <div style="margin-top:8px;display:inline-block;border:1px solid ${
+                      st.color
+                    };color:${
+      st.color
+    };border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700;">
+                      ${st.text}
+                    </div>
+                    <div style="color:#666;font-size:13px;margin-top:8px;">${createdAtStr}</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Meta -->
+          <tr>
+            <td style="padding:18px 24px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                  <!-- Invoice details -->
+                  <td valign="top" width="50%" style="padding-right:10px;">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid #eee;border-radius:8px;">
+                      <tr>
+                        <td style="padding:12px 14px;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#333;"><strong>Invoice Details</strong></td>
+                      </tr>
+                      <tr>
+                        <td style="padding:0 14px 12px;">
+                          <table role="presentation" width="100%">
+                            <tr>
+                              <td style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#666;padding:4px 0;">Invoice No.</td>
+                              <td align="right" style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;"><strong>${
+                                data?.invoiceNumber || '—'
+                              }</strong></td>
+                            </tr>
+                            <tr>
+                              <td style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#666;padding:4px 0;">Payment Method</td>
+                              <td align="right" style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;"><strong>${(
+                                data?.paymentType || ''
+                              ).toUpperCase()}</strong></td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+
+                  <!-- Bill to -->
+                  <td valign="top" width="50%" style="padding-left:10px;">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid #eee;border-radius:8px;">
+                      <tr>
+                        <td style="padding:12px 14px;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#333;"><strong>Bill To</strong></td>
+                      </tr>
+                      <tr>
+                        <td style="padding:0 14px 12px;font-family:Arial,Helvetica,sans-serif;color:#1b1b1b;">
+                          <div style="font-size:14px;"><strong>${
+                            data?.customerFullname || '—'
+                          }</strong></div>
+                          <div style="font-size:13px;color:#666;margin-top:2px;">${
+                            data?.customerEmail || ''
+                          }</div>
+                          <div style="font-size:13px;color:#666;margin-top:2px;">${
+                            data?.customerPhone || ''
+                          }</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Items -->
+<tr>
+  <td style="padding:0 24px 8px;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid #eee;border-radius:8px;">
+      <tr>
+        <td style="padding:12px 14px;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#333;">
+          <strong>Order Items (Pre-Order)</strong>
+        </td>
+      </tr>
+
+      <!-- Column header with fixed widths -->
+      <tr>
+        <td style="padding:0 14px 6px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+            <tr>
+              <!-- 348px = 56 (thumb) + 12 (gap) + 280 (name) -->
+              <td width="348" style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.06em;padding:6px 0;">Item</td>
+              <td width="40"  align="right" style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.06em;padding:6px 0;white-space:nowrap;">Qty</td>
+              <td width="90"  align="right" style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.06em;padding:6px 0;white-space:nowrap;">Unit Price</td>
+              <td width="100" align="right" style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.06em;padding:6px 0;white-space:nowrap;">Subtotal</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- Item rows injected here -->
+      <tr>
+        <td style="padding:0 14px 10px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+            ${rows}
+          </table>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+          <!-- Totals -->
+          <tr>
+            <td style="padding:8px 24px 0;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                  <td valign="top" style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#666;padding-right:12px;">
+                    ${preorderNote}
+                  </td>
+                  <td valign="top" align="right" style="width:300px;">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid #eee;border-radius:8px;">
+                      <tr>
+                        <td style="padding:10px 14px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#666;">Payment Method</td>
+                        <td align="right" style="padding:10px 14px;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;"><strong>${(
+                          data?.paymentType || ''
+                        ).toUpperCase()}</strong></td>
+                      </tr>
+                      <tr>
+                        <td style="padding:10px 14px;border-top:1px solid #eee;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#666;">Total</td>
+                        <td align="right" style="padding:10px 14px;border-top:1px solid #eee;font-family:Arial,Helvetica,sans-serif;font-size:18px;color:#1b1b1b;"><strong>${fmtCurrency(
+                          data?.totalPrice
+                        )}</strong></td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Bank -->
+          <tr>
+            <td style="padding:16px 24px 0;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                ${bankBlock}
+              </table>
+            </td>
+          </tr>
+
+          <!-- Event + QR -->
+          <tr>
+            <td style="padding:16px 24px 20px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                  <td valign="top" style="font-family:Arial,Helvetica,sans-serif;">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid #eee;border-radius:8px;">
+                      <tr>
+                        <td style="padding:12px 14px;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#333;"><strong>Event</strong></td>
+                      </tr>
+                      <tr>
+                        <td style="padding:0 14px 12px;">
+                          <table role="presentation" width="100%">
+                            <tr>
+                              <td style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#666;padding:4px 0;width:140px;">Name</td>
+                              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;"><strong>${
+                                data?.eventData?.name || '—'
+                              }</strong></td>
+                            </tr>
+                            <tr>
+                              <td style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#666;padding:4px 0;">Date</td>
+                              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;">${eventDateStr}</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td valign="bottom" align="right" style="width:140px;padding-left:12px;">
+                    ${qrImg}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:14px 24px 24px;border-top:1px dashed #e6e6e6;">
+              <table role="presentation" width="100%">
+                <tr>
+                  <td style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#666;">
+                    Thank you for your pre-order.
+                  </td>
+                  <td align="right" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#999;">
+                    Invoice ${data?.invoiceNumber || ''}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
   },
 };
