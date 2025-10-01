@@ -74,11 +74,11 @@ class OrderController {
 
       if (findOrder.status === 2) {
         findOrder.menus.forEach(async (el) => {
-          const menuFound = await Menu.findById(el._id).session(session);
+          const menuFound = await Menu.findById(el.id).session(session);
           const payloadMenu = {
             quantityOrder: menuFound.quantityOrder + el.totalPortion,
           };
-          await Menu.updateOne({ _id: el._id }, payloadMenu, { session });
+          await Menu.updateOne({ _id: el.id }, payloadMenu, { session });
         });
       }
 
@@ -88,11 +88,11 @@ class OrderController {
       if (status === 'refund' || status === 'cancel') {
         statusPayload = 2;
         findOrder.menus.forEach(async (el) => {
-          const menuFound = await Menu.findById(el._id).session(session);
+          const menuFound = await Menu.findById(el.id).session(session);
           const payloadMenu = {
             quantityOrder: menuFound.quantityOrder - el.totalPortion,
           };
-          await Menu.updateOne({ _id: el._id }, payloadMenu, { session });
+          await Menu.updateOne({ _id: el.id }, payloadMenu, { session });
         });
       }
       if (status === 'done') {

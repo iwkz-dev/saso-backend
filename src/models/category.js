@@ -19,7 +19,7 @@ const categorySchema = new mongoose.Schema({
 });
 
 // ! HOOKS
-categorySchema.pre('save', async function () {
+categorySchema.pre('save', async function preSaveCategory() {
   const category = this;
   category.slug = category.name.toLowerCase().replace(' ', '_');
 });

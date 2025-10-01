@@ -249,13 +249,13 @@ class OrderController {
     try {
       session.startTransaction();
 
-      const order = await detailById(Order, orderId, { session });
+      const order = await detailById(Order, orderId, null);
       if (!order) throw { name: 'Not Found', message: 'Order not found' };
       if (userId !== order.customerId.toString()) {
         throw { name: 'Forbidden', message: 'Unauthorized access' };
       }
 
-      const event = await detailById(Event, order.event, { session });
+      const event = await detailById(Event, order.event, null);
       if (!event) throw { name: 'Not Found', message: 'Event not found' };
 
       const findPaymentType = await PaymentType.findOne({
