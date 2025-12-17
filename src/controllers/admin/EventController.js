@@ -22,6 +22,11 @@ class EventController {
 
       const payload = {
         name,
+        slug: name
+          .toLowerCase()
+          .trim()
+          .replace(/\s+/g, '-')
+          .replace(/[^a-z0-9-]/g, ''),
         description: req.body.description || '',
         started_at: req.body.started_at,
         po_closed: !!req.body.po_closed,
@@ -104,7 +109,13 @@ class EventController {
         filter.status = statusQuery;
       }
 
-      const findEvents = await dataPagination(Event, filter, null, options);
+      const findEvents = await dataPagination(
+        Event,
+        filter,
+        null,
+        options,
+        session
+      );
 
       await session.commitTransaction();
       session.endSession();
@@ -233,6 +244,11 @@ class EventController {
 
       const payload = {
         name: req.body.name,
+        slug: req.body.name
+          .toLowerCase()
+          .trim()
+          .replace(/\s+/g, '-')
+          .replace(/[^a-z0-9-]/g, ''),
         description: req.body.description || '',
         started_at: req.body.started_at,
         po_closed: !!req.body.po_closed,
@@ -378,15 +394,6 @@ class EventController {
         statusPayload = 0;
       } else if (status === 'approved') {
         statusPayload = 1;
-        const activeEvent = await Event.find({ status: statusPayload }).session(
-          session
-        );
-        if (activeEvent.length > 0) {
-          throw {
-            name: 'Bad Request',
-            message: 'You still have an active event',
-          };
-        }
       } else if (status === 'done') {
         statusPayload = 2;
       } else {

@@ -80,6 +80,43 @@ class EventController {
       next(error);
     }
   }
+
+  static async getEventBySlug(req, res, next) {
+    const { slug } = req.params;
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      const event = await Event.findOne({ slug, status: 1 }).session(session);
+      if (!event) {
+        throw { name: 'Not Found', message: 'Event not found' };
+      }
+
+      const contactPersons = await ContactPerson.find({
+        event: event._id,
+      }).session(session);
+
+      const eventWithContactPersons = {
+        ...event._doc,
+        contactPersons,
+      };
+
+      await session.commitTransaction();
+      session.endSession();
+
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(
+          resHelpers.success('success fetch data', eventWithContactPersons)
+        );
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      console.log(error);
+      next(error);
+    }
+  }
 }
 
 module.exports = EventController;

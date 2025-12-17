@@ -117,7 +117,7 @@ router.post('/', OrderController.order);
  *               schema:
  *                 $ref: '#/components/schemas/Error'
  */
-router.get('/', OrderController.getAllOrders);
+router.get('/event/:eventId', OrderController.getAllOrders);
 
 /**
  * @swagger

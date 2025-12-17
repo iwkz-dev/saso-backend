@@ -62,4 +62,55 @@ const EventController = require('@controllers/customer/EventController');
  */
 router.get('/', EventController.getAllEvents);
 
+/**
+ * @swagger
+ * /customer/event/{slug}:
+ *    get:
+ *      summary: Get event detail by slug
+ *      tags: [Customer-Event]
+ *      description: Return detailed information of a specific event based on its slug
+ *      parameters:
+ *        - in: path
+ *          name: slug
+ *          required: true
+ *          schema:
+ *            type: string
+ *          description: Unique slug of the event
+ *          example: music-festival-2025
+ *      responses:
+ *        "200":
+ *          description: OK
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/ResultEvent'
+ *        "404":
+ *          description: Event not found
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *              example:
+ *                status: failed
+ *                message: Event not found
+ *                error: Not Found
+ *        "401":
+ *          description: Invalid Access token
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *              example:
+ *                status: failed
+ *                message: Invalid Access Token
+ *                error: Invalid Auth
+ *        "500":
+ *          description: Error 500
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
+router.get('/:slug', EventController.getEventBySlug);
+
 module.exports = router;

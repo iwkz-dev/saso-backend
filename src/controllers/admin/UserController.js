@@ -1,5 +1,6 @@
 'use strict';
 
+const mongoose = require('mongoose');
 const httpStatus = require('http-status-codes');
 const User = require('@models/user');
 const resHelpers = require('@helpers/responseHelpers');
@@ -55,6 +56,9 @@ class UserController {
     const { page, limit, sort, filters } = req.query;
 
     const { role } = req.user;
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
       const options = {
         page: page || 1,
@@ -93,16 +97,22 @@ class UserController {
         User,
         filter,
         ['-password'],
-        options
+        options,
+        session
       );
       // const findUsers = await User.find()
       //   .select("-password")
       //   .sort({ updated_at: -1 });
+      await session.commitTransaction();
+      session.endSession();
+
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('success fetch data', findUsers));
     } catch (error) {
       console.log(error);
+      await session.abortTransaction();
+      session.endSession();
       next(error);
     }
   }
