@@ -14,7 +14,7 @@ async function onPagination(count, limit, page) {
 }
 
 module.exports = {
-  dataPagination: async (model, filter, select, query) => {
+  dataPagination: async (model, filter, select, query, session) => {
     const page = query.page ? parseInt(query.page, 10) : 1;
     const limit = query.limit ? parseInt(query.limit, 10) : null;
     const options = {
@@ -28,7 +28,10 @@ module.exports = {
       };
     }
 
-    const findData = await model.find(filter, null, options).select(select);
+    const findData = await model
+      .find(filter, null, options)
+      .select(select)
+      .session(session);
 
     const countData = await model.countDocuments(filter);
     const getPagination = await onPagination(countData, options.limit, page);

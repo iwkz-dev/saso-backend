@@ -78,7 +78,8 @@ class ContactPersonController {
         ContactPerson,
         filter,
         null,
-        options
+        options,
+        session
       );
 
       await session.commitTransaction();

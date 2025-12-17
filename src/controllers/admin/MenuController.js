@@ -128,7 +128,14 @@ class MenuController {
         filter.vendor = vendor;
       }
 
-      const findMenu = await dataPagination(Menu, filter, null, options);
+      const findMenu = await dataPagination(
+        Menu,
+        filter,
+        null,
+        options,
+        session
+      );
+
       await session.commitTransaction();
       session.endSession();
 

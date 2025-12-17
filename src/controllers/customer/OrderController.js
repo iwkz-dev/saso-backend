@@ -100,10 +100,10 @@ class OrderController {
 
   static async approveOrder(req, res, next) {
     const { orderID, facilitatorAccessToken } = req.body;
-    const session = await mongoose.startSession();
-    try {
-      session.startTransaction();
 
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
       const paymentResponse = await getOrderPaypal(
         orderID,
         facilitatorAccessToken
@@ -185,21 +185,35 @@ class OrderController {
   static async getAllOrders(req, res, next) {
     const { id: userId } = req.user;
     const { page, limit } = req.query;
+    const { eventId } = req.params;
 
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
       const options = {
         page: page || 1,
         limit: limit || 100000,
         sort: { type: 'created_at', method: -1 },
       };
-      const filter = { customerId: userId };
-      const orders = await dataPagination(Order, filter, null, options);
+      const filter = { customerId: userId, event: eventId };
+      const orders = await dataPagination(
+        Order,
+        filter,
+        null,
+        options,
+        session
+      );
+
+      await session.commitTransaction();
+      session.endSession();
 
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('Fetched orders', orders));
     } catch (error) {
       console.log(error);
+      await session.abortTransaction();
+      session.endSession();
       next(error);
     }
   }

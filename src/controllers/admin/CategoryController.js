@@ -73,7 +73,8 @@ class CategoryController {
         Category,
         null,
         null,
-        options
+        options,
+        session
       );
       await session.commitTransaction();
       session.endSession();

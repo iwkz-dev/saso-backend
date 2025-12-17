@@ -1,5 +1,6 @@
 'use strict';
 
+const mongoose = require('mongoose');
 const httpStatus = require('http-status-codes');
 const PaymentType = require('@models/paymentType');
 const resHelpers = require('@helpers/responseHelpers');
@@ -38,6 +39,9 @@ class PaymentTypeController {
 
   static async getAllPaymentTypes(req, res, next) {
     const { page, limit, sort } = req.query;
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
       const options = {
         page: page || 1,
@@ -67,13 +71,20 @@ class PaymentTypeController {
         PaymentType,
         null,
         null,
-        options
+        options,
+        session
       );
+
+      await session.commitTransaction();
+      session.endSession();
+
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('success fetch data', findPaymentTypes));
     } catch (error) {
       console.log(error);
+      await session.abortTransaction();
+      session.endSession();
       next(error);
     }
   }

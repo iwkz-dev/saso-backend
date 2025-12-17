@@ -44,7 +44,8 @@ class OrderController {
         null,
         options,
         session
-      ); // Ensure dataPagination supports sessions
+      );
+
       await session.commitTransaction();
       session.endSession();
 
