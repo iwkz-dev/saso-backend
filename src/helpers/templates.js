@@ -334,40 +334,50 @@ module.exports = {
     const isTransfer = (data?.paymentType || '').toLowerCase() === 'transfer';
     const bankBlock = isTransfer
       ? `
-      <tr>
-        <td style="padding:16px;border:1px solid #eee;border-radius:8px;">
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
-            <tr>
-              <td colspan="2" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#333;padding-bottom:8px;"><strong>Bank Transfer Details</strong></td>
-            </tr>
-            <tr>
-              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;width:140px;">IBAN</td>
-              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;"><strong>${
-                data?.eventData?.iban || '—'
-              }</strong></td>
-            </tr>
-            <tr>
-              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;">BIC</td>
-              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;"><strong>${
-                data?.eventData?.bic || '—'
-              }</strong></td>
-            </tr>
-            <tr>
-              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;">Bank Name</td>
-              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;"><strong>${
-                data?.eventData?.bankName || '—'
-              }</strong></td>
-            </tr>
-            <tr>
-              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;">Usage Note</td>
-              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;">${
-                data?.eventData?.usageNote || ''
-              }</td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    `
+    <tr>
+      <td style="padding:16px;border:1px solid #eee;border-radius:8px;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+          <tr>
+            <td colspan="2" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#333;padding-bottom:8px;">
+              <strong>Bank / PayPal Transfer Details</strong>
+            </td>
+          </tr>
+          <tr>
+            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;width:140px;">IBAN</td>
+            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;">
+              <strong>${data?.eventData?.iban || '—'}</strong>
+            </td>
+          </tr>
+          <tr>
+            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;">BIC</td>
+            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;">
+              <strong>${data?.eventData?.bic || '—'}</strong>
+            </td>
+          </tr>
+          <tr>
+            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;">Bank Name</td>
+            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;">
+              <strong>${data?.eventData?.bankName || '—'}</strong>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;">Paypal</td>
+            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;">
+              <strong>${data?.eventData?.paypal || '—'}</strong>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;">Usage Note</td>
+            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;">
+              ${data?.eventData?.usageNote || ''}
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  `
       : '';
 
     // Pre-order note by status
@@ -562,42 +572,50 @@ module.exports = {
             </td>
           </tr>
 
-          <!-- Event + QR -->
+          <!-- Event -->
           <tr>
-            <td style="padding:16px 24px 20px;">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+            <td style="padding:16px 24px 0;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid #eee;border-radius:8px;">
                 <tr>
-                  <td valign="top" style="font-family:Arial,Helvetica,sans-serif;">
-                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid #eee;border-radius:8px;">
+                  <td style="padding:12px 14px;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#333;">
+                    <strong>Event</strong>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:0 14px 12px;">
+                    <table role="presentation" width="100%">
                       <tr>
-                        <td style="padding:12px 14px;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#333;"><strong>Event</strong></td>
+                        <td style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#666;width:140px;">Name</td>
+                        <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;">
+                          <strong>${data?.eventData?.name || '—'}</strong>
+                        </td>
                       </tr>
                       <tr>
-                        <td style="padding:0 14px 12px;">
-                          <table role="presentation" width="100%">
-                            <tr>
-                              <td style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#666;padding:4px 0;width:140px;">Name</td>
-                              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;"><strong>${
-                                data?.eventData?.name || '—'
-                              }</strong></td>
-                            </tr>
-                            <tr>
-                              <td style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#666;padding:4px 0;">Date</td>
-                              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;">${eventDateStr}</td>
-                            </tr>
-                          </table>
+                        <td style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#666;">Date</td>
+                        <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;">
+                          ${eventDateStr}
                         </td>
                       </tr>
                     </table>
-                  </td>
-                  <td valign="bottom" align="right" style="width:140px;padding-left:12px;">
-                    ${qrImg}
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
 
+          <!-- QR (Centered & Large) -->
+          <tr>
+            <td align="center" style="padding:20px 24px 28px;">
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#666;margin-bottom:10px;">
+                Scan for ticket verification
+              </div>
+              ${qrImg.replace(
+                '<img',
+                '<img width="200" style="display:block;width:200px;max-width:100%;height:auto;border-radius:8px;"'
+              )}
+            </td>
+          </tr>
+          
           <!-- Footer -->
           <tr>
             <td style="padding:14px 24px 24px;border-top:1px dashed #e6e6e6;">
