@@ -92,77 +92,114 @@ router.post(
 /**
  * @swagger
  * /admin/menu:
- *    get:
- *      summary: Return the list of all the menus
- *      tags: [Admin-Menu]
- *      description: <h1>You have to choose query between status and event, can not do both</h1><br>If you want to show all menus please delete all forms below
- *      security:
- *         - ApiKeyAuth: []
- *      parameters:
- *         - in: query
- *           name: sort
- *           schema:
- *             type: string
- *           description: Sort criteria depend on key of object data, default updated_at:desc.
- *           example: updated_at:desc
- *         - in: query
- *           name: status
- *           schema:
- *             type: string
- *           description: Filter for filtering event depends on status of the event. approved / done / draft.
- *           example: approved
- *         - in: query
- *           name: event
- *           schema:
- *             type: string
- *           description: Event id in bson object, if not defined it will show all menus
- *         - in: query
- *           name: category
- *           schema:
- *             type: string
- *           description: Category id in bson object, if not defined it will show all menus
- *           example: 61dbb879a59f547c07e1ce21
- *         - in: query
- *           name: page
- *           schema:
- *             type: number
- *           description: Number of current page
- *           example: 1
- *         - in: query
- *           name: limit
- *           schema:
- *             type: number
- *           description: Number of items will shown in one page
- *           example: 2
- *         - in: query
- *           name: status
- *           schema:
- *             type: string
- *           description: Filter for filtering event depends on status of the event. approved / done / draft
- *           example: approved
- *      responses:
- *        "200":
- *          description: OK
- *          content:
- *             application/json:
- *               schema:
- *                  $ref: '#/components/schemas/ResultMenus'
- *        "401":
- *           description: Invalid Access token
- *           content:
- *             application/json:
- *               schema:
- *                 $ref: '#/components/schemas/Error'
- *               example:
- *                status: failed
- *                message: Invalid Access Token
- *                error: Invalid Auth
- *        "500":
- *           description: Error 500
- *           content:
- *             application/json:
- *               schema:
- *                 $ref: '#/components/schemas/Error'
+ *   get:
+ *     summary: Return the list of all menus
+ *     tags: [Admin-Menu]
+ *     description: >
+ *       <h1>Query behavior</h1>
+ *       <ul>
+ *         <li>If no query parameters are provided, all menus will be returned.</li>
+ *         <li>
+ *           Menus can be filtered by <b>event</b> directly using the event ID,
+ *           or indirectly using <b>status</b> and/or <b>flagDate</b>.
+ *         </li>
+ *         <li>
+ *           When <b>status</b> is provided, the system will search for an event
+ *           with the corresponding status (draft, approved, or done) and return
+ *           menus associated with that event.
+ *         </li>
+ *         <li>
+ *           When <b>flagDate=now</b> is provided, only events starting from the
+ *           current year onward will be considered.
+ *         </li>
+ *         <li>
+ *           The <b>name</b> parameter filters menus based on the related event name.
+ *         </li>
+ *         <li>
+ *           Sorting, pagination, and filtering by category or vendor can be combined
+ *           with the above filters.
+ *         </li>
+ *       </ul>
+ *     security:
+ *       - ApiKeyAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *         description: Sort criteria using field and direction. Default is created_at:desc.
+ *         example: created_at:desc
+ *
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         description: Filter menus by event name.
+ *         example: Music Festival
+ *
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *         description: Filter menus by event status. Allowed values are draft, approved, or done.
+ *         example: approved
+ *
+ *       - in: query
+ *         name: event
+ *         schema:
+ *           type: string
+ *         description: Event ID (BSON ObjectId). If not defined, menus from all events will be returned.
+ *         example: 61dbb879a59f547c07e1ce21
+ *
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: Category ID (BSON ObjectId).
+ *         example: 61dbb879a59f547c07e1ce21
+ *
+ *       - in: query
+ *         name: vendor
+ *         schema:
+ *           type: string
+ *         description: Vendor ID (BSON ObjectId).
+ *         example: 61dbb879a59f547c07e1ce21
+ *
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: number
+ *         description: Current page number.
+ *         example: 1
+ *
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: number
+ *         description: Number of items per page.
+ *         example: 10
+ *
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ResultMenus'
+ *
+ *       "401":
+ *         description: Invalid access token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/', MenuController.getAllMenus);
 

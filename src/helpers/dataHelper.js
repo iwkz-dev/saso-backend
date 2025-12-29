@@ -109,4 +109,9 @@ module.exports = {
     const newStr = wordsArray.join(' ');
     return newStr;
   },
+
+  escapeRegex: (text) => {
+    if (!text) return text;
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  },
 };
