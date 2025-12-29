@@ -3,7 +3,7 @@
 const httpStatus = require('http-status-codes');
 const mongoose = require('mongoose');
 const Menu = require('@models/menu');
-const Vendor = require('@models/menu');
+const Vendor = require('@models/vendor');
 
 const readXlsxFile = require('read-excel-file/node');
 const Event = require('@models/event');
@@ -168,6 +168,8 @@ class MenuController {
       const vendorNames = [
         ...new Set(menus.map((m) => normalizeName(m.vendor)).filter(Boolean)),
       ];
+
+      console.log(vendorNames);
 
       const categories = await Category.find(
         { name: { $in: categoryNames } },
