@@ -114,4 +114,6 @@ module.exports = {
     if (!text) return text;
     return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   },
+
+  normalizeName: (value) => value?.toString().trim(),
 };

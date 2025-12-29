@@ -91,6 +91,93 @@ router.post(
 
 /**
  * @swagger
+ * /admin/menu/bulk:
+ *   post:
+ *     summary: Create multiple menus for an event
+ *     tags: [Admin-Menu]
+ *     security:
+ *       - ApiKeyAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - event
+ *               - menus
+ *             properties:
+ *               event:
+ *                 type: string
+ *                 format: uuid
+ *                 description: Event ID
+ *               menus:
+ *                 type: array
+ *                 minItems: 1
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - name
+ *                     - price
+ *                     - quantity
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                       example: Burger
+ *                     category:
+ *                       type: string
+ *                       example: Food
+ *                     vendor:
+ *                       type: string
+ *                       example: ABC Vendor
+ *                     price:
+ *                       type: number
+ *                       example: 12.5
+ *                     quantity:
+ *                       type: number
+ *                       example: 100
+ *                     description:
+ *                       type: string
+ *                       example: Beef burger
+ *     responses:
+ *       "201":
+ *         description: Menus created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 count:
+ *                   type: number
+ *                   example: 5
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Menu'
+ *       "400":
+ *         description: Validation Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               status: failed
+ *               message: Validation Error
+ *               error: One or more required fields are missing
+ *       "401":
+ *         description: Invalid Access token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post('/bulk', MenuController.createMenus);
+
+/**
+ * @swagger
  * /admin/menu:
  *   get:
  *     summary: Return the list of all menus

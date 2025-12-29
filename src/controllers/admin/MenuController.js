@@ -3,6 +3,8 @@
 const httpStatus = require('http-status-codes');
 const mongoose = require('mongoose');
 const Menu = require('@models/menu');
+const Vendor = require('@models/menu');
+
 const readXlsxFile = require('read-excel-file/node');
 const Event = require('@models/event');
 const Category = require('@models/category');
@@ -14,6 +16,7 @@ const {
   updateWithImages,
   firstWordUppercase,
   escapeRegex,
+  normalizeName,
 } = require('@helpers/dataHelper');
 
 class MenuController {
@@ -140,6 +143,130 @@ class MenuController {
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('success fetch data', menus));
     } catch (error) {
+      console.error(error);
+      next(error);
+    } finally {
+      session.endSession();
+    }
+  }
+
+  static async createMenus(req, res, next) {
+    const { event, menus } = req.body;
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      if (!event) throw new Error('Event is required');
+      if (!Array.isArray(menus) || menus.length === 0)
+        throw new Error('Menus must be a non-empty array');
+
+      // Collect unique category and vendor names
+      const categoryNames = [
+        ...new Set(menus.map((m) => normalizeName(m.category)).filter(Boolean)),
+      ];
+      const vendorNames = [
+        ...new Set(menus.map((m) => normalizeName(m.vendor)).filter(Boolean)),
+      ];
+
+      const categories = await Category.find(
+        { name: { $in: categoryNames } },
+        { name: 1 }
+      ).session(session);
+      const vendors = await Vendor.find(
+        { name: { $in: vendorNames } },
+        { name: 1 }
+      ).session(session);
+
+      const categoryMap = categories.reduce((acc, c) => {
+        acc[normalizeName(c.name)] = c._id;
+        return acc;
+      }, {});
+      const vendorMap = vendors.reduce((acc, v) => {
+        acc[normalizeName(v.name)] = v._id;
+        return acc;
+      }, {});
+
+      const existingMenus = await Menu.find({ event }, { name: 1 }).session(
+        session
+      );
+      const existingNames = new Set(
+        existingMenus.map((m) => normalizeName(m.name))
+      );
+
+      const duplicates = [];
+      const payloads = [];
+
+      // Prepare all async name transformations in parallel
+      const namePromises = menus.map((item) => firstWordUppercase(item.name));
+      const names = await Promise.all(namePromises);
+
+      for (let i = 0; i < menus.length; i++) {
+        const item = menus[i];
+
+        if (!item.name) throw new Error(`Row ${i + 1}: name is required`);
+        if (item.price === undefined || item.price === null)
+          throw new Error(`Row ${i + 1}: price is required`);
+        if (item.quantity === undefined || item.quantity === null)
+          throw new Error(`Row ${i + 1}: quantity is required`);
+
+        const name = names[i];
+        const normalizedName = normalizeName(name);
+
+        // Check for duplication in the same event
+        if (existingNames.has(normalizedName)) {
+          duplicates.push(name);
+        } else {
+          existingNames.add(normalizedName); // mark as used
+
+          const categoryId = item.category
+            ? categoryMap[normalizeName(item.category)]
+            : null;
+          if (item.category && !categoryId)
+            throw new Error(
+              `Row ${i + 1}: category "${item.category}" not found`
+            );
+
+          const vendorId = item.vendor
+            ? vendorMap[normalizeName(item.vendor)]
+            : null;
+          if (item.vendor && !vendorId)
+            throw new Error(`Row ${i + 1}: vendor "${item.vendor}" not found`);
+
+          payloads.push({
+            name,
+            description: item.description || '',
+            note: item.note || '',
+            quantity: +item.quantity,
+            quantityOrder: 0,
+            price: +item.price,
+            category: categoryId,
+            vendor: vendorId,
+            images: [],
+            event,
+            updated_at: new Date(),
+            created_at: new Date(),
+          });
+        }
+      }
+
+      // Insert new menus
+      const createdMenus = await Menu.insertMany(payloads, {
+        session,
+        ordered: true,
+      });
+
+      await session.commitTransaction();
+
+      res.status(httpStatus.StatusCodes.CREATED).json(
+        resHelpers.success('success create multiple menus', {
+          count: createdMenus.length,
+          data: createdMenus,
+          duplicates, // return skipped duplicates for info
+        })
+      );
+    } catch (error) {
+      await session.abortTransaction();
       console.error(error);
       next(error);
     } finally {
