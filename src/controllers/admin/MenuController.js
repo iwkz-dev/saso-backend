@@ -2,10 +2,10 @@
 
 const httpStatus = require('http-status-codes');
 const mongoose = require('mongoose');
+const readXlsxFile = require('read-excel-file/node');
+
 const Menu = require('@models/menu');
 const Vendor = require('@models/vendor');
-
-const readXlsxFile = require('read-excel-file/node');
 const Event = require('@models/event');
 const Category = require('@models/category');
 const resHelpers = require('@helpers/responseHelpers');
