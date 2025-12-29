@@ -64,5 +64,10 @@ const eventSchema = new mongoose.Schema({
   },
 });
 
+eventSchema.pre('save', async function preSaveCategory() {
+  const event = this;
+  event.slug = event.name.toLowerCase().replace(' ', '_');
+});
+
 const Event = mongoose.model('Event', eventSchema);
 module.exports = Event;

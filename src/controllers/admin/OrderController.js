@@ -8,10 +8,13 @@ const PaymentType = require('@models/paymentType');
 const Event = require('@models/event');
 const QRCode = require('qrcode');
 const resHelpers = require('@helpers/responseHelpers');
-const { dataPagination } = require('@helpers/dataHelper');
+const {
+  dataPagination,
+  detailById,
+  escapeRegex,
+} = require('@helpers/dataHelper');
 const { invoiceTemplate } = require('@helpers/templates');
 const { mailer } = require('@helpers/nodemailer');
-const { detailById } = require('../../helpers/dataHelper');
 
 class OrderController {
   static async getAllOrders(req, res, next) {
@@ -31,7 +34,7 @@ class OrderController {
 
       const filter = {};
       if (invoiceNumber) {
-        filter.invoiceNumber = { $regex: `.*${invoiceNumber}.*` };
+        filter.invoiceNumber = { $regex: `.*${escapeRegex(invoiceNumber)}.*` };
       }
 
       if (event) {

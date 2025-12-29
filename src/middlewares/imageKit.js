@@ -57,7 +57,6 @@ async function imgKitUploadMulti(req, _, next) {
 
     const uploads = await Promise.all(
       files.map((file) => {
-        console.log(file.originalname);
         if (!isValidImage(file)) {
           throw {
             name: 'Bad Request',

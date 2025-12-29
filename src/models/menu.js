@@ -10,6 +10,7 @@ const menuSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, 'Name is required'],
+    trim: true,
   },
   barcode: {
     type: String,
@@ -33,6 +34,7 @@ const menuSchema = new mongoose.Schema({
   event: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Events',
+    required: [true, 'Event is required'],
   },
   vendor: {
     type: mongoose.Schema.Types.ObjectId,
@@ -41,7 +43,7 @@ const menuSchema = new mongoose.Schema({
   price: {
     type: Number,
     min: [0, 'Cannot be lower than 0'],
-    required: [true, 'Quantity is required'],
+    required: [true, 'Price is required'],
     currency: {
       type: String,
       default: 'EUR',
@@ -62,6 +64,8 @@ const menuSchema = new mongoose.Schema({
     type: Date,
   },
 });
+
+menuSchema.index({ name: 1, event: 1 }, { unique: true });
 
 const Menu = mongoose.model('Menu', menuSchema);
 module.exports = Menu;
