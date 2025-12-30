@@ -116,4 +116,21 @@ module.exports = {
   },
 
   normalizeName: (value) => value?.toString().trim(),
+
+  handleMongoDuplicate: (httpStatus, resHelper, error, res) => {
+    const index = error.message.match(/index:\s(.+?)\sdup key/)?.[1];
+
+    const DUPLICATE_INDEX_MESSAGES = {
+      name_1_event_1: 'Menu name already exists for this event',
+    };
+
+    return res
+      .status(httpStatus.StatusCodes.CONFLICT)
+      .json(
+        resHelper.failed(
+          DUPLICATE_INDEX_MESSAGES[index] || 'Duplicate value',
+          'DuplicateKey'
+        )
+      );
+  },
 };

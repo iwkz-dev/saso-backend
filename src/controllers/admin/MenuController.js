@@ -52,16 +52,16 @@ class MenuController {
       }
 
       await session.commitTransaction();
-      session.endSession();
 
       res
         .status(httpStatus.StatusCodes.CREATED)
         .json(resHelpers.success('success create a menu', createMenu[0]));
     } catch (error) {
       await session.abortTransaction();
-      session.endSession();
       console.error(error);
       next(error);
+    } finally {
+      session.endSession();
     }
   }
 
