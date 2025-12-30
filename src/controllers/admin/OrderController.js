@@ -15,6 +15,7 @@ const {
 } = require('@helpers/dataHelper');
 const { invoiceTemplate } = require('@helpers/templates');
 const { mailer } = require('@helpers/nodemailer');
+const { STATUS_ORDER_MAP } = require('@constants/status');
 
 class OrderController {
   static async getAllOrders(req, res, next) {
@@ -70,54 +71,63 @@ class OrderController {
     try {
       const { status, id } = req.params;
 
-      let statusPayload = 0;
+      if (!(status in STATUS_ORDER_MAP)) {
+        throw { name: 'Bad Request', message: 'Invalid status' };
+      }
+
       const findOrder = await Order.findById(id).session(session);
       if (!findOrder) {
         throw { name: 'Not Found', message: 'Order not found' };
       }
 
       if (findOrder.status === 2) {
-        findOrder.menus.forEach(async (el) => {
+        const restoreStockPromises = findOrder.menus.map(async (el) => {
           const menuFound = await Menu.findById(el.id).session(session);
-          const payloadMenu = {
-            quantityOrder: menuFound.quantityOrder + el.totalPortion,
-          };
-          await Menu.updateOne({ _id: el.id }, payloadMenu, { session });
+          console.log('menuFound', menuFound, el.id);
+          if (!menuFound) {
+            throw { name: 'Not Found', message: 'Menu not found' };
+          }
+
+          return Menu.updateOne(
+            { _id: el.id },
+            { $inc: { quantityOrder: el.totalPortion } },
+            { session }
+          );
         });
+        await Promise.all(restoreStockPromises);
       }
 
-      if (status === 'paid') {
-        statusPayload = 1;
-      }
       if (status === 'refund' || status === 'cancel') {
-        statusPayload = 2;
-        findOrder.menus.forEach(async (el) => {
+        const reduceStockPromises = findOrder.menus.map(async (el) => {
           const menuFound = await Menu.findById(el.id).session(session);
-          const payloadMenu = {
-            quantityOrder: menuFound.quantityOrder - el.totalPortion,
-          };
-          await Menu.updateOne({ _id: el.id }, payloadMenu, { session });
+          if (!menuFound) {
+            throw { name: 'Not Found', message: 'Menu not found' };
+          }
+
+          return Menu.updateOne(
+            { _id: el.id },
+            { $inc: { quantityOrder: -el.totalPortion } },
+            { session }
+          );
         });
-      }
-      if (status === 'done') {
-        statusPayload = 3;
+        await Promise.all(reduceStockPromises);
       }
 
-      const updateOrder = await Order.updateOne(
+      await Order.updateOne(
         { _id: id },
-        { status: statusPayload, updated_at: new Date() },
-        { new: true, session }
+        { status: STATUS_ORDER_MAP[status], updated_at: new Date() },
+        { session }
       );
 
       const findUpdatedOrder = await Order.findById(id).session(session);
-      const findEvent = await Event.findOne({
-        _id: findUpdatedOrder.event,
-      }).session(session);
-      if (findEvent.status !== 1 || !findEvent) {
+
+      const findEvent = await Event.findById(findUpdatedOrder.event).session(
+        session
+      );
+      if (!findEvent || findEvent.status !== 1) {
         throw {
           name: 'Bad Request',
-          message:
-            'Event is not found or its status is still in draft or already done',
+          message: 'Event not found or not active',
         };
       }
 
@@ -127,6 +137,7 @@ class OrderController {
           { id: findUpdatedOrder.paymentType },
         ],
       }).session(session);
+
       if (!findPaymentType) {
         throw { name: 'Bad Request', message: 'Payment type not found' };
       }
@@ -137,7 +148,7 @@ class OrderController {
 
       const dataEmail = {
         ...findUpdatedOrder._doc,
-        eventData: { ...findEvent._doc },
+        eventData: findEvent._doc,
         paymentType: findPaymentType.type,
         qrcodeImg,
       };
@@ -153,16 +164,15 @@ class OrderController {
       });
 
       await session.commitTransaction();
-      session.endSession();
 
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success('success change status', updateOrder));
+        .json(resHelpers.success('success change status', findUpdatedOrder));
     } catch (error) {
       await session.abortTransaction();
-      session.endSession();
-      console.log(error);
       next(error);
+    } finally {
+      session.endSession();
     }
   }
 

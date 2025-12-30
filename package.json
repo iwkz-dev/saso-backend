@@ -38,7 +38,8 @@
     "@controllers": "src/controllers",
     "@middlewares": "src/middlewares",
     "@configs": "src/config",
-    "@routes": "src/routes"
+    "@routes": "src/routes",
+    "@constants": "src/constants"
   },
   "dependencies": {
     "axios": "^1.6.8",

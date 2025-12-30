@@ -12,6 +12,7 @@ const {
   updateWithImages,
   firstWordUppercase,
 } = require('@helpers/dataHelper');
+const { STATUS_EVENT_MAP } = require('@constants/status');
 
 class EventController {
   static async create(req, res, next) {
@@ -29,7 +30,7 @@ class EventController {
           .replace(/[^a-z0-9-]/g, ''),
         description: req.body.description || '',
         started_at: req.body.started_at,
-        po_closed: !!req.body.po_closed,
+        po_closed: req.body.po_closed || false,
         images: req.body.imagesData || [],
         status: 0,
         iban: req.body.iban || '',
@@ -51,35 +52,31 @@ class EventController {
       }
 
       await session.commitTransaction();
-      session.endSession();
 
       res
         .status(httpStatus.StatusCodes.CREATED)
         .json(resHelpers.success('success create an event', createEvent[0]));
     } catch (error) {
       await session.abortTransaction();
-      session.endSession();
       console.log(error);
       next(error);
+    } finally {
+      session.endSession();
     }
   }
 
-  // -1 for descending & 1 for ascending
   static async getAllEvents(req, res, next) {
     const session = await mongoose.startSession();
     session.startTransaction();
+
     try {
       const { page, limit, flagDate, status, sort } = req.query;
 
-      let statusQuery = '';
-      if (status === 'draft') {
-        statusQuery = 0;
-      }
-      if (status === 'approved') {
-        statusQuery = 1;
-      }
-      if (status === 'done') {
-        statusQuery = 2;
+      const statusQuery =
+        status !== undefined ? STATUS_EVENT_MAP[status] : undefined;
+
+      if (status && statusQuery === undefined) {
+        throw { name: 'Bad Request', message: 'Invalid status' };
       }
 
       const options = {
@@ -93,18 +90,19 @@ class EventController {
       };
 
       if (sort) {
-        const splittedSort = sort.split(':');
-        const method = splittedSort[1] === 'desc' ? -1 : 1;
+        const [type, order] = sort.split(':');
         options.sort = {
-          type: splittedSort[0],
-          method,
+          type,
+          method: order === 'desc' ? -1 : 1,
         };
       }
 
       const filter = {};
+
       if (flagDate === 'now') {
         filter.startYear = { $gte: new Date().getFullYear() };
       }
+
       if (status) {
         filter.status = statusQuery;
       }
@@ -116,18 +114,13 @@ class EventController {
         options,
         session
       );
-
-      await session.commitTransaction();
-      session.endSession();
-
-      res
-        .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success('Success load events', findEvents));
+      throw { name: 'Bad Request', message: 'Invalid status' };
     } catch (error) {
       await session.abortTransaction();
-      session.endSession();
       console.log(error);
       next(error);
+    } finally {
+      session.endSession();
     }
   }
 
@@ -142,16 +135,16 @@ class EventController {
       }
 
       await session.commitTransaction();
-      session.endSession();
 
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('Success load an event', findEvent));
     } catch (error) {
       await session.abortTransaction();
-      session.endSession();
       console.log(error);
       next(error);
+    } finally {
+      session.endSession();
     }
   }
 
@@ -189,16 +182,16 @@ class EventController {
       }
 
       await session.commitTransaction();
-      session.endSession();
 
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('Event successfully deleted', deletedEvent));
     } catch (error) {
       await session.abortTransaction();
-      session.endSession();
       console.log(error);
       next(error);
+    } finally {
+      session.endSession();
     }
   }
 
@@ -251,7 +244,7 @@ class EventController {
           .replace(/[^a-z0-9-]/g, ''),
         description: req.body.description || '',
         started_at: req.body.started_at,
-        po_closed: !!req.body.po_closed,
+        po_closed: req.body.po_closed || false,
         startYear: getYear[0],
         images: payloadImages.imagesSaved,
         iban: req.body.iban || '',
@@ -277,16 +270,16 @@ class EventController {
       }
 
       await session.commitTransaction();
-      session.endSession();
 
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('success update data', updatedEvent));
     } catch (error) {
       await session.abortTransaction();
-      session.endSession();
       console.log(error);
       next(error);
+    } finally {
+      session.endSession();
     }
   }
 
@@ -321,7 +314,6 @@ class EventController {
       }
 
       await session.commitTransaction();
-      session.endSession();
 
       res
         .status(httpStatus.StatusCodes.OK)
@@ -333,9 +325,10 @@ class EventController {
         );
     } catch (error) {
       await session.abortTransaction();
-      session.endSession();
       console.log(error);
       next(error);
+    } finally {
+      session.endSession();
     }
   }
 
@@ -370,33 +363,29 @@ class EventController {
       });
 
       await session.commitTransaction();
-      session.endSession();
 
       res
         .status(httpStatus.StatusCodes.CREATED)
         .json(resHelpers.success('success destroy an image', updatedEvent));
     } catch (error) {
       await session.abortTransaction();
-      session.endSession();
       console.log(error);
       next(error);
+    } finally {
+      session.endSession();
     }
   }
 
   static async changeStatus(req, res, next) {
     const session = await mongoose.startSession();
     session.startTransaction();
+
     try {
       const { id, status } = req.params;
 
-      let statusPayload;
-      if (status === 'draft') {
-        statusPayload = 0;
-      } else if (status === 'approved') {
-        statusPayload = 1;
-      } else if (status === 'done') {
-        statusPayload = 2;
-      } else {
+      const statusPayload = STATUS_EVENT_MAP[status];
+
+      if (statusPayload === undefined) {
         throw { name: 'Bad Request', message: 'Invalid status' };
       }
 
@@ -407,16 +396,16 @@ class EventController {
       );
 
       await session.commitTransaction();
-      session.endSession();
 
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('success change status', updateEvent));
     } catch (error) {
       await session.abortTransaction();
-      session.endSession();
       console.log(error);
       next(error);
+    } finally {
+      session.endSession();
     }
   }
 
@@ -442,7 +431,6 @@ class EventController {
       );
 
       await session.commitTransaction();
-      session.endSession();
 
       res
         .status(httpStatus.StatusCodes.OK)
@@ -451,9 +439,10 @@ class EventController {
         );
     } catch (error) {
       await session.abortTransaction();
-      session.endSession();
       console.log(error);
       next(error);
+    } finally {
+      session.endSession();
     }
   }
 

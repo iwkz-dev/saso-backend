@@ -68,16 +68,16 @@ class EventController {
       findEvents.data = eventWithContactPerson;
 
       await session.commitTransaction();
-      session.endSession();
 
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('success fetch data', findEvents));
     } catch (error) {
       await session.abortTransaction();
-      session.endSession();
       console.log(error);
       next(error);
+    } finally {
+      session.endSession();
     }
   }
 
@@ -103,7 +103,6 @@ class EventController {
       };
 
       await session.commitTransaction();
-      session.endSession();
 
       res
         .status(httpStatus.StatusCodes.OK)
@@ -112,9 +111,10 @@ class EventController {
         );
     } catch (error) {
       await session.abortTransaction();
-      session.endSession();
       console.log(error);
       next(error);
+    } finally {
+      session.endSession();
     }
   }
 }
