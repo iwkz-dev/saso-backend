@@ -114,7 +114,12 @@ class EventController {
         options,
         session
       );
-      throw { name: 'Bad Request', message: 'Invalid status' };
+
+      await session.commitTransaction();
+
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success('Success load events', findEvents));
     } catch (error) {
       await session.abortTransaction();
       console.log(error);
