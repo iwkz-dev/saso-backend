@@ -18,6 +18,7 @@ class EventController {
   static async create(req, res, next) {
     const session = await mongoose.startSession();
     session.startTransaction();
+
     try {
       const name = await firstWordUppercase(req.body.name);
 
@@ -70,7 +71,7 @@ class EventController {
     session.startTransaction();
 
     try {
-      const { page, limit, flagDate, status, sort } = req.query;
+      const { page = 1, limit = 100000, flagDate, status, sort } = req.query;
 
       const statusQuery =
         status !== undefined ? STATUS_EVENT_MAP[status] : undefined;
@@ -80,8 +81,8 @@ class EventController {
       }
 
       const options = {
-        page: page || 1,
-        limit: limit || 100000,
+        page,
+        limit,
         sort: {
           type: 'created_at',
           method: -1,

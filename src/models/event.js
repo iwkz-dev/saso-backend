@@ -11,11 +11,13 @@ const eventSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Name is required'],
     unique: true,
+    trim: true,
   },
   slug: {
     type: String,
     required: [true, 'Slug is required'],
     unique: true,
+    trim: true,
   },
   description: {
     type: String,

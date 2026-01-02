@@ -5,8 +5,8 @@ const mongoose = require('mongoose');
 const orderSchema = new mongoose.Schema({
   invoiceNumber: {
     type: String,
+    trim: true,
   },
-  //   ! LATER: STATUS BUAT YANG SUDAH BAYAR ATAU BELOM
   status: {
     type: Number,
   },

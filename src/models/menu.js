@@ -14,12 +14,15 @@ const menuSchema = new mongoose.Schema({
   },
   barcode: {
     type: String,
+    trim: true,
   },
   description: {
     type: String,
+    trim: true,
   },
   note: {
     type: String,
+    trim: true,
   },
   quantity: {
     type: Number,
