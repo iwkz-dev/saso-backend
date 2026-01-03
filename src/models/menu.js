@@ -36,12 +36,12 @@ const menuSchema = new mongoose.Schema({
   },
   event: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Events',
+    ref: 'Event',
     required: [true, 'Event is required'],
   },
   vendor: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Vendors',
+    ref: 'Vendor',
   },
   price: {
     type: Number,
@@ -58,7 +58,7 @@ const menuSchema = new mongoose.Schema({
   },
   category: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Categories',
+    ref: 'Category',
   },
   updated_at: {
     type: Date,

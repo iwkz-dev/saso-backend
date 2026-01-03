@@ -39,6 +39,15 @@ class EventController {
           },
         },
 
+        {
+          $lookup: {
+            from: 'paymenttypes',
+            localField: 'paymentTypes',
+            foreignField: '_id',
+            as: 'paymentTypes',
+          },
+        },
+
         { $sort: { updated_at: -1 } },
 
         {
@@ -89,6 +98,14 @@ class EventController {
             localField: '_id',
             foreignField: 'event',
             as: 'contactPersons',
+          },
+        },
+        {
+          $lookup: {
+            from: 'paymenttypes',
+            localField: 'paymentTypes',
+            foreignField: '_id',
+            as: 'paymentTypes',
           },
         },
         { $sort: { updated_at: -1 } },

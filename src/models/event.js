@@ -58,6 +58,12 @@ const eventSchema = new mongoose.Schema({
     type: Array,
     validate: [arrayLimit, '{PATH} exceeds the limit of 5'],
   },
+  paymentTypes: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'PaymentType',
+    },
+  ],
   updated_at: {
     type: Date,
   },

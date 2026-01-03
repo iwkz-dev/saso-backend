@@ -17,7 +17,7 @@ const {
 
 class OrderGuestController {
   static async order(req, res, next) {
-    const { menus, event, arrivedAt, note, paymentType, userData } = req.body;
+    const { menus, event, arrivedAt, note, paymentTypeId, userData } = req.body;
 
     const session = await mongoose.startSession();
     try {
@@ -40,7 +40,7 @@ class OrderGuestController {
       );
 
       const { findPaymentType, paymentResponse } = await getPaymentDetails(
-        paymentType,
+        paymentTypeId,
         invoiceNumber,
         totalPrice,
         session
@@ -60,7 +60,7 @@ class OrderGuestController {
         arrived_at: arrivedAt,
         updated_at: new Date(),
         created_at: new Date(),
-        paymentType: findPaymentType.type,
+        paymentType: findPaymentType._id,
         paypalOrderId: paymentResponse.id || '',
       };
 
@@ -69,7 +69,7 @@ class OrderGuestController {
       await sendInvoiceEmail(
         createOrder[0],
         findEvent.toObject(),
-        findPaymentType.type,
+        findPaymentType.name,
         createOrder[0].customerEmail
       );
 
@@ -168,7 +168,7 @@ class OrderGuestController {
       await sendInvoiceEmail(
         findUpdatedOrder,
         findEvent.toObject(),
-        findPaymentType.type,
+        findPaymentType.name,
         findUpdatedOrder.customerEmail
       );
 

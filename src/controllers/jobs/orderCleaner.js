@@ -47,7 +47,7 @@ const orderCleaner = async () => {
         const dataEmail = {
           ...order._doc,
           eventData: { ...findEvent._doc },
-          paymentType: findPaymentType.type,
+          paymentType: findPaymentType.name,
         };
         const template = invoiceTemplate(dataEmail);
 

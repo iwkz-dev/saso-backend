@@ -282,7 +282,11 @@ class MenuController {
 
     try {
       const { id } = req.params;
-      const findMenu = await detailById(Menu, id, null);
+      const findMenu = await Menu.findById(id)
+        .populate('event')
+        .populate('vendor')
+        .populate('category')
+        .session(session);
 
       if (!findMenu) {
         throw { name: 'Not Found', message: 'Menu not found' };

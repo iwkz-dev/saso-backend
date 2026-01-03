@@ -103,7 +103,9 @@ class ContactPersonController {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-      const findContactPerson = await detailById(ContactPerson, id, null);
+      const findContactPerson = await ContactPerson.findById(id)
+        .populate('event')
+        .session(session);
       if (!findContactPerson) {
         throw { name: 'Not Found', message: 'Contact Person not found' };
       }

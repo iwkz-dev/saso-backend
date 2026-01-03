@@ -20,7 +20,7 @@ const {
 
 class OrderController {
   static async order(req, res, next) {
-    const { menus, event, arrivedAt, note, paymentType } = req.body;
+    const { menus, event, arrivedAt, note, paymentTypeId } = req.body;
     const userId = req.user.id;
 
     const session = await mongoose.startSession();
@@ -44,7 +44,7 @@ class OrderController {
       );
 
       const { findPaymentType, paymentResponse } = await getPaymentDetails(
-        paymentType,
+        paymentTypeId,
         invoiceNumber,
         totalPrice,
         session
@@ -69,7 +69,7 @@ class OrderController {
         arrived_at: arrivedAt,
         updated_at: new Date(),
         created_at: new Date(),
-        paymentType: findPaymentType.type,
+        paymentType: findPaymentType._id,
         paypalOrderId: paymentResponse.id || '',
       };
 
@@ -77,7 +77,7 @@ class OrderController {
       await sendInvoiceEmail(
         createOrder[0],
         findEvent.toObject(),
-        findPaymentType.type,
+        findPaymentType.name,
         createOrder[0].customerEmail
       );
 
@@ -162,7 +162,7 @@ class OrderController {
       await sendInvoiceEmail(
         updatedOrder,
         findEvent.toObject(),
-        findPaymentType.type,
+        findPaymentType.name,
         updatedOrder.customerEmail
       );
 
@@ -239,7 +239,7 @@ class OrderController {
       const result = JSON.parse(JSON.stringify(order));
       result.paymentType = {
         paymentType: order.paymentType,
-        name: findPaymentType.type,
+        name: findPaymentType.name,
       };
 
       await session.commitTransaction();
@@ -281,7 +281,7 @@ class OrderController {
       const template = invoiceTemplate({
         ...order._doc,
         eventData: { ...event._doc },
-        paymentType: findPaymentType.type,
+        paymentType: findPaymentType.name,
       });
       const pdfData = await pdfGenerator(template);
 

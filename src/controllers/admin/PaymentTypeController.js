@@ -7,7 +7,7 @@ const resHelpers = require('@helpers/responseHelpers');
 
 class PaymentTypeController {
   static async create(req, res, next) {
-    const { name, type, note = '', events = [] } = req.body;
+    const { name, type, note = '' } = req.body;
     const session = await mongoose.startSession();
     session.startTransaction();
 
@@ -16,21 +16,9 @@ class PaymentTypeController {
         name,
         type: type.toLowerCase(),
         note,
-        events: [...new Set(events)],
         updated_at: new Date(),
         created_at: new Date(),
       };
-
-      const findPaymentType = await PaymentType.findOne({
-        type: type.toLowerCase(),
-      });
-
-      if (findPaymentType) {
-        throw {
-          name: 'Bad Request',
-          message: `You already have payment type with name: ${req.body.type}`,
-        };
-      }
 
       const createPaymentType = await PaymentType.create(payload);
       await session.commitTransaction();
@@ -63,19 +51,11 @@ class PaymentTypeController {
 
       const skip = (page - 1) * limit;
 
-      // Fetch payment types with related events
+      // Fetch payment types
       const paymentTypes = await PaymentType.aggregate([
         { $sort: sortOption },
         { $skip: Number(skip) },
         { $limit: Number(limit) },
-        {
-          $lookup: {
-            from: 'events', // collection name
-            localField: '_id',
-            foreignField: 'paymentTypeId',
-            as: 'events',
-          },
-        },
       ]).session(session);
 
       // Get total count for pagination
@@ -110,12 +90,7 @@ class PaymentTypeController {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-      const paymentType = await PaymentType.findById(id)
-        .populate({
-          path: 'events',
-          options: { sort: { started_at: -1 } },
-        })
-        .session(session);
+      const paymentType = await PaymentType.findById(id).session(session);
 
       if (!paymentType) {
         throw { name: 'Not Found', message: 'Payment Type not found' };
@@ -135,7 +110,7 @@ class PaymentTypeController {
   }
 
   static async update(req, res, next) {
-    const { name, type, note = '', events = [] } = req.body;
+    const { name, type, note = '' } = req.body;
 
     const { id } = req.params;
 
@@ -156,7 +131,6 @@ class PaymentTypeController {
         name,
         type: type.toLowerCase(),
         note,
-        events,
         updated_at: new Date(),
       };
 

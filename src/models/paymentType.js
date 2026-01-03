@@ -6,7 +6,6 @@ const paymentTypeSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, 'Name is required'],
-    unique: true,
     trim: true,
   },
   type: {
@@ -18,12 +17,6 @@ const paymentTypeSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
-  events: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Event',
-    },
-  ],
   updated_at: {
     type: Date,
   },

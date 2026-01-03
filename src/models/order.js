@@ -12,7 +12,7 @@ const orderSchema = new mongoose.Schema({
   },
   customerId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Users',
+    ref: 'User',
   },
   customerFullname: {
     type: String,
@@ -34,7 +34,7 @@ const orderSchema = new mongoose.Schema({
   },
   event: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Events',
+    ref: 'Event',
   },
   note: {
     type: String,

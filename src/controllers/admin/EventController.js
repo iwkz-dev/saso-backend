@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const httpStatus = require('http-status-codes');
 const Event = require('@models/event');
 const Menu = require('@models/menu');
+const PaymentType = require('@models/paymentType');
 const resHelpers = require('@helpers/responseHelpers');
 const { bulkUpload, deleteImages, deleteImage } = require('@helpers/images');
 const {
@@ -39,12 +40,37 @@ class EventController {
         bankName: req.body.bankName || '',
         paypal: req.body.paypal || '',
         usageNote: req.body.usageNote || '',
+        paymentTypes: req.body.paymentTypes || [],
         updated_at: new Date(),
         created_at: new Date(),
       };
 
       const getYear = req.body.started_at.split('-');
       payload.startYear = getYear[0];
+
+      // Validate unique payment type names
+      if (payload.paymentTypes.length > 0) {
+        const paymentTypesData = await PaymentType.find({
+          _id: { $in: payload.paymentTypes },
+        }).session(session);
+
+        const nameCount = {};
+        for (const pt of paymentTypesData) {
+          nameCount[pt.name] = (nameCount[pt.name] || 0) + 1;
+        }
+
+        const duplicates = Object.keys(nameCount).filter(
+          (n) => nameCount[n] > 1
+        );
+        if (duplicates.length > 0) {
+          throw {
+            name: 'Bad Request',
+            message: `Duplicate payment type names found: ${duplicates.join(
+              ', '
+            )}`,
+          };
+        }
+      }
 
       const createEvent = await Event.create([payload], { session });
 
@@ -135,7 +161,9 @@ class EventController {
     session.startTransaction();
     try {
       const { id } = req.params;
-      const findEvent = await detailById(Event, id, null);
+      const findEvent = await Event.findById(id)
+        .populate('paymentTypes')
+        .session(session);
       if (!findEvent) {
         throw { name: 'Not Found', message: 'Event not found' };
       }
@@ -259,8 +287,33 @@ class EventController {
         paypal: req.body.paypal || '',
         usageNote: req.body.usageNote || '',
         status: req.body.status,
+        paymentTypes: req.body.paymentTypes || [],
         updated_at: new Date(),
       };
+
+      // Validate unique payment type names
+      if (payload.paymentTypes.length > 0) {
+        const paymentTypesData = await PaymentType.find({
+          _id: { $in: payload.paymentTypes },
+        }).session(session);
+
+        const nameCount = {};
+        for (const pt of paymentTypesData) {
+          nameCount[pt.name] = (nameCount[pt.name] || 0) + 1;
+        }
+
+        const duplicates = Object.keys(nameCount).filter(
+          (n) => nameCount[n] > 1
+        );
+        if (duplicates.length > 0) {
+          throw {
+            name: 'Bad Request',
+            message: `Duplicate payment type names found: ${duplicates.join(
+              ', '
+            )}`,
+          };
+        }
+      }
 
       const updatedEvent = await Event.findOneAndUpdate({ _id: id }, payload, {
         new: true,
