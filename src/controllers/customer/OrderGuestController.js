@@ -192,19 +192,22 @@ class OrderGuestController {
 
   static async getOrderByInvoiceNumber(req, res, next) {
     const { invoiceNumber, customerFullname, eventId } = req.query;
-
     const session = await mongoose.startSession();
+
     try {
       session.startTransaction();
 
       const findEvent = await detailById(Event, eventId, null);
-      if (findEvent.status !== 1) {
-        throw { name: 'Not Found', message: 'Order not found' };
+      if (!findEvent || findEvent.status !== 1) {
+        throw { name: 'Not Found', message: 'Event not found' };
       }
 
       const findOrder = await Order.findOne({
-        $and: [{ invoiceNumber }, { customerFullname }],
-      }).session(session);
+        invoiceNumber,
+        customerFullname,
+      })
+        .populate('paymentType')
+        .session(session);
 
       if (
         !findOrder ||
@@ -213,23 +216,13 @@ class OrderGuestController {
         throw { name: 'Not Found', message: 'Order not found' };
       }
 
-      const findPaymentType = await PaymentType.findOne({
-        $or: [{ type: findOrder.paymentType }, { id: findOrder.paymentType }],
-      }).session(session);
-
-      const result = JSON.parse(JSON.stringify(findOrder));
-      result.paymentType = {
-        paymentType: findOrder.paymentType,
-        name: findPaymentType.type,
-      };
-
       await session.commitTransaction();
+
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success('Successfully fetched data', result));
+        .json(resHelpers.success('Successfully fetched data', findOrder));
     } catch (error) {
       await session.abortTransaction();
-      console.log(error);
       next(error);
     } finally {
       session.endSession();

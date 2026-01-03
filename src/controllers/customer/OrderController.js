@@ -77,7 +77,10 @@ class OrderController {
       await sendInvoiceEmail(
         createOrder[0],
         findEvent.toObject(),
-        findPaymentType.name,
+        {
+          name: findPaymentType.name,
+          note: findPaymentType.note,
+        },
         createOrder[0].customerEmail
       );
 
@@ -225,27 +228,19 @@ class OrderController {
 
     try {
       session.startTransaction();
-      const order = await detailById(Order, orderId, null);
+      const order = await Order.findById(orderId)
+        .populate('paymentType')
+        .session(session);
 
       if (!order) throw { name: 'Not Found', message: 'Order not found' };
       if (userId !== order.customerId.toString()) {
         throw { name: 'Forbidden', message: 'Unauthorized access' };
       }
 
-      const findPaymentType = await PaymentType.findOne({
-        $or: [{ type: order.paymentType }, { id: order.paymentType }],
-      }).session(session);
-
-      const result = JSON.parse(JSON.stringify(order));
-      result.paymentType = {
-        paymentType: order.paymentType,
-        name: findPaymentType.name,
-      };
-
       await session.commitTransaction();
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success('Fetched order', result));
+        .json(resHelpers.success('Fetched order', order));
     } catch (error) {
       await session.abortTransaction();
       console.log(error);
@@ -281,7 +276,10 @@ class OrderController {
       const template = invoiceTemplate({
         ...order._doc,
         eventData: { ...event._doc },
-        paymentType: findPaymentType.name,
+        paymentType: {
+          name: findPaymentType.name,
+          note: findPaymentType.note,
+        },
       });
       const pdfData = await pdfGenerator(template);
 

@@ -148,7 +148,10 @@ class OrderController {
       const dataEmail = {
         ...findUpdatedOrder._doc,
         eventData: findEvent._doc,
-        paymentType: findPaymentType.name,
+        paymentType: {
+          name: findPaymentType.name,
+          note: findPaymentType.note,
+        },
         qrcodeImg,
       };
 
@@ -182,7 +185,10 @@ class OrderController {
     try {
       session.startTransaction();
 
-      const findOrder = await Order.findOne({ invoiceNumber });
+      const findOrder = await Order.findOne({ invoiceNumber })
+        .populate('paymentType')
+        .session(session);
+
       if (!findOrder) {
         throw { name: 'Not Found', message: 'Order not found' };
       }
@@ -210,6 +216,7 @@ class OrderController {
     try {
       const findOrder = await Order.findById(id)
         .populate('event')
+        .populate('paymentType')
         .session(session);
       if (!findOrder) {
         throw { name: 'Not Found', message: 'Order not found' };
@@ -332,7 +339,10 @@ class OrderController {
         const dataEmail = {
           ...findUpdatedOrder._doc,
           eventData: { ...findEvent._doc },
-          paymentType: findPaymentType.type,
+          paymentType: {
+            name: findPaymentType.name,
+            note: findPaymentType.note,
+          },
           qrcodeImg,
         };
 
