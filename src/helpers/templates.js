@@ -244,7 +244,6 @@ module.exports = {
   },
 
   invoiceTemplate(data) {
-    console.log(data);
     const toDate = (v) => (v ? new Date(v) : null);
     const dateOpts = {
       weekday: 'long',

@@ -69,7 +69,10 @@ class OrderGuestController {
       await sendInvoiceEmail(
         createOrder[0],
         findEvent.toObject(),
-        findPaymentType.name,
+        {
+          name: findPaymentType.name,
+          note: findPaymentType.note,
+        },
         createOrder[0].customerEmail
       );
 
@@ -168,7 +171,10 @@ class OrderGuestController {
       await sendInvoiceEmail(
         findUpdatedOrder,
         findEvent.toObject(),
-        findPaymentType.name,
+        {
+          name: findPaymentType.name,
+          note: findPaymentType.note,
+        },
         findUpdatedOrder.customerEmail
       );
 
