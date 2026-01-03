@@ -11,11 +11,13 @@ const eventSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Name is required'],
     unique: true,
+    trim: true,
   },
   slug: {
     type: String,
     required: [true, 'Slug is required'],
     unique: true,
+    trim: true,
   },
   description: {
     type: String,
@@ -56,6 +58,12 @@ const eventSchema = new mongoose.Schema({
     type: Array,
     validate: [arrayLimit, '{PATH} exceeds the limit of 5'],
   },
+  paymentTypes: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'PaymentType',
+    },
+  ],
   updated_at: {
     type: Date,
   },

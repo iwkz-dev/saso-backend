@@ -4,11 +4,7 @@ const mongoose = require('mongoose');
 const httpStatus = require('http-status-codes');
 const ContactPerson = require('@models/contactPerson');
 const resHelpers = require('@helpers/responseHelpers');
-const {
-  dataPagination,
-  detailById,
-  firstWordUppercase,
-} = require('@helpers/dataHelper');
+const { dataPagination, firstWordUppercase } = require('@helpers/dataHelper');
 
 class ContactPersonController {
   static async create(req, res, next) {
@@ -103,7 +99,9 @@ class ContactPersonController {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-      const findContactPerson = await detailById(ContactPerson, id, null);
+      const findContactPerson = await ContactPerson.findById(id)
+        .populate('event')
+        .session(session);
       if (!findContactPerson) {
         throw { name: 'Not Found', message: 'Contact Person not found' };
       }

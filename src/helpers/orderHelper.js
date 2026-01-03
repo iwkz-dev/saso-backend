@@ -84,14 +84,15 @@ async function validateAndPrepareMenus(menus, eventId, session) {
 }
 
 async function getPaymentDetails(
-  paymentType,
+  paymentTypeId,
   invoiceNumber,
   totalPrice,
   session
 ) {
   const findPaymentType = await PaymentType.findOne({
-    type: paymentType,
+    _id: paymentTypeId,
   }).session(session);
+
   if (!findPaymentType)
     throw { name: 'Bad Request', message: 'Payment type not found' };
 

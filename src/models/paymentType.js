@@ -3,9 +3,19 @@
 const mongoose = require('mongoose');
 
 const paymentTypeSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, 'Name is required'],
+    trim: true,
+  },
   type: {
     type: String,
     required: [true, 'Type is required'],
+    trim: true,
+  },
+  note: {
+    type: String,
+    trim: true,
   },
   updated_at: {
     type: Date,

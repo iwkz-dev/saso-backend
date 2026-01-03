@@ -4,139 +4,156 @@ const mongoose = require('mongoose');
 const httpStatus = require('http-status-codes');
 const PaymentType = require('@models/paymentType');
 const resHelpers = require('@helpers/responseHelpers');
-const { dataPagination, detailById } = require('@helpers/dataHelper');
 
 class PaymentTypeController {
   static async create(req, res, next) {
+    const { name, type, note = '' } = req.body;
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
-      const type = await req.body.type;
       const payload = {
+        name,
         type: type.toLowerCase(),
+        note,
         updated_at: new Date(),
         created_at: new Date(),
       };
-      const findPaymentType = await PaymentType.findOne({
-        type: type.toLowerCase(),
-      });
-      if (findPaymentType) {
-        throw {
-          name: 'Bad Request',
-          message: `You already have payment type with name: ${req.body.type}`,
-        };
-      } else {
-        const createPaymentType = await PaymentType.create(payload);
-        res
-          .status(httpStatus.StatusCodes.CREATED)
-          .json(
-            resHelpers.success('success create an payment', createPaymentType)
-          );
-      }
+
+      const createPaymentType = await PaymentType.create(payload);
+      await session.commitTransaction();
+      res
+        .status(httpStatus.StatusCodes.CREATED)
+        .json(
+          resHelpers.success('success create an payment', createPaymentType)
+        );
     } catch (error) {
+      await session.abortTransaction();
       console.log(error);
       next(error);
+    } finally {
+      session.endSession();
     }
   }
 
   static async getAllPaymentTypes(req, res, next) {
-    const { page, limit, sort } = req.query;
+    const { page = 1, limit = 100000, sort } = req.query;
 
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-      const options = {
-        page: page || 1,
-        limit: limit || 100000,
-        sort: {
-          type: 'created_at',
-          method: -1,
-        },
-      };
+      let sortOption = { created_at: -1 }; // default sort
 
-      let method;
       if (sort) {
-        const splittedSort = sort.split(':');
-        if (splittedSort[1] === 'desc') {
-          method = -1;
-        }
-        if (splittedSort[1] === 'asc') {
-          method = 1;
-        }
-        options.sort = {
-          type: splittedSort[0],
-          method,
-        };
+        const [field, direction] = sort.split(':');
+        sortOption = { [field]: direction === 'asc' ? 1 : -1 };
       }
 
-      const findPaymentTypes = await dataPagination(
-        PaymentType,
-        null,
-        null,
-        options,
-        session
-      );
+      const skip = (page - 1) * limit;
+
+      // Fetch payment types
+      const paymentTypes = await PaymentType.aggregate([
+        { $sort: sortOption },
+        { $skip: Number(skip) },
+        { $limit: Number(limit) },
+      ]).session(session);
+
+      // Get total count for pagination
+      const totalCount = await PaymentType.countDocuments().session(session);
+      const maxPage = Math.ceil(totalCount / limit);
 
       await session.commitTransaction();
-      session.endSession();
 
-      res
-        .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success('success fetch data', findPaymentTypes));
+      res.status(httpStatus.StatusCodes.OK).json(
+        resHelpers.success('Success load payment types', {
+          pagination: {
+            maxPage,
+            currentPage: Number(page),
+            limit: Number(limit),
+            count: totalCount,
+          },
+          data: paymentTypes,
+        })
+      );
     } catch (error) {
-      console.log(error);
+      console.error(error);
       await session.abortTransaction();
-      session.endSession();
       next(error);
+    } finally {
+      session.endSession();
     }
   }
 
   static async getPaymentTypeById(req, res, next) {
     const { id } = req.params;
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
-      const findPaymentType = await detailById(PaymentType, id, null);
-      if (!findPaymentType) {
+      const paymentType = await PaymentType.findById(id).session(session);
+
+      if (!paymentType) {
         throw { name: 'Not Found', message: 'Payment Type not found' };
       }
+
+      await session.commitTransaction();
       res
         .status(httpStatus.StatusCodes.OK)
-        .json(resHelpers.success('success fetch data', findPaymentType));
+        .json(resHelpers.success('success fetch data', paymentType));
     } catch (error) {
+      await session.abortTransaction();
       console.log(error);
       next(error);
+    } finally {
+      session.endSession();
     }
   }
 
   static async update(req, res, next) {
-    const payload = {
-      type: req.body.type,
-      updated_at: new Date(),
-    };
+    const { name, type, note = '' } = req.body;
 
     const { id } = req.params;
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
       const findPaymentType = await PaymentType.findOne({
-        type: req.body.type.toLowerCase(),
+        name: name.trim(),
       });
-      if (findPaymentType) {
+      if (findPaymentType && findPaymentType._id.toString() !== id) {
         throw {
           name: 'Bad Request',
           message: `You already have payment type with name: ${req.body.type}`,
         };
-      } else {
-        const updatePaymentType = await PaymentType.findOneAndUpdate(
-          { _id: id },
-          payload,
-          { new: true }
-        );
-        if (!updatePaymentType) {
-          throw { name: 'Not Found', message: 'Payment type not found' };
-        }
-        res
-          .status(httpStatus.StatusCodes.OK)
-          .json(resHelpers.success('success update data', updatePaymentType));
       }
+
+      const payload = {
+        name,
+        type: type.toLowerCase(),
+        note,
+        updated_at: new Date(),
+      };
+
+      const updatePaymentType = await PaymentType.findOneAndUpdate(
+        { _id: id },
+        payload,
+        { new: true }
+      );
+
+      if (!updatePaymentType) {
+        throw { name: 'Not Found', message: 'Payment type not found' };
+      }
+
+      await session.commitTransaction();
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success('success update data', updatePaymentType));
     } catch (error) {
+      await session.abortTransaction();
       console.log(error);
       next(error);
+    } finally {
+      session.endSession();
     }
   }
 

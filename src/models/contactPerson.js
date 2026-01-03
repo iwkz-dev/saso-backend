@@ -13,7 +13,7 @@ const contactPersonSchema = new mongoose.Schema({
   },
   event: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Events',
+    ref: 'Event',
   },
   updated_at: {
     type: Date,

@@ -83,7 +83,6 @@ class OrderController {
       if (findOrder.status === 2) {
         const restoreStockPromises = findOrder.menus.map(async (el) => {
           const menuFound = await Menu.findById(el.id).session(session);
-          console.log('menuFound', menuFound, el.id);
           if (!menuFound) {
             throw { name: 'Not Found', message: 'Menu not found' };
           }
@@ -149,7 +148,7 @@ class OrderController {
       const dataEmail = {
         ...findUpdatedOrder._doc,
         eventData: findEvent._doc,
-        paymentType: findPaymentType.type,
+        paymentType: findPaymentType.name,
         qrcodeImg,
       };
 
@@ -195,6 +194,32 @@ class OrderController {
       res
         .status(httpStatus.StatusCodes.OK)
         .json(resHelpers.success('Successfully fetched data', result));
+    } catch (error) {
+      await session.abortTransaction();
+      console.log(error);
+      next(error);
+    } finally {
+      session.endSession();
+    }
+  }
+
+  static async getOrderById(req, res, next) {
+    const { id } = req.params;
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      const findOrder = await Order.findById(id)
+        .populate('event')
+        .session(session);
+      if (!findOrder) {
+        throw { name: 'Not Found', message: 'Order not found' };
+      }
+
+      await session.commitTransaction();
+
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success('Successfully fetched data', findOrder));
     } catch (error) {
       await session.abortTransaction();
       console.log(error);

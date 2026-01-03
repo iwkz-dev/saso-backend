@@ -66,6 +66,58 @@ router.get('/', OrderController.getAllOrders);
 
 /**
  * @swagger
+ * /admin/order/{id}:
+ *    get:
+ *      summary: Get order by ID
+ *      tags: [Admin-Order]
+ *      security:
+ *         - ApiKeyAuth: []
+ *      parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Order id
+ *         example: 61f116232924ffa77f2bb98b
+ *      responses:
+ *        "200":
+ *          description: OK
+ *          content:
+ *             application/json:
+ *               schema:
+ *                  $ref: '#/components/schemas/Order'
+ *        "401":
+ *           description: Invalid Access token
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Invalid Access Token
+ *                error: Invalid Auth
+ *        "404":
+ *           description: Order not found
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ *               example:
+ *                status: failed
+ *                message: Order not found
+ *                error: Not Found
+ *        "500":
+ *           description: Error 500
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Error'
+ */
+router.get('/:id', OrderController.getOrderById);
+
+/**
+ * @swagger
  * /admin/order/{id}/{status}:
  *    patch:
  *      summary: Change status order
