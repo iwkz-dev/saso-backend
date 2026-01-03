@@ -148,7 +148,10 @@ class OrderController {
       const dataEmail = {
         ...findUpdatedOrder._doc,
         eventData: findEvent._doc,
-        paymentType: findPaymentType.name,
+        paymentType: {
+          name: findPaymentType.name,
+          note: findPaymentType.note,
+        },
         qrcodeImg,
       };
 
@@ -336,7 +339,10 @@ class OrderController {
         const dataEmail = {
           ...findUpdatedOrder._doc,
           eventData: { ...findEvent._doc },
-          paymentType: findPaymentType.type,
+          paymentType: {
+            name: findPaymentType.name,
+            note: findPaymentType.note,
+          },
           qrcodeImg,
         };
 

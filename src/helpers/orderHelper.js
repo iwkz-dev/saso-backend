@@ -115,7 +115,10 @@ async function sendInvoiceEmail(order, eventData, paymentType, to) {
   const template = invoiceTemplate({
     ...order.toObject(),
     eventData,
-    paymentType,
+    paymentType: {
+      name: paymentType.name,
+      note: paymentType.note,
+    },
     qrcodeImg,
   });
 

@@ -77,7 +77,10 @@ class OrderController {
       await sendInvoiceEmail(
         createOrder[0],
         findEvent.toObject(),
-        findPaymentType.name,
+        {
+          name: findPaymentType.name,
+          note: findPaymentType.note,
+        },
         createOrder[0].customerEmail
       );
 
@@ -273,7 +276,10 @@ class OrderController {
       const template = invoiceTemplate({
         ...order._doc,
         eventData: { ...event._doc },
-        paymentType: findPaymentType.name,
+        paymentType: {
+          name: findPaymentType.name,
+          note: findPaymentType.note,
+        },
       });
       const pdfData = await pdfGenerator(template);
 

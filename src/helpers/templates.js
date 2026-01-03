@@ -244,6 +244,7 @@ module.exports = {
   },
 
   invoiceTemplate(data) {
+    console.log(data);
     const toDate = (v) => (v ? new Date(v) : null);
     const dateOpts = {
       weekday: 'long',
@@ -331,54 +332,51 @@ module.exports = {
       .join('');
 
     // Bank block (for transfer)
-    const isTransfer = (data?.paymentType || '').toLowerCase() === 'transfer';
-    const bankBlock = isTransfer
-      ? `
-    <tr>
-      <td style="padding:16px;border:1px solid #eee;border-radius:8px;">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
-          <tr>
-            <td colspan="2" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#333;padding-bottom:8px;">
-              <strong>Bank / PayPal Transfer Details</strong>
-            </td>
-          </tr>
-          <tr>
-            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;width:140px;">IBAN</td>
-            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;">
-              <strong>${data?.eventData?.iban || '—'}</strong>
-            </td>
-          </tr>
-          <tr>
-            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;">BIC</td>
-            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;">
-              <strong>${data?.eventData?.bic || '—'}</strong>
-            </td>
-          </tr>
-          <tr>
-            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;">Bank Name</td>
-            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;">
-              <strong>${data?.eventData?.bankName || '—'}</strong>
-            </td>
-          </tr>
+    const isTransfer = `
+      <tr>
+        <td style="padding:16px;border:1px solid #eee;border-radius:8px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+            <tr>
+              <td colspan="2" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#333;padding-bottom:8px;">
+                <strong>Bank / PayPal Transfer Details</strong>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;width:140px;">IBAN</td>
+              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;">
+                <strong>${data?.eventData?.iban || '—'}</strong>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;">BIC</td>
+              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;">
+                <strong>${data?.eventData?.bic || '—'}</strong>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;">Bank Name</td>
+              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;">
+                <strong>${data?.eventData?.bankName || '—'}</strong>
+              </td>
+            </tr>
 
-          <tr>
-            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;">Paypal</td>
-            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;">
-              <strong>${data?.eventData?.paypal || '—'}</strong>
-            </td>
-          </tr>
+            <tr>
+              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;">Paypal</td>
+              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;">
+                <strong>${data?.eventData?.paypal || '—'}</strong>
+              </td>
+            </tr>
 
-          <tr>
-            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;">Usage Note</td>
-            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;">
-              ${data?.eventData?.usageNote || ''}
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  `
-      : '';
+            <tr>
+              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#666;padding:4px 0;">Usage Note</td>
+              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;">
+                ${data?.eventData?.usageNote || ''}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    `;
 
     // Pre-order note by status
     let preorderNote;
@@ -388,6 +386,7 @@ module.exports = {
       preorderNote = 'Payment received — your pre-order is confirmed.';
     } else {
       preorderNote =
+        data.paymentType?.note ||
         'This is a pre-order. Please complete payment to confirm your order.';
     }
 
@@ -463,7 +462,7 @@ module.exports = {
                             <tr>
                               <td style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#666;padding:4px 0;">Payment Method</td>
                               <td align="right" style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;padding:4px 0;"><strong>${(
-                                data?.paymentType || ''
+                                data?.paymentType.name || ''
                               ).toUpperCase()}</strong></td>
                             </tr>
                           </table>
@@ -547,7 +546,7 @@ module.exports = {
                       <tr>
                         <td style="padding:10px 14px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#666;">Payment Method</td>
                         <td align="right" style="padding:10px 14px;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1b1b1b;"><strong>${(
-                          data?.paymentType || ''
+                          data?.paymentType.name || ''
                         ).toUpperCase()}</strong></td>
                       </tr>
                       <tr>
@@ -567,7 +566,7 @@ module.exports = {
           <tr>
             <td style="padding:16px 24px 0;">
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
-                ${bankBlock}
+                ${isTransfer}
               </table>
             </td>
           </tr>
