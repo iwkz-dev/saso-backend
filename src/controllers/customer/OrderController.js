@@ -165,7 +165,10 @@ class OrderController {
       await sendInvoiceEmail(
         updatedOrder,
         findEvent.toObject(),
-        findPaymentType.name,
+        {
+          name: findPaymentType.name,
+          note: findPaymentType.note,
+        },
         updatedOrder.customerEmail
       );
 
