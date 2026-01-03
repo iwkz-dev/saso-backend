@@ -40,7 +40,7 @@ class EventController {
         bankName: req.body.bankName || '',
         paypal: req.body.paypal || '',
         usageNote: req.body.usageNote || '',
-        paymentTypes: req.body.paymentTypes || [],
+        paymentTypes: req.body.paymentTypes.split(',') || [],
         updated_at: new Date(),
         created_at: new Date(),
       };
@@ -287,7 +287,7 @@ class EventController {
         paypal: req.body.paypal || '',
         usageNote: req.body.usageNote || '',
         status: req.body.status,
-        paymentTypes: req.body.paymentTypes || [],
+        paymentTypes: req.body.paymentTypes.split(',') || [],
         updated_at: new Date(),
       };
 

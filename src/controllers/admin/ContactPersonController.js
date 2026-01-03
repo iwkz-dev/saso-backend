@@ -4,11 +4,7 @@ const mongoose = require('mongoose');
 const httpStatus = require('http-status-codes');
 const ContactPerson = require('@models/contactPerson');
 const resHelpers = require('@helpers/responseHelpers');
-const {
-  dataPagination,
-  detailById,
-  firstWordUppercase,
-} = require('@helpers/dataHelper');
+const { dataPagination, firstWordUppercase } = require('@helpers/dataHelper');
 
 class ContactPersonController {
   static async create(req, res, next) {
