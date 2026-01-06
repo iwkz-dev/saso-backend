@@ -169,8 +169,6 @@ class MenuController {
         ...new Set(menus.map((m) => normalizeName(m.vendor)).filter(Boolean)),
       ];
 
-      console.log(vendorNames);
-
       const categories = await Category.find(
         { name: { $in: categoryNames } },
         { name: 1 }

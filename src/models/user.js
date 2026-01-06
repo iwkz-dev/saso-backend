@@ -50,10 +50,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  forgetPasswordToken: {
+  resetPasswordToken: {
     type: String,
   },
-  forgetPasswordExpiresAt: {
+  resetPasswordExpiresAt: {
     type: Date,
   },
   verificationToken: {

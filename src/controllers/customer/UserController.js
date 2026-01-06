@@ -8,7 +8,12 @@ const { detailById } = require('@helpers/dataHelper');
 const { jwtSign } = require('@helpers/jwt');
 const { generateVerificationToken } = require('@helpers/verificationToken');
 const { mailer } = require('@helpers/nodemailer');
-const { comparePassword, hashPassword } = require('@helpers/bcrypt');
+const { comparePassword } = require('@helpers/bcrypt');
+const crypto = require('crypto');
+const {
+  changePasswordTemplate,
+  resetPasswordSuccessTemplate,
+} = require('@helpers/templates');
 const {
   verificationEmailTemplate,
   welcomeEmailTemplate,
@@ -143,6 +148,56 @@ class UserController {
     }
   }
 
+  static async requestVerifyEmail(req, res, next) {
+    const userId = req.user._id;
+    let session;
+
+    try {
+      session = await mongoose.startSession();
+      session.startTransaction();
+
+      const user = await User.findById(userId).session(session);
+
+      if (!user) {
+        throw { name: 'Not Found', message: 'User not found' };
+      }
+
+      if (user.isVerified) {
+        throw { name: 'Bad Request', message: 'Email is already verified' };
+      }
+
+      const verificationToken = generateVerificationToken();
+      const verificationTokenExpiresAt = new Date(
+        Date.now() + 24 * 60 * 60 * 1000
+      ); // 24 hours
+
+      user.verificationToken = verificationToken;
+      user.verificationTokenExpiresAt = verificationTokenExpiresAt;
+
+      await user.save({ session });
+
+      await session.commitTransaction();
+
+      const emailTemplate = verificationEmailTemplate(
+        user.email,
+        verificationToken
+      );
+      await mailer(emailTemplate);
+
+      return res
+        .status(httpStatus.StatusCodes.OK)
+        .json(
+          resHelpers.success('New verification email sent successfully', {})
+        );
+    } catch (error) {
+      if (session) await session.abortTransaction();
+      console.error('Error in requestVerifyEmail controller:', error);
+      next(error);
+    } finally {
+      if (session) session.endSession();
+    }
+  }
+
   static async getUserById(req, res, next) {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -265,6 +320,109 @@ class UserController {
         .json(resHelpers.success('Successfully logged out', null));
     } catch (error) {
       console.error('Error in logout controller:', error);
+      next(error);
+    }
+  }
+
+  static async forgotPassword(req, res, next) {
+    const { email } = req.body;
+    let session;
+
+    try {
+      session = await mongoose.startSession();
+      session.startTransaction();
+
+      if (!email) {
+        throw { name: 'Bad Request', message: 'Email is required' };
+      }
+
+      const user = await User.findOne({ email }).session(session);
+      if (!user) {
+        throw { name: 'Not Found', message: 'User not found' };
+      }
+
+      const forgotPasswordToken = crypto.randomBytes(32).toString('hex');
+
+      user.resetPasswordToken = forgotPasswordToken;
+      user.resetPasswordExpiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+      await user.save({ session });
+      await session.commitTransaction();
+
+      const forgetPasswordTemplate = changePasswordTemplate(
+        email,
+        forgotPasswordToken
+      );
+
+      await mailer(forgetPasswordTemplate);
+
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success('Success send forgot password email', {}));
+    } catch (error) {
+      await session.abortTransaction();
+      console.log(error);
+      next(error);
+    } finally {
+      session.endSession();
+    }
+  }
+
+  static async resetPassword(req, res, next) {
+    const { token, email } = req.query;
+    const { newPassword } = req.body;
+    let session;
+
+    try {
+      session = await mongoose.startSession();
+      session.startTransaction();
+
+      if (!token || !newPassword) {
+        throw {
+          name: 'Bad Request',
+          message: 'Token and new password are required',
+        };
+      }
+
+      const user = await User.findOne({
+        email,
+        resetPasswordToken: token,
+        resetPasswordExpiresAt: { $gt: new Date() },
+      })
+        .select('+password')
+        .session(session);
+
+      if (!user) {
+        throw new Error('Invalid or expired reset password token');
+      }
+
+      const isPasswordValid = comparePassword(newPassword, user.password);
+
+      if (isPasswordValid) {
+        throw {
+          name: 'Bad Request',
+          message: 'New password must be different from the old password',
+        };
+      }
+
+      user.password = newPassword;
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpiresAt = undefined;
+
+      await user.save({ session });
+      await session.commitTransaction();
+
+      const resetPasswordTemplate = resetPasswordSuccessTemplate(
+        user.email,
+        user.fullname
+      );
+      await mailer(resetPasswordTemplate);
+
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success('success update password', {}));
+    } catch (error) {
+      console.log(error);
       next(error);
     }
   }

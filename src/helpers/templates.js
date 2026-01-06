@@ -87,7 +87,7 @@ module.exports = {
         </p>
         <p style="text-align:center;">
           <a
-            href="${process.env.PROD_API_URL}/change-password/${token}"
+            href="${process.env.PROD_API_URL}/change-password?token=${token}&email=${email}"
             class="button"
           >
             Change Password
@@ -306,6 +306,104 @@ module.exports = {
         </p>
         <p>
           If there are any questions or assistance is required, please feel free to reach out.
+        </p>
+        <p>
+          Warm regards,<br />
+          <strong>IWKZ e.V</strong>
+        </p>
+      </div>
+      <div class="footer">
+        © Indonesischer Weisheits- & Kulturzentrum e.V
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+    `,
+    };
+  },
+  resetPasswordSuccessTemplate(email, name) {
+    return {
+      from: 'noreply@gmail.com',
+      to: email,
+      subject: 'Your Password Has Been Reset',
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>Password Reset Successful</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #F5F7F9;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #444;
+    }
+    .wrapper {
+      width: 100%;
+      padding: 40px 0;
+    }
+    .container {
+      max-width: 570px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #E7EAEC;
+    }
+    .header {
+      text-align: center;
+      padding: 24px;
+      font-weight: bold;
+      font-size: 16px;
+      color: #555;
+      background-color: #F9FAFB;
+    }
+    .content {
+      padding: 35px;
+    }
+    h1 {
+      font-size: 20px;
+      margin-bottom: 15px;
+      color: #292E31;
+    }
+    p {
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      color: #555;
+    }
+    .highlight {
+      color: #414EF9;
+      font-weight: bold;
+    }
+    .footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: #999;
+      background-color: #F9FAFB;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="container">
+      <div class="header">
+        Indonesischer Weisheits- & Kulturzentrum e.V · Berlin
+      </div>
+      <div class="content">
+        <h1>Password Reset Successful</h1>
+        <p>
+          Hello <span class="highlight">${name}</span>,
+        </p>
+        <p>
+          Your password has been successfully reset. You can now log in using your new password.
+        </p>
+        <p>
+          If you did not request this change, please contact our support immediately.
         </p>
         <p>
           Warm regards,<br />
