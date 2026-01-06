@@ -42,8 +42,25 @@ const userSchema = new mongoose.Schema({
   role: {
     type: Number,
   },
+  lastLogin: {
+    type: Date,
+    default: Date.now,
+  },
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
   forgetPasswordToken: {
     type: String,
+  },
+  forgetPasswordExpiresAt: {
+    type: Date,
+  },
+  verificationToken: {
+    type: String,
+  },
+  verificationTokenExpiresAt: {
+    type: Date,
   },
   updated_at: {
     type: Date,
@@ -55,9 +72,13 @@ const userSchema = new mongoose.Schema({
 
 // ! HOOKS
 userSchema.pre('save', async function preSaveHook(next) {
-  const user = this;
-  if (!user.isModified('password')) return next();
-  user.password = hashPassword(user.password);
+  try {
+    if (!this.isModified('password')) return next();
+    this.password = await hashPassword(this.password);
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 const User = mongoose.model('User', userSchema);

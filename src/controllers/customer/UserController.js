@@ -6,13 +6,22 @@ const User = require('@models/user');
 const resHelpers = require('@helpers/responseHelpers');
 const { detailById } = require('@helpers/dataHelper');
 const { jwtSign } = require('@helpers/jwt');
+const { generateVerificationToken } = require('@helpers/verificationToken');
+const { mailer } = require('@helpers/nodemailer');
+const { comparePassword, hashPassword } = require('@helpers/bcrypt');
+const {
+  verificationEmailTemplate,
+  welcomeEmailTemplate,
+} = require('@helpers/templates');
 
 class UserController {
   static async register(req, res, next) {
-    const session = await mongoose.startSession();
-    session.startTransaction();
+    let session;
 
     try {
+      session = await mongoose.startSession();
+      session.startTransaction();
+
       const payload = {
         fullname: req.body.fullname,
         email: req.body.email.toLowerCase(),
@@ -31,36 +40,106 @@ class UserController {
         throw { name: 'Bad Request', message: 'Email is already registered' };
       }
 
-      const createUser = await User.create([payload], { session });
+      const verificationToken = generateVerificationToken();
+      const verificationTokenExpiresAt = new Date(
+        Date.now() + 24 * 60 * 60 * 1000
+      );
+
+      const user = new User({
+        ...payload,
+        verificationToken,
+        verificationTokenExpiresAt,
+      });
+
+      const createdUser = await user.save({ session });
+
       const result = {
-        _id: createUser[0]._id,
-        fullname: createUser[0].fullname,
-        email: createUser[0].email,
-        isActive: createUser[0].isActive,
-        role: createUser[0].role,
-        phone: createUser[0].phone,
-        updated_at: createUser[0].updated_at,
-        created_at: createUser[0].created_at,
+        _id: createdUser._id,
+        fullname: createdUser.fullname,
+        email: createdUser.email,
+        isActive: createdUser.isActive,
+        role: createdUser.role,
+        phone: createdUser.phone,
+        updated_at: createdUser.updated_at,
+        created_at: createdUser.created_at,
       };
 
-      const accessToken = jwtSign({
-        id: result._id,
-        email: result.email,
-        role: result.role,
-      });
-      result.accessToken = accessToken;
+      jwtSign({ userId: user._id }, { expiresIn: '7d' }, res);
 
       await session.commitTransaction();
-      session.endSession();
+
+      const emailTemplate = verificationEmailTemplate(
+        createdUser.email,
+        verificationToken
+      );
+
+      await mailer(emailTemplate);
 
       res
         .status(httpStatus.StatusCodes.CREATED)
         .json(resHelpers.success('Success create a user', result));
     } catch (error) {
       await session.abortTransaction();
-      session.endSession();
       console.error(error);
       next(error);
+    } finally {
+      session.endSession();
+    }
+  }
+
+  static async verifyEmail(req, res, next) {
+    const { token: code } = req.params;
+    const userId = req.user._id;
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      const user = await User.findOne({
+        _id: userId,
+        verificationToken: code,
+        verificationTokenExpiresAt: { $gt: new Date() },
+      }).session(session);
+
+      if (!user) {
+        throw {
+          name: 'Bad Request',
+          message: 'Invalid or expired verification token',
+        };
+      }
+
+      user.isVerified = true;
+      user.verificationToken = undefined;
+      user.verificationTokenExpiresAt = undefined;
+      await user.save({ session });
+
+      const emailTemplate = welcomeEmailTemplate(user.email, user.fullname);
+
+      await mailer(emailTemplate);
+
+      await session.commitTransaction();
+
+      const result = {
+        _id: user._id,
+        fullname: user.fullname,
+        email: user.email,
+        isActive: user.isActive,
+        role: user.role,
+        phone: user.phone,
+        updated_at: user.updated_at,
+        created_at: user.created_at,
+      };
+
+      return res
+        .status(httpStatus.StatusCodes.CREATED)
+        .json(resHelpers.success('Email verified successfully', result));
+    } catch (error) {
+      console.error('Error in verifyEmail controller:', error);
+
+      await session.abortTransaction();
+      next(error);
+    } finally {
+      session.endSession();
     }
   }
 
@@ -85,6 +164,107 @@ class UserController {
       await session.abortTransaction();
       session.endSession();
       console.error(error);
+      next(error);
+    }
+  }
+
+  static async checkAuth(req, res, next) {
+    const userId = req.user._id;
+    let session;
+
+    try {
+      session = await mongoose.startSession();
+      session.startTransaction();
+
+      const user = await User.findById(userId).session(session);
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      await session.commitTransaction();
+
+      return res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success('Success fetch data', user));
+    } catch (error) {
+      console.error('Error in checkAuth controller:', error);
+      await session.abortTransaction();
+      next(error);
+    } finally {
+      session.endSession();
+    }
+  }
+
+  static async login(req, res, next) {
+    const { email, password } = req.body;
+    let session;
+
+    try {
+      session = await mongoose.startSession();
+      session.startTransaction();
+
+      if (!email || !password) {
+        throw new Error('Email and password are required');
+      }
+      const user = await User.findOne({ email }).select('+password');
+
+      if (!user) {
+        throw new Error('Invalid email or password');
+      }
+
+      const verifiedPassword = comparePassword(password, user.password);
+      if (!verifiedPassword) {
+        throw {
+          name: 'Invalid Auth',
+          message: 'Email / Password is wrong',
+        };
+      }
+
+      if (user.isActive === false) {
+        throw {
+          name: 'Forbidden',
+          message: 'Your account is inactive',
+        };
+      }
+
+      jwtSign({ userId: user._id }, { expiresIn: '7d' }, res);
+
+      user.lastLogin = new Date();
+
+      await user.save({ session });
+      await session.commitTransaction();
+
+      const result = {
+        id: user._id,
+        email: user.email,
+      };
+
+      res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success('Success login', result));
+    } catch (error) {
+      await session.abortTransaction();
+      console.log(error);
+      next(error);
+    } finally {
+      session.endSession();
+    }
+  }
+
+  static async logout(req, res, next) {
+    try {
+      res.clearCookie('jwtToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Lax',
+      });
+
+      return res
+        .status(httpStatus.StatusCodes.OK)
+        .json(resHelpers.success('Successfully logged out', null));
+    } catch (error) {
+      console.error('Error in logout controller:', error);
       next(error);
     }
   }
