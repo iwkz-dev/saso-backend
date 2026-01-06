@@ -312,7 +312,7 @@ class UserController {
       res.clearCookie('jwtToken', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Lax',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       });
 
       return res
