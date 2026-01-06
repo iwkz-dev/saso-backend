@@ -24,11 +24,13 @@ const app = express();
 
 app.use(logger('dev'));
 
-const allowedOrigins = process.env.FRONTEND_URLS.split(',');
-
+const allowedOrigins = process.env.FRONTEND_URLS.split(',').map((url) =>
+  url.trim()
+);
 app.use(
   cors({
     origin: (origin, callback) => {
+      console.log('Request origin:', origin);
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
@@ -39,8 +41,8 @@ app.use(
     credentials: true,
   })
 );
-app.use(cookieParser());
 
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
