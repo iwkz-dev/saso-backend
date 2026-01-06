@@ -107,4 +107,12 @@ router.post('/register', UserController.register);
  */
 router.get('/detail', authCustomer, UserController.getUserById);
 
+router.post('/verify-email/:token', authCustomer, UserController.verifyEmail);
+
+router.get('/check-auth', authCustomer, UserController.checkAuth);
+
+router.post('/login', UserController.login);
+
+router.post('/logout', UserController.logout);
+
 module.exports = router;

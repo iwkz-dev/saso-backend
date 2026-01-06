@@ -59,24 +59,24 @@ async function authSuperAdmin(req, res, next) {
 }
 
 async function authCustomer(req, res, next) {
-  const { authorization } = req.headers;
-  const accessToken = authorization && authorization.split(' ')[1];
+  const accessToken = req.cookies.jwtToken;
 
   try {
     if (!accessToken) {
       throw { name: 'Invalid Auth', message: 'Invalid Access Token' };
-    } else {
-      const verifiedAccessToken = jwtVerify(accessToken);
-      const findUser = await User.findOne({
-        _id: verifiedAccessToken.id,
-      });
-      if (!findUser || findUser.role !== 3) {
-        throw { name: 'Invalid Auth', message: 'Invalid Access Token' };
-      } else {
-        req.user = verifiedAccessToken;
-        next();
-      }
     }
+
+    const verifiedAccessToken = jwtVerify(accessToken);
+    const findUser = await User.findOne({
+      _id: verifiedAccessToken.userId,
+    });
+
+    if (!findUser || findUser.role !== 3) {
+      throw { name: 'Invalid Auth', message: 'Invalid Access Token' };
+    }
+
+    req.user = findUser;
+    next();
   } catch (error) {
     console.log(error);
     next(error);

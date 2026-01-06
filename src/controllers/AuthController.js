@@ -38,11 +38,15 @@ class AuthController {
             message: 'Email / Password is wrong',
           };
         } else {
-          const accessToken = jwtSign({
-            id: findUser._id,
-            email: findUser.email,
-            role: findUser.role,
-          });
+          const accessToken = jwtSign(
+            {
+              id: findUser._id,
+              email: findUser.email,
+              role: findUser.role,
+            },
+            { expiresIn: '7d' },
+            res
+          );
 
           const isUserAdmin = findUser.role === 1 || findUser.role === 2;
 
