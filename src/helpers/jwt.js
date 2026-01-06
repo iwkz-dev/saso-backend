@@ -11,6 +11,7 @@ module.exports = {
       secure: process.env.NODE_ENV === 'production', // HTTPS only in prod
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      partitioned: true,
     });
 
     return accessToken;
