@@ -11,6 +11,8 @@ const logger = require('morgan');
 const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
 const routers = require('@routes');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const cookieParser = require('cookie-parser');
 const { openAPIDocs } = require('@configs/swagger');
 // const { startJobs } = require('./controllers/jobs');
 
@@ -22,7 +24,23 @@ const app = express();
 
 app.use(logger('dev'));
 
-app.use(cors());
+const allowedOrigins = process.env.FRONTEND_URLS.split(',');
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  })
+);
+app.use(cookieParser());
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 

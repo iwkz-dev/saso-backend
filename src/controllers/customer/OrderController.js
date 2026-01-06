@@ -29,7 +29,7 @@ class OrderController {
 
       const findEvent = await Event.findOne({ _id: event }).session(session);
       if (!findEvent || findEvent.po_closed) {
-        throw { name: 'Bad Request', message: 'Event not found' };
+        throw { name: 'Bad Request', message: 'Event not found or closed' };
       }
 
       const invoiceNumber = await generateInvoiceNumber(findEvent, session);
@@ -50,9 +50,18 @@ class OrderController {
         session
       );
 
+      // Fetch the user and check verification
       const findUser = await User.findById(userId).session(session);
       if (!findUser) {
         throw { name: 'Bad Request', message: 'User not found' };
+      }
+
+      if (!findUser.isVerified) {
+        throw {
+          name: 'Forbidden',
+          message:
+            'Email is not verified. Please verify your email to place an order.',
+        };
       }
 
       const payload = {
@@ -74,6 +83,7 @@ class OrderController {
       };
 
       const createOrder = await Order.create([payload], { session });
+
       await sendInvoiceEmail(
         createOrder[0],
         findEvent.toObject(),
@@ -85,7 +95,7 @@ class OrderController {
       );
 
       res.status(httpStatus.StatusCodes.CREATED).json(
-        resHelpers.success('success create an order', {
+        resHelpers.success('Success create an order', {
           createOrder: createOrder[0],
           paymentResponse,
         })
@@ -94,7 +104,7 @@ class OrderController {
       await session.commitTransaction();
     } catch (error) {
       await session.abortTransaction();
-      console.log(error);
+      console.error(error);
       next(error);
     } finally {
       session.endSession();
