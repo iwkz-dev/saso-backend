@@ -59,13 +59,26 @@ async function authSuperAdmin(req, res, next) {
 }
 
 async function authCustomer(req, res, next) {
-  const accessToken = req.cookies.jwtToken;
-
   try {
-    if (!accessToken) {
-      throw { name: 'Invalid Auth', message: 'Invalid Access Token' };
+    let accessToken;
+
+    // Check Cookies
+    if (req.cookies && req.cookies.jwtToken) {
+      accessToken = req.cookies.jwtToken;
+    }
+    // Check Authorization Header (Bearer Token)
+    else if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith('Bearer')
+    ) {
+      accessToken = req.headers.authorization.split(' ')[1];
     }
 
+    if (!accessToken) {
+      throw { name: 'Unauthorized', message: 'No token provided' };
+    }
+
+    // Verify token
     const verifiedAccessToken = jwtVerify(accessToken);
     const findUser = await User.findOne({
       _id: verifiedAccessToken.userId,
@@ -74,8 +87,7 @@ async function authCustomer(req, res, next) {
     if (!findUser || findUser.role !== 3) {
       throw { name: 'Invalid Auth', message: 'Invalid Access Token' };
     }
-
-    req.user = findUser;
+    req.user = findUser; // Attach user payload to request
     next();
   } catch (error) {
     console.log(error);

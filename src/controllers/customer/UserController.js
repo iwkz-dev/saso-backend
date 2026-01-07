@@ -69,7 +69,7 @@ class UserController {
         created_at: createdUser.created_at,
       };
 
-      jwtSign({ userId: user._id }, { expiresIn: '7d' }, res);
+      const token = jwtSign({ userId: user._id }, { expiresIn: '7d' }, res);
 
       await session.commitTransaction();
 
@@ -82,7 +82,9 @@ class UserController {
 
       res
         .status(httpStatus.StatusCodes.CREATED)
-        .json(resHelpers.success('Success create a user', result));
+        .json(
+          resHelpers.success('Success create a user', { ...result, token })
+        );
     } catch (error) {
       await session.abortTransaction();
       console.error(error);
@@ -283,7 +285,7 @@ class UserController {
         };
       }
 
-      jwtSign({ userId: user._id }, { expiresIn: '7d' }, res);
+      const token = jwtSign({ userId: user._id }, { expiresIn: '7d' }, res);
 
       user.lastLogin = new Date();
 
@@ -293,6 +295,8 @@ class UserController {
       const result = {
         id: user._id,
         email: user.email,
+        isVerified: user.isVerified,
+        token,
       };
 
       res
@@ -313,7 +317,6 @@ class UserController {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-        partitioned: true,
       });
 
       return res
