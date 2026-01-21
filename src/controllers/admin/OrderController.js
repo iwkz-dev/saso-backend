@@ -133,7 +133,7 @@ class OrderController {
       const findPaymentType = await PaymentType.findOne({
         $or: [
           { type: findUpdatedOrder.paymentType },
-          { id: findUpdatedOrder.paymentType },
+          { _id: findUpdatedOrder.paymentType },
         ],
       }).session(session);
 
